@@ -10,6 +10,9 @@ target_include_directories(wifi PRIVATE
 target_link_libraries(wifi
     pico_stdlib
     pico_cyw43_arch_lwip_threadsafe_background
+    pico_lwip_mqtt
 )
 
+pico_enable_stdio_usb(wifi 1)
+pico_enable_stdio_uart(wifi 0)
 pico_add_extra_outputs(wifi)
