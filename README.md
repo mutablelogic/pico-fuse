@@ -29,7 +29,7 @@ On all platforms, you need an `/opt` directory:
 sudo install -d /opt -m 777
 ```
 
-If you haven't done so already, create an ssh key and [add it to your 
+If you haven't done so already, [create an ssh key](https://www.digitalocean.com/community/tutorials/how-to-create-ssh-keys-with-openssh-on-macos-or-linux) and [add it to your 
 github account](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account).
 
 You can then proceed to download and install the Pico SDK
