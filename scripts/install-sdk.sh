@@ -1,19 +1,7 @@
 #!/bin/bash
 PREFIX="/opt"
 PICOSDK="1.5.0"
-PICOTOOL="1.1.0"
-
-# You will want to install dependencies:
-#
-# mac: 
-#  brew install cmake libusb
-#  brew tap ArmMbed/homebrew-formulae
-#  brew install arm-none-eabi-gcc
-#
-# fedora:
-#   dnf install -y g++ gcc-arm-linux-gnu arm-none-eabi-gcc-cs-c++ arm-none-eabi-gcc-cs arm-none-eabi-binutils arm-none-eabi-newlib \
-#                  libusb-devel libusb \
-#                  cmake
+PICOTOOL="1.1.1"
 
 ###############################################################
 # Check for dependencies
