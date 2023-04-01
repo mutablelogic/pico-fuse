@@ -4,12 +4,12 @@ PICO_PLATFORM ?= rp2040
 PICO_BOARD ?= pico_w
 
 # Targets
-all: build
+all: config build
 
 config: mkdir
 	@PICO_SDK_PATH=${PICO_SDK_PATH} cmake -B ${BUILD_DIR} -DPICO_PLATFORM=${PICO_PLATFORM} -DPICO_BOARD=${PICO_BOARD}
 
-build: config
+build: mkdir
 	@PICO_SDK_PATH=${PICO_SDK_PATH} cmake --build ${BUILD_DIR}
 
 mkdir:

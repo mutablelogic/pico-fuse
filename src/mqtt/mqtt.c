@@ -1,9 +1,22 @@
 #include "pico/stdlib.h"
 #include "pico/cyw43_arch.h"
-#include "lwip/apps/mqtt.h"
+#include "mqtt.h"
 
-// MQTT initialization
-mqtt_client_t *mqtt_init(const char* broker, const char* client_id, const char* user, const char* password, u16_t port) {
+mqtt_client* mqtt_init(const char* broker, const char* client_id, const char* user, const char* password) {
+    mqtt_client* client = malloc(sizeof(mqtt_client));
+    if(client == NULL) {
+        return NULL;
+    }
+    client->client = mqtt_client_new();
+    err_t err = mqtt_client_connect(client->client, const ip_addr_t* ipaddr, mqtt_connection_cb_t cb, void *arg,
+                   const struct mqtt_connect_client_info_t *client_info);
+
+
+    return client;
+}
+
+/*
+mqtt_client_t* mqtt_init(const char* broker, const char* client_id, const char* user, const char* password, u16_t port) {
     ip_addr_t addr;
     err_t err;
     mqtt_client_t *client = mqtt_client_new();
@@ -12,11 +25,11 @@ mqtt_client_t *mqtt_init(const char* broker, const char* client_id, const char* 
         client_id,
         user,
         password,
-        120,  /* keep alive */
-        NULL, /* will_topic */
-        NULL, /* will_msg */
-        0,    /* will_qos */
-        0     /* will_retain */
+        120,  // keep alive
+        NULL, // will_topic
+        NULL, // will_msg
+        0,    // will_qos 
+        0     // will_retain 
 #if LWIP_ALTCP && LWIP_ALTCP_TLS
         ,
         NULL
@@ -42,3 +55,4 @@ mqtt_client_t *mqtt_init(const char* broker, const char* client_id, const char* 
     }
     return client;
 }
+*/
