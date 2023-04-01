@@ -15,3 +15,4 @@ project(pico_frame CXX C ASM)
 pico_sdk_init()
 
 add_subdirectory(src/blink)
+add_subdirectory(src/wifi)
