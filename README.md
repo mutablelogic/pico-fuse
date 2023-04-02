@@ -66,10 +66,11 @@ To load the example onto your Pico W, plug it in using the USB cable whilst hold
 Pico. Then run the following command:
 
 ```bash
+cd ${HOME}/projects/pico-frame
 /opt/bin/picotool load  -f -x build/src/blink/blink.uf2
 ```
 
-Fingers crossed, the LED should start blinking.
+Fingers crossed, the LED should start blinking. The code for this example is in the [`src/blink`](tree/main/src/blink) folder.
 
 ## References
 
