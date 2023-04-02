@@ -70,7 +70,7 @@ cd ${HOME}/projects/pico-frame
 /opt/bin/picotool load  -f -x build/src/blink/blink.uf2
 ```
 
-Fingers crossed, the LED should start blinking. The code for this example is in the [`src/blink`](tree/main/src/blink) folder.
+Fingers crossed, the LED should start blinking. The code for this example is in the [`src/blink`](main/src/blink) folder.
 
 ## References
 
