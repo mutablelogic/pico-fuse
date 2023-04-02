@@ -3,12 +3,17 @@
 #include "pico/cyw43_arch.h"
 #include "wifi.h"
 #include "mqtt.h"
+#include "adc.h"
 #include "opts.h"
 
 int main()
 {
+    // Initialize the board
     stdio_init_all();
     sleep_ms(250);
+
+    // ADC with temperature sensor
+    mq_adc_init(1);
 
     // WiFi
     int err = wifi_init(WIFI, WIFI_PASSWORD);
@@ -35,6 +40,9 @@ int main()
     }
 
     // Main loop
+    char str[80];
+    float temp = 0;
+    float t = 0;
     while (true)
     {
         int err = mq_connect(client);
@@ -42,10 +50,17 @@ int main()
         {
         case ERR_OK:
         case ERR_ISCONN:
-            err = mq_publish(client, MQTT_PUB, "hello world");
-            if(err) {
-                printf("mqtt publish failed with error %d\n", err);
-                sleep_ms(1000);
+            t = mq_adc_read_temp();
+            if (t != temp)
+            {
+                temp = t;
+                sprintf(str, "temperature %.2fC", temp);
+                err = mq_publish(client, MQTT_PUB, str);
+                if (err)
+                {
+                    printf("mqtt publish failed with error %d\n", err);
+                    sleep_ms(1000);
+                }
             }
             break;
         default:

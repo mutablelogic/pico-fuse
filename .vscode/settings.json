@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "*.hcl": "terraform",
+        "unique_id.h": "c",
+        "adc.h": "c"
+    }
+}

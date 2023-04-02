@@ -70,7 +70,12 @@ cd ${HOME}/projects/pico-frame
 /opt/bin/picotool load  -f -x build/src/blink/blink.uf2
 ```
 
-Fingers crossed, the LED should start blinking. The code for this example is in the [`src/blink`](src/blink) folder.
+Fingers crossed, the LED should start blinking. The code for this example is in the [`src/blink`](src/blink) folder:
+
+  * The `CMakeLists.txt` file defines how to build the example
+  * The `blink.c` file contains the source code for the example
+
+This one is a little complicated as the Pico hardware and the Pico W hardware use different GPIO pins for the LED.
 
 ## References
 

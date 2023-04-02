@@ -25,13 +25,17 @@ void mqtt_request_cb(void *arg, err_t err)
 
 void mqtt_connection_cb(mqtt_client_t *client, void *arg, mqtt_connection_status_t status)
 {
-    LWIP_PLATFORM_DIAG(("MQTT client %s connection cb: status %d\n", ((const mq *)arg)->client_id, (int)status));
     if (status == MQTT_CONNECT_ACCEPTED && ((const mq *)arg)->topic != NULL)
     {
         int err = mqtt_sub_unsub(client, ((const mq *)arg)->topic, 1, mqtt_request_cb, arg, 1);
-        if(err) {
+        if (err)
+        {
             LWIP_PLATFORM_DIAG(("MQTT client \"%s\" subscribe failed with error %d", ((const mq *)arg)->client_id, err));
         }
+    }
+    else
+    {
+        LWIP_PLATFORM_DIAG(("MQTT client %s connection cb: status %d\n", ((const mq *)arg)->client_id, (int)status));
     }
 }
 
