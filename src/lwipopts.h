@@ -1,6 +1,8 @@
 #ifndef _LWIPOPTS_EXAMPLE_COMMONH_H
 #define _LWIPOPTS_EXAMPLE_COMMONH_H
 
+#define MEMP_NUM_SYS_TIMEOUT            (LWIP_NUM_SYS_TIMEOUT_INTERNAL+1) 
+
 // allow override in some examples
 #ifndef NO_SYS
 #define NO_SYS                      1

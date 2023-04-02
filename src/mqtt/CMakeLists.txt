@@ -2,6 +2,7 @@ add_executable(mqtt
     main.c
     wifi.c
     mqtt.c
+    unique_id.c
 )
 
 target_include_directories(mqtt PRIVATE
@@ -11,6 +12,7 @@ target_include_directories(mqtt PRIVATE
 
 target_link_libraries(mqtt
     pico_stdlib
+    pico_unique_id
     pico_cyw43_arch_lwip_threadsafe_background
     pico_lwip_mqtt
 )
