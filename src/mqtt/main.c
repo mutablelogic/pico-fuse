@@ -1,4 +1,4 @@
-
+#include <stdio.h>
 #include "pico/stdlib.h"
 #include "pico/cyw43_arch.h"
 #include "wifi.h"
@@ -21,6 +21,9 @@ int main()
     {
         printf("wifi init failed with error code=%d\n", err);
         return 0;
+    } else {
+        // Start up message
+        printf("Connected to WiFi access point %s\n",WIFI);
     }
 
     // Broker address

@@ -16,3 +16,5 @@ pico_sdk_init()
 
 add_subdirectory(src/blink)
 add_subdirectory(src/mqtt)
+add_subdirectory(src/uart)
+
