@@ -10,7 +10,10 @@ target_include_directories(runloop PRIVATE
 
 target_link_libraries(runloop
     pico_stdlib
+    hardware_adc
 )
+
+target_compile_definitions(runloop PRIVATE PICO_DEBUG_MALLOC=1)
 
 pico_enable_stdio_usb(runloop 1)
 pico_enable_stdio_uart(runloop 0)

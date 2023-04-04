@@ -22,3 +22,7 @@ clean:
 
 mqtt: mkdir
 	@PICO_SDK_PATH=${PICO_SDK_PATH} make -C ${BUILD_DIR}/src/mqtt
+
+runloop: mkdir
+	@PICO_SDK_PATH=${PICO_SDK_PATH} make -C ${BUILD_DIR}/src/runloop
+
