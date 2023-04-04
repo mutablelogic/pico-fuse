@@ -95,7 +95,8 @@ typedef struct
     int direction;       // The GPIO mode (GPIO_OUT, GPIO_IN)
     bool pullup;         // Enable pullup
     bool pulldown;       // Enable pulldown (setting both pulls enables a "bus keep" function)
-    int irq;             // The GPIO level (GPIO_IRQ_LEVEL_LOW, GPIO_IRQ_LEVEL_HIGH, GPIO_IRQ_LEVEL_FALL, GPIO_IRQ_LEVEL_RISE)
+    bool irqrise;        // The GPIO level GPIO_IRQ_LEVEL_RISE
+    bool irqfall;        // The GPIO level GPIO_IRQ_LEVEL_FALL
 } runloop_gpio_t;
 
 #endif

@@ -220,10 +220,10 @@ void runloop_handle_init(runloop_t *runloop, runloop_init_t *data)
     runloop_callback(runloop, EVENT_INIT, (void *)(data));
 
     // set the appName if not NULL
-    // if (data->appName != NULL)
-    //{
-    //    bi_decl(bi_program_description(data->appName));
-    //}
+    if (data->appName != NULL)
+    {
+        printf("TODO: Set appname=%s\n", data->appName);
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -231,8 +231,6 @@ void runloop_handle_init(runloop_t *runloop, runloop_init_t *data)
 
 void runloop_handle_adc_init(runloop_t *runloop, runloop_adc_t *data)
 {
-    printf("EVENT_ADC_INIT channel=%d gpio=%d\n", data->channel, data->gpio);
-
     // Set GPIO pin for ADC
     if (data->gpio != 0)
     {
@@ -250,23 +248,26 @@ void runloop_handle_adc_init(runloop_t *runloop, runloop_adc_t *data)
     runloop_callback(runloop, EVENT_ADC_INIT, (void *)(data));
 
     // Set pin name
-    // if (data->gpio != 0 && data->pinName != NULL)
-    //{
-    //    bi_decl(bi_1pin_with_name(data->gpio, data->pinName));
-    //}
+    if (data->gpio != 0 && data->pinName != NULL)
+    {
+        printf("TODO: Set gpio=%d adc=%d name=%s\n", data->gpio, data->channel, data->pinName);
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // Handle the EVENT_GPIO_INIT event
 
+void runloop_handle_gpio_callback(uint gpio, uint32_t events)
+{
+    printf("GPIO IRQ: gpio=%d events=%d\n",gpio, events);
+}
+
 void runloop_handle_gpio_init(runloop_t *runloop, runloop_gpio_t *data)
 {
-    printf("EVENT_GPIO_INIT gpio=%d\n", data->gpio);
-
     // Set GPIO pin direction, and pulls
     if (data->gpio != 0)
     {
-        gpio_init(data->gpio);
+        // gpio_init(data->gpio);
         if (data->direction == GPIO_IN)
         {
             gpio_set_input_enabled(data->gpio, true);
@@ -277,16 +278,19 @@ void runloop_handle_gpio_init(runloop_t *runloop, runloop_gpio_t *data)
             gpio_set_input_enabled(data->gpio, false);
         }
 
-        void (^count_loop)() = ^{
-          for (int i = 0; i < 100; i++)
-              printf("%d\n", i);
-          printf("ah ah ah\n");
-        };
-
         // Set IRQ callback
-        if (data->irq)
+        uint32_t events;
+        if (data->irqrise)
         {
-            gpio_set_irq_enabled_with_callback(data->gpio, data->irq, true, count_loop);
+            events |= GPIO_IRQ_EDGE_RISE;
+        }
+        if (data->irqfall)
+        {
+            events |= GPIO_IRQ_EDGE_FALL;
+        }
+        if (events > 0)
+        {
+            gpio_set_irq_enabled_with_callback(data->gpio, events, true, runloop_handle_gpio_callback);
         }
     }
 
@@ -294,14 +298,10 @@ void runloop_handle_gpio_init(runloop_t *runloop, runloop_gpio_t *data)
     runloop_callback(runloop, EVENT_GPIO_INIT, (void *)(data));
 
     // Set pin name
-    // if (data->gpio != 0 && data->pinName != NULL)
-    //{
-    //    bi_decl(bi_1pin_with_name(data->gpio, data->pinName));
-    //}
-}
-
-void gpio_callback(uint gpio, uint32_t events)
-{
+    if (data->gpio != 0 && data->pinName != NULL)
+    {
+        printf("TODO: Set gpio=%d direction=%d name=%s\n", data->gpio, data->direction, data->pinName);
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

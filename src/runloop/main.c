@@ -3,20 +3,18 @@
 #include <pico/stdlib.h>
 #include "runloop.h"
 
+// GPIO pin definitions
+runloop_gpio_t bootsel = {.pinName = "BOOTSEL", .gpio = 23, .irqrise = true, .irqfall = true};
+
 ///////////////////////////////////////////////////////////////////////////////
 // EVENT_INIT handler
 
 runloop_state_t my_main_init(runloop_t *runloop, runloop_state_t state, runloop_event_t event, void *data)
 {
-    printf("Called EVENT_INIT handler\n");
-
+    // Set application name
     ((runloop_init_t *)data)->appName = "runloop testing application";
 
     // Enable GPIO23 (the BOOTSEL button) as input
-    runloop_gpio_t bootsel = {
-        .gpio = 23,
-        .direction = GPIO_IN,
-        .pullup = true};
     runloop_push(runloop, EVENT_GPIO_INIT, &bootsel);
 
     // Return success
@@ -41,7 +39,7 @@ runloop_state_t my_adc_init(runloop_t *runloop, runloop_state_t state, runloop_e
 runloop_state_t my_gpio_init(runloop_t *runloop, runloop_state_t state, runloop_event_t event, void *data)
 {
     runloop_gpio_t *gpio = (runloop_gpio_t *)data;
-    printf("Called EVENT_GPIO_INIT handler for GPIO %d\n", gpio - gpio);
+    printf("Called EVENT_GPIO_INIT handler for GPIO %d\n", gpio->gpio);
 
     // Return success
     return state;
