@@ -1,6 +1,7 @@
 add_executable(runloop 
     main.c
     runloop.c
+    hashmap.c
 )
 
 target_include_directories(runloop PRIVATE

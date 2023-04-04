@@ -10,11 +10,11 @@ typedef enum
     ADC_2 = (1 << 2),  // Initialize ADC 2
     ADC_3 = (1 << 3),  // Initialize ADC 3
     ADC_4 = (1 << 4),  // Initialize ADC 4 (Temperature)
-    UART_0 = (1 << 5), // Initialize UART 0
-    UART_1 = (1 << 6), // Initialize UART 1
-    WIFI = (1 << 7),   // Initialize WiFi connections
-    DNS = (1 << 8),    // Initialize DNS resolution
-    MQTT = (1 << 9),   // Initialize MQTT
+    UART_0 = (1 << 6), // Initialize UART 0
+    UART_1 = (1 << 7), // Initialize UART 1
+    WIFI = (1 << 8),   // Initialize WiFi connections
+    DNS = (1 << 9),    // Initialize DNS resolution
+    MQTT = (1 << 10),  // Initialize MQTT
 } runloop_flags_t;
 
 typedef enum
@@ -33,6 +33,7 @@ typedef enum
     EVENT_MQTT_RECEIVE,      // MQTT receive a message from a topic
     EVENT_ADC_INIT,          // ADC initialization
     EVENT_ADC_SAMPLE,        // ADC sample
+    EVENT_GPIO_INIT,         // Set GPIO pin modes
 } runloop_event_t;
 
 // The current state of the runloop. Use ANY to match any state
@@ -62,9 +63,9 @@ extern void runloop_main(runloop_t *runloop);
 // Push an event onto the runloop, returns -1 on error or 0 on success
 extern int runloop_push(runloop_t *runloop, runloop_event_t type, void *data);
 
-// Register a handler for a specific state and event pair
-extern void runloop_event(runloop_t *runloop, runloop_state_t state,
-                          runloop_event_t event, runloop_callback_t *callback);
+// Register a handler for a specific state and event pair and return 0 on success
+extern int runloop_event(runloop_t *runloop, runloop_state_t state,
+                         runloop_event_t event, runloop_callback_t *callback);
 
 ///////////////////////////////////////////////////////////////////////////////
 // EVENT_INIT argument
@@ -83,5 +84,18 @@ typedef struct
     int channel;         // The ADC channel
     int gpio;            // The GPIO pin
 } runloop_adc_t;
+
+///////////////////////////////////////////////////////////////////////////////
+// EVENT_GPIO_INIT argument
+
+typedef struct
+{
+    const char *pinName; // The name of the pin
+    int gpio;            // The GPIO pin
+    int direction;       // The GPIO mode (GPIO_OUT, GPIO_IN)
+    bool pullup;         // Enable pullup
+    bool pulldown;       // Enable pulldown (setting both pulls enables a "bus keep" function)
+    int irq;             // The GPIO level (GPIO_IRQ_LEVEL_LOW, GPIO_IRQ_LEVEL_HIGH, GPIO_IRQ_LEVEL_FALL, GPIO_IRQ_LEVEL_RISE)
+} runloop_gpio_t;
 
 #endif

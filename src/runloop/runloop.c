@@ -6,8 +6,10 @@
 #include <hardware/adc.h>
 
 #include "runloop.h"
+#include "hashmap.h"
 
 #define HAS_FLAG(f) ((runloop->flags & f) == f)
+#define HASHMAP_SIZE 100
 
 ///////////////////////////////////////////////////////////////////////////////
 // STRUCTURES
@@ -25,6 +27,7 @@ struct runloop_instance_t
     runloop_flags_t flags;
     struct runloop_node_t *head;
     struct runloop_node_t *tail;
+    hashmap_t *hashmap;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -47,6 +50,12 @@ runloop_t *runloop_init(runloop_flags_t flags)
     r->tail = NULL;
     r->state = ZERO;
     r->flags = flags;
+    r->hashmap = hashmap_init(HASHMAP_SIZE);
+    if (r->hashmap == NULL)
+    {
+        free(r);
+        return NULL;
+    }
 
     // Add an INIT event onto the queue to get things started
     if (runloop_push(r, EVENT_INIT, &runloop_init_data))
@@ -64,7 +73,15 @@ runloop_t *runloop_init(runloop_flags_t flags)
 
 void runloop_free(runloop_t *runloop)
 {
+    if (runloop == NULL)
+    {
+        return;
+    }
+
     // TODO: Deallocate all the events
+
+    // Free the hashmap
+    hashmap_free(runloop->hashmap);
     free(runloop);
 }
 
@@ -126,10 +143,30 @@ runloop_event_t runloop_pop(runloop_t *runloop, void **data)
 ///////////////////////////////////////////////////////////////////////////////
 // Register an event handler for a given (state, event) pair
 
-void runloop_event(runloop_t *runloop, runloop_state_t state,
-                   runloop_event_t event, runloop_callback_t *callback)
+int runloop_event(runloop_t *runloop, runloop_state_t state,
+                  runloop_event_t event, runloop_callback_t *callback)
 {
-    printf("TODO: Register event handler for state=%d event=%d\n", state, event);
+    return hashmap_put(runloop->hashmap, state, event, (void *)(callback));
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Call a handler and update state as needed
+
+void runloop_callback(runloop_t *runloop, runloop_event_t event, void *data)
+{
+    runloop_callback_t *callback = hashmap_get(runloop->hashmap, runloop->state, event);
+    if (callback == NULL)
+    {
+        callback = hashmap_get(runloop->hashmap, ANY, event);
+    }
+    if (callback != NULL)
+    {
+        runloop_state_t state = callback(runloop, runloop->state, event, data);
+        if (state != ANY)
+        {
+            runloop->state = state;
+        }
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -179,12 +216,14 @@ void runloop_handle_init(runloop_t *runloop, runloop_init_t *data)
         runloop_push(runloop, EVENT_ADC_INIT, &runloop_adc_data[4]);
     }
 
-    // TODO: Call the registered event handler
+    // Call the registered event handler
+    runloop_callback(runloop, EVENT_INIT, (void *)(data));
+
     // set the appName if not NULL
-    if (data->appName != NULL)
-    {
-        bi_decl(bi_program_description(data->appName));
-    }
+    // if (data->appName != NULL)
+    //{
+    //    bi_decl(bi_program_description(data->appName));
+    //}
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -207,13 +246,62 @@ void runloop_handle_adc_init(runloop_t *runloop, runloop_adc_t *data)
         adc_set_temp_sensor_enabled(true);
     }
 
-    // Dispatch to any registered event handlers
+    // Call the registered event handler
+    runloop_callback(runloop, EVENT_ADC_INIT, (void *)(data));
 
     // Set pin name
-    if (data->gpio != 0 && data->pinName != NULL)
+    // if (data->gpio != 0 && data->pinName != NULL)
+    //{
+    //    bi_decl(bi_1pin_with_name(data->gpio, data->pinName));
+    //}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Handle the EVENT_GPIO_INIT event
+
+void runloop_handle_gpio_init(runloop_t *runloop, runloop_gpio_t *data)
+{
+    printf("EVENT_GPIO_INIT gpio=%d\n", data->gpio);
+
+    // Set GPIO pin direction, and pulls
+    if (data->gpio != 0)
     {
-        bi_decl(bi_1pin_with_name(data->gpio, data->pinName));
+        gpio_init(data->gpio);
+        if (data->direction == GPIO_IN)
+        {
+            gpio_set_input_enabled(data->gpio, true);
+            gpio_set_pulls(data->gpio, data->pullup, data->pulldown);
+        }
+        else
+        {
+            gpio_set_input_enabled(data->gpio, false);
+        }
+
+        void (^count_loop)() = ^{
+          for (int i = 0; i < 100; i++)
+              printf("%d\n", i);
+          printf("ah ah ah\n");
+        };
+
+        // Set IRQ callback
+        if (data->irq)
+        {
+            gpio_set_irq_enabled_with_callback(data->gpio, data->irq, true, count_loop);
+        }
     }
+
+    // Call the registered event handler
+    runloop_callback(runloop, EVENT_GPIO_INIT, (void *)(data));
+
+    // Set pin name
+    // if (data->gpio != 0 && data->pinName != NULL)
+    //{
+    //    bi_decl(bi_1pin_with_name(data->gpio, data->pinName));
+    //}
+}
+
+void gpio_callback(uint gpio, uint32_t events)
+{
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -244,9 +332,11 @@ void runloop_main(runloop_t *runloop)
         case EVENT_ADC_INIT:
             runloop_handle_adc_init(runloop, (runloop_adc_t *)data);
             break;
+        case EVENT_GPIO_INIT:
+            runloop_handle_gpio_init(runloop, (runloop_gpio_t *)data);
+            break;
         default:
             printf("Other event=%d data=%p\n", type, data);
         }
-        sleep_ms(1000);
     }
 }

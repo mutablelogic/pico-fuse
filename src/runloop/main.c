@@ -6,11 +6,44 @@
 ///////////////////////////////////////////////////////////////////////////////
 // EVENT_INIT handler
 
-runloop_state_t main_init(runloop_t *runloop, runloop_state_t state, runloop_event_t event, void *data)
+runloop_state_t my_main_init(runloop_t *runloop, runloop_state_t state, runloop_event_t event, void *data)
 {
-    ((runloop_init_t* )data)->appName = "runloop testing application";
+    printf("Called EVENT_INIT handler\n");
 
-    // Don't change the state
+    ((runloop_init_t *)data)->appName = "runloop testing application";
+
+    // Enable GPIO23 (the BOOTSEL button) as input
+    runloop_gpio_t bootsel = {
+        .gpio = 23,
+        .direction = GPIO_IN,
+        .pullup = true};
+    runloop_push(runloop, EVENT_GPIO_INIT, &bootsel);
+
+    // Return success
+    return state;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// EVENT_ADC_INIT handler
+
+runloop_state_t my_adc_init(runloop_t *runloop, runloop_state_t state, runloop_event_t event, void *data)
+{
+    runloop_adc_t *adc = (runloop_adc_t *)data;
+    printf("Called EVENT_ADC_INIT handler for channel %d gpio %d\n", adc->channel, adc->gpio);
+
+    // Return success
+    return state;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// EVENT_GPIO_INIT handler
+
+runloop_state_t my_gpio_init(runloop_t *runloop, runloop_state_t state, runloop_event_t event, void *data)
+{
+    runloop_gpio_t *gpio = (runloop_gpio_t *)data;
+    printf("Called EVENT_GPIO_INIT handler for GPIO %d\n", gpio - gpio);
+
+    // Return success
     return state;
 }
 
@@ -21,17 +54,11 @@ int main()
 {
     // Set up the runloop, with ADC_4 enabled (temperature sensor)
     runloop_t *runloop = runloop_init(ADC_4);
-    if (runloop == NULL)
-    {
-        while (true)
-        {
-            printf("Failed to initialize runloop=%p\n", runloop);
-            sleep_ms(1000);
-        }
-    }
 
-    // Add init event for EVENT_INIT
-    runloop_event(runloop, ANY, EVENT_INIT, main_init);
+    // Event handlers
+    runloop_event(runloop, ANY, EVENT_INIT, my_main_init);
+    runloop_event(runloop, ANY, EVENT_ADC_INIT, my_adc_init);
+    runloop_event(runloop, ANY, EVENT_GPIO_INIT, my_gpio_init);
 
     // Run forever
     runloop_main(runloop);
