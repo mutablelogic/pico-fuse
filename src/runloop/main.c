@@ -46,6 +46,17 @@ runloop_state_t my_gpio_init(runloop_t *runloop, runloop_state_t state, runloop_
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// EVENT_GPIO handler
+
+runloop_state_t my_gpio_change(runloop_t *runloop, runloop_state_t state, runloop_event_t event, void *data)
+{
+    printf("Called EVENT_GPIO handler\n");
+
+    // Return success
+    return state;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // main
 
 int main()
@@ -57,6 +68,7 @@ int main()
     runloop_event(runloop, ANY, EVENT_INIT, my_main_init);
     runloop_event(runloop, ANY, EVENT_ADC_INIT, my_adc_init);
     runloop_event(runloop, ANY, EVENT_GPIO_INIT, my_gpio_init);
+    runloop_event(runloop, ANY, EVENT_GPIO, my_gpio_change);
 
     // Run forever
     runloop_main(runloop);

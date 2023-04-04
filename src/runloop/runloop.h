@@ -34,6 +34,7 @@ typedef enum
     EVENT_ADC_INIT,          // ADC initialization
     EVENT_ADC_SAMPLE,        // ADC sample
     EVENT_GPIO_INIT,         // Set GPIO pin modes
+    EVENT_GPIO,              // GPIO pin state change
 } runloop_event_t;
 
 // The current state of the runloop. Use ANY to match any state
@@ -53,9 +54,6 @@ typedef runloop_state_t runloop_callback_t(
 
 // Initialize the runloop structure
 extern runloop_t *runloop_init(runloop_flags_t flags);
-
-// Free runloop structure
-extern void runloop_free(runloop_t *runloop);
 
 // Run the loop forever
 extern void runloop_main(runloop_t *runloop);

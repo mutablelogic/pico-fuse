@@ -4,6 +4,7 @@
 #include <pico/stdlib.h>
 #include <pico/binary_info.h>
 #include <hardware/adc.h>
+#include <hardware/gpio.h>
 
 #include "runloop.h"
 #include "hashmap.h"
@@ -33,6 +34,7 @@ struct runloop_instance_t
 ///////////////////////////////////////////////////////////////////////////////
 // GLOBALS
 
+runloop_t *runloop;
 runloop_init_t runloop_init_data;
 runloop_adc_t runloop_adc_data[5];
 
@@ -41,48 +43,39 @@ runloop_adc_t runloop_adc_data[5];
 
 runloop_t *runloop_init(runloop_flags_t flags)
 {
-    runloop_t *r = malloc(sizeof(runloop_t));
-    if (r == NULL)
+    if (runloop != NULL)
+    {
+        return runloop;
+    }
+
+    runloop = malloc(sizeof(runloop_t));
+    if (runloop == NULL)
     {
         return NULL;
     }
-    r->head = NULL;
-    r->tail = NULL;
-    r->state = ZERO;
-    r->flags = flags;
-    r->hashmap = hashmap_init(HASHMAP_SIZE);
-    if (r->hashmap == NULL)
+
+    runloop->head = NULL;
+    runloop->tail = NULL;
+    runloop->state = ZERO;
+    runloop->flags = flags;
+    runloop->hashmap = hashmap_init(HASHMAP_SIZE);
+    if (runloop->hashmap == NULL)
     {
-        free(r);
+        free(runloop);
+        runloop = NULL;
         return NULL;
     }
 
     // Add an INIT event onto the queue to get things started
-    if (runloop_push(r, EVENT_INIT, &runloop_init_data))
+    if (runloop_push(runloop, EVENT_INIT, &runloop_init_data))
     {
-        free(r);
+        free(runloop);
+        runloop = NULL;
         return NULL;
     }
 
     // Return the runloop
-    return r;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// Free runloop structure
-
-void runloop_free(runloop_t *runloop)
-{
-    if (runloop == NULL)
-    {
-        return;
-    }
-
-    // TODO: Deallocate all the events
-
-    // Free the hashmap
-    hashmap_free(runloop->hashmap);
-    free(runloop);
+    return runloop;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -259,7 +252,12 @@ void runloop_handle_adc_init(runloop_t *runloop, runloop_adc_t *data)
 
 void runloop_handle_gpio_callback(uint gpio, uint32_t events)
 {
-    printf("GPIO IRQ: gpio=%d events=%d\n",gpio, events);
+    // printf("GPIO IRQ: gpio=%d events=%d\n",gpio, events);
+    if (runloop != NULL)
+    {
+        // Trigger event
+        runloop_push(runloop, EVENT_GPIO, NULL);
+    }
 }
 
 void runloop_handle_gpio_init(runloop_t *runloop, runloop_gpio_t *data)
@@ -335,8 +333,11 @@ void runloop_main(runloop_t *runloop)
         case EVENT_GPIO_INIT:
             runloop_handle_gpio_init(runloop, (runloop_gpio_t *)data);
             break;
+        case EVENT_GPIO:
+            runloop_callback(runloop, EVENT_GPIO, data);
+            break;
         default:
-            printf("Other event=%d data=%p\n", type, data);
+            printf("Unhandled event=%d data=%p\n", type, data);
         }
     }
 }
