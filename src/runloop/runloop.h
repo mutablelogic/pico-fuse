@@ -12,9 +12,9 @@ typedef enum
     ADC_4 = (1 << 4),  // Initialize ADC 4 (Temperature)
     UART_0 = (1 << 6), // Initialize UART 0
     UART_1 = (1 << 7), // Initialize UART 1
-    WIFI = (1 << 8),   // Initialize WiFi connections
-    DNS = (1 << 9),    // Initialize DNS resolution
-    MQTT = (1 << 10),  // Initialize MQTT
+    WIFI = (1 << 9),   // Initialize WiFi connections
+    DNS = (1 << 10),   // Initialize DNS resolution
+    MQTT = (1 << 11),  // Initialize MQTT
 } runloop_flags_t;
 
 typedef enum
@@ -35,6 +35,9 @@ typedef enum
     EVENT_ADC_SAMPLE,        // ADC sample
     EVENT_GPIO_INIT,         // Set GPIO pin modes
     EVENT_GPIO,              // GPIO pin state change
+    EVENT_LED,               // LED state change
+    EVENT_TIMER_INIT,        // Repeating timer initialization
+    EVENT_TIMER,             // Repeating timer fired
 } runloop_event_t;
 
 // The current state of the runloop. Use ANY to match any state
@@ -58,8 +61,8 @@ extern runloop_t *runloop_init(runloop_flags_t flags);
 // Run the loop forever
 extern void runloop_main(runloop_t *runloop);
 
-// Push an event onto the runloop, returns -1 on error or 0 on success
-extern int runloop_push(runloop_t *runloop, runloop_event_t type, void *data);
+// Fire an event on the runloop, returns -1 on error or 0 on success
+extern int runloop_fire(runloop_t *runloop, runloop_event_t type, void *data);
 
 // Register a handler for a specific state and event pair and return 0 on success
 extern int runloop_event(runloop_t *runloop, runloop_state_t state,
@@ -84,7 +87,7 @@ typedef struct
 } runloop_adc_t;
 
 ///////////////////////////////////////////////////////////////////////////////
-// EVENT_GPIO_INIT argument
+// EVENT_GPIO_INIT and EVENT_GPIO argument
 
 typedef struct
 {
@@ -96,5 +99,13 @@ typedef struct
     bool irqrise;        // The GPIO level GPIO_IRQ_LEVEL_RISE
     bool irqfall;        // The GPIO level GPIO_IRQ_LEVEL_FALL
 } runloop_gpio_t;
+
+///////////////////////////////////////////////////////////////////////////////
+// EVENT_TIMER
+
+typedef struct
+{
+    int delay_ms; // The delay in milliseconds
+} runloop_timer_t;
 
 #endif

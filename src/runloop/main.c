@@ -6,6 +6,9 @@
 // GPIO pin definitions
 runloop_gpio_t bootsel = {.pinName = "BOOTSEL", .gpio = 23, .irqrise = true, .irqfall = true};
 
+// Timer
+runloop_timer_t timer = {.delay_ms = 1000};
+
 ///////////////////////////////////////////////////////////////////////////////
 // EVENT_INIT handler
 
@@ -15,7 +18,10 @@ runloop_state_t my_main_init(runloop_t *runloop, runloop_state_t state, runloop_
     ((runloop_init_t *)data)->appName = "runloop testing application";
 
     // Enable GPIO23 (the BOOTSEL button) as input
-    runloop_push(runloop, EVENT_GPIO_INIT, &bootsel);
+    runloop_fire(runloop, EVENT_GPIO_INIT, &bootsel);
+
+    // Enable a timer event every 1000ms
+    runloop_fire(runloop, EVENT_TIMER_INIT, &timer);
 
     // Return success
     return state;
@@ -52,6 +58,29 @@ runloop_state_t my_gpio_change(runloop_t *runloop, runloop_state_t state, runloo
 {
     printf("Called EVENT_GPIO handler\n");
 
+    // Switch LED on
+    runloop_fire(runloop, EVENT_LED, (void *)true);
+
+    // Switch LED off
+    runloop_fire(runloop, EVENT_LED, (void *)false);
+
+    // Return success
+    return state;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// EVENT_TIMER
+
+runloop_state_t my_gpio_timer(runloop_t *runloop, runloop_state_t state, runloop_event_t event, void *data)
+{
+    printf("Called EVENT_GPIO handler\n");
+
+    // Switch LED on
+    runloop_fire(runloop, EVENT_LED, (void *)true);
+
+    // Switch LED off
+    runloop_fire(runloop, EVENT_LED, (void *)false);
+
     // Return success
     return state;
 }
@@ -69,6 +98,7 @@ int main()
     runloop_event(runloop, ANY, EVENT_ADC_INIT, my_adc_init);
     runloop_event(runloop, ANY, EVENT_GPIO_INIT, my_gpio_init);
     runloop_event(runloop, ANY, EVENT_GPIO, my_gpio_change);
+    runloop_event(runloop, ANY, EVENT_TIMER, my_gpio_timer);
 
     // Run forever
     runloop_main(runloop);

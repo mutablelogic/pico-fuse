@@ -67,7 +67,7 @@ runloop_t *runloop_init(runloop_flags_t flags)
     }
 
     // Add an INIT event onto the queue to get things started
-    if (runloop_push(runloop, EVENT_INIT, &runloop_init_data))
+    if (runloop_fire(runloop, EVENT_INIT, &runloop_init_data))
     {
         free(runloop);
         runloop = NULL;
@@ -87,9 +87,9 @@ bool runloop_is_empty(runloop_t *runloop)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// Push an event onto the runloop, returns -1 on error or 0 on success
+// Fire an event on the runloop, returns -1 on error or 0 on success
 
-int runloop_push(runloop_t *runloop, runloop_event_t type, void *data)
+int runloop_fire(runloop_t *runloop, runloop_event_t type, void *data)
 {
     struct runloop_node_t *node = malloc(sizeof(struct runloop_node_t));
     if (node == NULL)
@@ -182,31 +182,31 @@ void runloop_handle_init(runloop_t *runloop, runloop_init_t *data)
     {
         runloop_adc_data[0].channel = 0;
         runloop_adc_data[0].gpio = 26;
-        runloop_push(runloop, EVENT_ADC_INIT, &runloop_adc_data[0]);
+        runloop_fire(runloop, EVENT_ADC_INIT, &runloop_adc_data[0]);
     }
     if (HAS_FLAG(ADC_1))
     {
         runloop_adc_data[1].channel = 1;
         runloop_adc_data[1].gpio = 27;
-        runloop_push(runloop, EVENT_ADC_INIT, &runloop_adc_data[1]);
+        runloop_fire(runloop, EVENT_ADC_INIT, &runloop_adc_data[1]);
     }
     if (HAS_FLAG(ADC_2))
     {
         runloop_adc_data[2].channel = 2;
         runloop_adc_data[2].gpio = 28;
-        runloop_push(runloop, EVENT_ADC_INIT, &runloop_adc_data[2]);
+        runloop_fire(runloop, EVENT_ADC_INIT, &runloop_adc_data[2]);
     }
     if (HAS_FLAG(ADC_3))
     {
         runloop_adc_data[3].channel = 3;
         runloop_adc_data[3].gpio = 29;
-        runloop_push(runloop, EVENT_ADC_INIT, &runloop_adc_data[3]);
+        runloop_fire(runloop, EVENT_ADC_INIT, &runloop_adc_data[3]);
     }
     if (HAS_FLAG(ADC_4))
     {
         runloop_adc_data[4].channel = 4;
         runloop_adc_data[4].gpio = 0;
-        runloop_push(runloop, EVENT_ADC_INIT, &runloop_adc_data[4]);
+        runloop_fire(runloop, EVENT_ADC_INIT, &runloop_adc_data[4]);
     }
 
     // Call the registered event handler
@@ -256,7 +256,7 @@ void runloop_handle_gpio_callback(uint gpio, uint32_t events)
     if (runloop != NULL)
     {
         // Trigger event
-        runloop_push(runloop, EVENT_GPIO, NULL);
+        runloop_fire(runloop, EVENT_GPIO, NULL);
     }
 }
 
@@ -303,6 +303,49 @@ void runloop_handle_gpio_init(runloop_t *runloop, runloop_gpio_t *data)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// EVENT_LED
+
+void runloop_handle_led(runloop_t *runloop, bool value)
+{
+    printf("TODO: Set led=%d\n", value);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// EVENT_TIMER_INIT and EVENT_TIMER
+
+bool runloop_handle_timer_callback(repeating_timer_t *timer)
+{
+    // Call the registered event handler
+    runloop_callback(runloop, EVENT_TIMER, timer->user_data);
+
+    // TODO: free the timer if we want to cancel the timer
+
+    // Should not cancel the timer here
+    return true;
+}
+
+void runloop_handle_timer_init(runloop_t *runloop, runloop_timer_t *data)
+{
+    if (data->delay_ms != 0)
+    {
+        // Create a structure to hold the timer data
+        repeating_timer_t *timer = malloc(sizeof(repeating_timer_t));
+        if (timer == NULL)
+        {
+            printf("ERROR: Failed to add timer\n");
+            return;
+        }
+
+        // Set timer
+        if (!add_repeating_timer_ms(data->delay_ms, runloop_handle_timer_callback, (void *)(data), timer))
+        {
+            printf("ERROR: Failed to add timer\n");
+            return;
+        }
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // Run
 
 void runloop_main(runloop_t *runloop)
@@ -335,6 +378,12 @@ void runloop_main(runloop_t *runloop)
             break;
         case EVENT_GPIO:
             runloop_callback(runloop, EVENT_GPIO, data);
+            break;
+        case EVENT_LED:
+            runloop_handle_led(runloop, (bool)data);
+            break;
+        case EVENT_TIMER_INIT:
+            runloop_handle_timer_init(runloop, (runloop_timer_t *)data);
             break;
         default:
             printf("Unhandled event=%d data=%p\n", type, data);
