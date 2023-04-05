@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <pico/stdlib.h>
 #include <pico/binary_info.h>
+#include <pico/cyw43_arch.h>
 #include <hardware/adc.h>
 #include <hardware/gpio.h>
 
@@ -37,6 +38,8 @@ struct runloop_instance_t
 runloop_t *runloop;
 runloop_init_t runloop_init_data;
 runloop_adc_t runloop_adc_data[5];
+runloop_led_t runloop_led_data;
+runloop_wifi_t runloop_wifi_data;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Initialize the runloop structure
@@ -167,11 +170,19 @@ void runloop_callback(runloop_t *runloop, runloop_event_t event, void *data)
 
 void runloop_handle_init(runloop_t *runloop, runloop_init_t *data)
 {
+    // Initialize STDIO
     stdio_init_all();
-    sleep_ms(1000);
 
-    // Debug
-    printf("EVENT_INIT\n");
+    // cyw43 initialization
+    // TODO: Use the country code
+    int err = cyw43_arch_init();
+    if (err != 0)
+    {
+        panic("cyw43_arch_init failed with pico_error=%d\n", err);
+    }
+
+    // Wait for 1s
+    sleep_ms(1000);
 
     // ADC initialization
     if (runloop->flags & (ADC_0 | ADC_1 | ADC_2 | ADC_3 | ADC_4))
@@ -207,6 +218,14 @@ void runloop_handle_init(runloop_t *runloop, runloop_init_t *data)
         runloop_adc_data[4].channel = 4;
         runloop_adc_data[4].gpio = 0;
         runloop_fire(runloop, EVENT_ADC_INIT, &runloop_adc_data[4]);
+    }
+    if (HAS_FLAG(LED))
+    {
+        runloop_fire(runloop, EVENT_LED_INIT, &runloop_led_data);
+    }
+    if (HAS_FLAG(WIFI))
+    {
+        runloop_fire(runloop, EVENT_WIFI_INIT, &runloop_wifi_data);
     }
 
     // Call the registered event handler
@@ -303,11 +322,46 @@ void runloop_handle_gpio_init(runloop_t *runloop, runloop_gpio_t *data)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// EVENT_LED
+// EVENT_LED_INIT and EVENT_LED
 
-void runloop_handle_led(runloop_t *runloop, bool value)
+void runloop_handle_led_init(runloop_t *runloop, runloop_led_t *data)
 {
-    printf("TODO: Set led=%d\n", value);
+#if defined(PICO_DEFAULT_LED_PIN)
+    data->gpio = PICO_DEFAULT_LED_PIN;
+#elif defined(CYW43_WL_GPIO_LED_PIN)
+    data->cyw43_arch = true;
+    data->gpio = CYW43_WL_GPIO_LED_PIN;
+#endif
+    // Call the registered event handler
+    runloop_callback(runloop, EVENT_LED_INIT, (void *)(data));
+
+    // Perform any initialization
+    if (data->gpio != 0)
+    {
+        if (!data->cyw43_arch)
+        {
+            gpio_init(data->gpio);
+            gpio_set_dir(data->gpio, GPIO_OUT);
+        }
+    }
+}
+
+void runloop_handle_led(runloop_t *runloop, runloop_led_t *data)
+{
+    if (data->gpio != 0)
+    {
+        if (data->cyw43_arch)
+        {
+            cyw43_arch_gpio_put(data->gpio, data->value);
+        }
+        else
+        {
+            gpio_put(data->gpio, data->value);
+        }
+    }
+
+    // Call the registered event handler
+    runloop_callback(runloop, EVENT_LED, (void *)(data));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -346,6 +400,33 @@ void runloop_handle_timer_init(runloop_t *runloop, runloop_timer_t *data)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// EVENT_WIFI_INIT
+
+void runloop_handle_wifi_init(runloop_t *runloop, runloop_wifi_t *data)
+{
+    // Call the registered event handler to get the SSID information
+    runloop_callback(runloop, EVENT_WIFI_INIT, (void *)(data));
+
+    // Connect
+    if (data->ssidName != NULL)
+    {
+        // TODO: Allow AP mode
+        cyw43_arch_enable_sta_mode();
+
+        int err = cyw43_arch_wifi_connect_async(data->ssidName, data->ssidPassword, CYW43_AUTH_WPA2_MIXED_PSK);
+        if (err != 0)
+        {
+            printf("ERROR: Failed to connect to wifi ssid=%s err=%d\n", data->ssidName, err);
+        }
+        else
+        {
+            // TODO start repeating timer for cyw43_wifi_link_status
+            printf("INFO: Connecting to wifi ssid=%s\n", data->ssidName);
+        }
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // Run
 
 void runloop_main(runloop_t *runloop)
@@ -379,11 +460,17 @@ void runloop_main(runloop_t *runloop)
         case EVENT_GPIO:
             runloop_callback(runloop, EVENT_GPIO, data);
             break;
-        case EVENT_LED:
-            runloop_handle_led(runloop, (bool)data);
-            break;
         case EVENT_TIMER_INIT:
             runloop_handle_timer_init(runloop, (runloop_timer_t *)data);
+            break;
+        case EVENT_LED_INIT:
+            runloop_handle_led_init(runloop, (runloop_led_t *)data);
+            break;
+        case EVENT_LED:
+            runloop_handle_led(runloop, (runloop_led_t *)data);
+            break;
+        case EVENT_WIFI_INIT:
+            runloop_handle_wifi_init(runloop, (runloop_wifi_t *)data);
             break;
         default:
             printf("Unhandled event=%d data=%p\n", type, data);

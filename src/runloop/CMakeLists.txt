@@ -11,6 +11,7 @@ target_include_directories(runloop PRIVATE
 
 target_link_libraries(runloop
     pico_stdlib
+    pico_cyw43_arch_none    
     hardware_adc
 )
 

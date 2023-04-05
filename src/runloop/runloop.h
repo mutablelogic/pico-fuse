@@ -12,6 +12,7 @@ typedef enum
     ADC_4 = (1 << 4),  // Initialize ADC 4 (Temperature)
     UART_0 = (1 << 6), // Initialize UART 0
     UART_1 = (1 << 7), // Initialize UART 1
+    LED = (1 << 8),    // Initialize On-board LED
     WIFI = (1 << 9),   // Initialize WiFi connections
     DNS = (1 << 10),   // Initialize DNS resolution
     MQTT = (1 << 11),  // Initialize MQTT
@@ -19,25 +20,24 @@ typedef enum
 
 typedef enum
 {
-    EVENT_NONE,              // No event
-    EVENT_INIT,              // Initialize the runloop
-    EVENT_WIFI_INIT,         // Return the AP name, password and country
-    EVENT_WIFI_CONNECTED,    // WiFi has been connected
-    EVENT_WIFI_DISCONNECTED, // WiFi did not connect or is disconnected
-    EVENT_MQTT_INIT,         // Return the broker address and credentials
-    EVENT_MQTT_CONNECTED,    // MQTT connected to broker
-    EVENT_MQTT_DISCONNECTED, // MQTT disconnected from broker
-    EVENT_MQTT_SEND,         // MQTT publish to a topic
-    EVENT_MQTT_SUBSCRIBE,    // MQTT subscribe to a topic
-    EVENT_MQTT_UNSUBSCRIBE,  // MQTT unsubscribe from a topic
-    EVENT_MQTT_RECEIVE,      // MQTT receive a message from a topic
-    EVENT_ADC_INIT,          // ADC initialization
-    EVENT_ADC_SAMPLE,        // ADC sample
-    EVENT_GPIO_INIT,         // Set GPIO pin modes
-    EVENT_GPIO,              // GPIO pin state change
-    EVENT_LED,               // LED state change
-    EVENT_TIMER_INIT,        // Repeating timer initialization
-    EVENT_TIMER,             // Repeating timer fired
+    EVENT_NONE,             // No event
+    EVENT_INIT,             // Initialize the runloop
+    EVENT_WIFI_INIT,        // Return the AP name, password and country
+    EVENT_WIFI_STATUS,      // WiFi connection status
+    EVENT_MQTT_INIT,        // Return the broker address and credentials
+    EVENT_MQTT_STATUS,      // MQTT connection status
+    EVENT_MQTT_SUBSCRIBE,   // MQTT subscribe to a topic
+    EVENT_MQTT_UNSUBSCRIBE, // MQTT unsubscribe from a topic
+    EVENT_MQTT_SEND,        // MQTT publish to a topic
+    EVENT_MQTT_RECEIVE,     // MQTT receive a message from a topic
+    EVENT_ADC_INIT,         // ADC initialization
+    EVENT_ADC_SAMPLE,       // ADC sample
+    EVENT_GPIO_INIT,        // Set GPIO pin modes
+    EVENT_GPIO,             // GPIO pin state change
+    EVENT_LED_INIT,         // LED initialization
+    EVENT_LED,              // LED state change
+    EVENT_TIMER_INIT,       // Repeating timer initialization
+    EVENT_TIMER,            // Repeating timer fired
 } runloop_event_t;
 
 // The current state of the runloop. Use ANY to match any state
@@ -69,15 +69,16 @@ extern int runloop_event(runloop_t *runloop, runloop_state_t state,
                          runloop_event_t event, runloop_callback_t *callback);
 
 ///////////////////////////////////////////////////////////////////////////////
-// EVENT_INIT argument
+// EVENT_INIT
 
 typedef struct
 {
-    const char *appName; // The name of the application
+    const char *appName;     // The name of the application
+    const char *countryCode; // The country code for WiFi
 } runloop_init_t;
 
 ///////////////////////////////////////////////////////////////////////////////
-// EVENT_ADC_INIT argument
+// EVENT_ADC_INIT
 
 typedef struct
 {
@@ -87,7 +88,7 @@ typedef struct
 } runloop_adc_t;
 
 ///////////////////////////////////////////////////////////////////////////////
-// EVENT_GPIO_INIT and EVENT_GPIO argument
+// EVENT_GPIO_INIT and EVENT_GPIO
 
 typedef struct
 {
@@ -99,6 +100,25 @@ typedef struct
     bool irqrise;        // The GPIO level GPIO_IRQ_LEVEL_RISE
     bool irqfall;        // The GPIO level GPIO_IRQ_LEVEL_FALL
 } runloop_gpio_t;
+
+///////////////////////////////////////////////////////////////////////////////
+// EVENT_LED_INIT and EVENT_LED
+
+typedef struct
+{
+    bool cyw43_arch; // Pico W
+    int gpio;        // The GPIO pin
+    bool value;      // The value
+} runloop_led_t;
+
+///////////////////////////////////////////////////////////////////////////////
+// EVENT_WIFI_INIT EVENT_WIFI_STATUS
+
+typedef struct
+{
+    const char *ssidName;
+    const char *ssidPassword;
+} runloop_wifi_t;
 
 ///////////////////////////////////////////////////////////////////////////////
 // EVENT_TIMER
