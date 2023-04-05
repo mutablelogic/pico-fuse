@@ -1,5 +1,6 @@
 add_library(pico_fuse STATIC
     picofuse.c
+    hashmap.c
     ev_init.c
     ev_quit.c
 )

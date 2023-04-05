@@ -13,6 +13,7 @@ typedef enum
     EV_NONE, // No event
     EV_INIT, // Initialize the runloop
     EV_QUIT, // Quit the runloop
+    EV_LED,  // LED changed state
 } picofuse_event_t;
 
 // The current state of the picofuse. Use ANY to match any state
@@ -26,6 +27,12 @@ typedef enum
 // Opaque picofuse structure
 typedef struct picofuse_instance_t picofuse_t;
 
+// Event callback
+typedef picofuse_state_t picofuse_callback_t(picofuse_t *,
+                                             picofuse_state_t,
+                                             picofuse_event_t,
+                                             void *);
+
 // Initialize picofuse
 extern picofuse_t *picofuse_init(picofuse_flags_t);
 
@@ -36,7 +43,15 @@ extern int picofuse_main(picofuse_t *);
 extern void picofuse_free(picofuse_t *);
 
 // Fire an event on the runloop, returns -1 on error or 0 on success
-extern int picofuse_fire(picofuse_t *self, picofuse_event_t type, void *data);
+extern int picofuse_fire(picofuse_t *,
+                         picofuse_event_t,
+                         void *);
+
+// Register an event handler
+extern int picofuse_register(picofuse_t *,
+                             picofuse_state_t,
+                             picofuse_event_t,
+                             picofuse_callback_t *);
 
 ///////////////////////////////////////////////////////////////////////////////
 // EV_INIT

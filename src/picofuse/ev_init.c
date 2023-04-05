@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <picofuse/picofuse.h>
 #include <pico/stdlib.h>
+#include "ev.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // Handle the EVENT_INIT event

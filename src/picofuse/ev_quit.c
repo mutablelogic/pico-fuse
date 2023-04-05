@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <picofuse/picofuse.h>
+#include "ev.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // Handle the EVENT_INIT event

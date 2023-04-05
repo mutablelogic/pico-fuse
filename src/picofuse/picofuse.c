@@ -1,6 +1,9 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <pico/stdlib.h>
 #include <picofuse/picofuse.h>
+#include "ev.h"
+#include "hashmap.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // Structures
@@ -18,7 +21,7 @@ struct picofuse_instance_t
     picofuse_flags_t flags;
     struct picofuse_node_t *head;
     struct picofuse_node_t *tail;
-    // hashmap_t *hashmap;
+    hashmap_t *hashmap;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -136,6 +139,16 @@ void picofuse_callback(picofuse_t *self, picofuse_event_t event, void *data)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// Register an event handler for a given (state, event) pair. Returns -1 on
+// error or 0 on success.
+
+int picofuse_register(picofuse_t *self, picofuse_state_t state,
+                      picofuse_event_t event, picofuse_callback_t *callback)
+{
+    return hashmap_put(self->hashmap, state, event, (void *)(callback));
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // Free resources
 
 void picofuse_free(picofuse_t *self)
@@ -145,6 +158,7 @@ void picofuse_free(picofuse_t *self)
         void *data;
         picofuse_next(self, &data);
     }
+    hashmap_free(self->hashmap);
     free(self);
 }
 
