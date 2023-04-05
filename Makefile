@@ -5,7 +5,6 @@ SRC_DIR := $(filter-out src/lwipopts.h, $(wildcard src/*))
 GIT := $(shell which git)
 CMAKE := $(shell which cmake)
 
-
 # Pico variables
 PICO_PLATFORM ?= rp2040
 PICO_BOARD ?= pico_w
