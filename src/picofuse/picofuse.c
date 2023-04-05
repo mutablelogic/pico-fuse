@@ -1,7 +1,6 @@
 #include <stdlib.h>
 #include <pico/stdlib.h>
-
-#include "picofuse.h"
+#include <picofuse/picofuse.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 // Structures
@@ -19,7 +18,7 @@ struct picofuse_instance_t
     picofuse_flags_t flags;
     struct picofuse_node_t *head;
     struct picofuse_node_t *tail;
-    //hashmap_t *hashmap;
+    // hashmap_t *hashmap;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -70,6 +69,27 @@ bool picofuse_is_empty(picofuse_t *runloop)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// Get next event, or returns EVENT_NONE
+
+picofuse_event_t picofuse_next(picofuse_t *self, void **data)
+{
+    if (picofuse_is_empty(self))
+    {
+        return EV_NONE;
+    }
+    struct picofuse_node_t *node = self->head;
+    self->head = self->head->next;
+    if (self->head == NULL)
+    {
+        self->tail = NULL;
+    }
+    *data = node->data;
+    picofuse_event_t type = node->type;
+    free(node);
+    return type;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // Fire an event immediately, returns -1 on error or 0 on success
 
 int picofuse_fire(picofuse_t *self, picofuse_event_t type, void *data)
@@ -93,4 +113,74 @@ int picofuse_fire(picofuse_t *self, picofuse_event_t type, void *data)
         self->tail = node;
     }
     return 0;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Call a handler and update state as needed
+
+void picofuse_callback(picofuse_t *self, picofuse_event_t event, void *data)
+{
+    picofuse_callback_t *callback = hashmap_get(self->hashmap, self->state, event);
+    if (callback == NULL)
+    {
+        callback = hashmap_get(self->hashmap, ANY, event);
+    }
+    if (callback != NULL)
+    {
+        picofuse_state_t state = callback(self, self->state, event, data);
+        if (state != ANY)
+        {
+            self->state = state;
+        }
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Free resources
+
+void picofuse_free(picofuse_t *self)
+{
+    while (!picofuse_is_empty(self))
+    {
+        void *data;
+        picofuse_next(self, &data);
+    }
+    free(self);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Main
+
+int picofuse_main(picofuse_t *self)
+{
+    int errorCode = 0;
+    while (!errorCode)
+    {
+        if (picofuse_is_empty(self))
+        {
+            sleep_ms(10);
+            continue;
+        }
+
+        // Get next event from the queue
+        void *data;
+        picofuse_event_t type = picofuse_next(self, &data);
+
+        // Process the event
+        switch (type)
+        {
+        case EV_NONE:
+            break;
+        case EV_INIT:
+            picofuse_handle_init(self, (picofuse_init_t *)data);
+            break;
+        case EV_QUIT:
+            picofuse_handle_quit(self, (picofuse_init_t *)data);
+            break;
+        default:
+            printf("Unhandled event=%d data=%p\n", type, data);
+        }
+    }
+
+    return errorCode;
 }

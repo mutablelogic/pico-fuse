@@ -30,10 +30,13 @@ typedef struct picofuse_instance_t picofuse_t;
 extern picofuse_t *picofuse_init(picofuse_flags_t);
 
 // Run the loop
-extern void picofuse_main(picofuse_t *);
+extern int picofuse_main(picofuse_t *);
 
 // Free the picofuse structure
 extern void picofuse_free(picofuse_t *);
+
+// Fire an event on the runloop, returns -1 on error or 0 on success
+extern int picofuse_fire(picofuse_t *self, picofuse_event_t type, void *data);
 
 ///////////////////////////////////////////////////////////////////////////////
 // EV_INIT
@@ -43,6 +46,7 @@ typedef struct
     const char *appName;          // The name of the application, or NULL
     const char *countryCode;      // Two-letter country code for the device, or NULL
     const char *deviceIdentifier; // Unique identifier for the device
+    int errorCode;                // Error code, or 0
 } picofuse_init_t;
 
 #endif // PICOFUSE_H

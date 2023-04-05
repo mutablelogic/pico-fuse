@@ -20,9 +20,11 @@ clean:
 	@echo Clean
 	@rm -fr $(BUILD_DIR)
 
-mqtt: mkdir
-	@PICO_SDK_PATH=${PICO_SDK_PATH} make -C ${BUILD_DIR}/src/mqtt
-
 runloop: mkdir
 	@PICO_SDK_PATH=${PICO_SDK_PATH} make -C ${BUILD_DIR}/src/runloop
 
+picofuse: mkdir
+	make -C ${BUILD_DIR}/src/picofuse
+
+blink: mkdir
+	make -C ${BUILD_DIR}/src/blink
