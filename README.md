@@ -1,9 +1,29 @@
 # pico-fuse
 
 This is a library to use with the Raspberry Pi Pico boards using the RP2040 microprocessor,
-which provides an event-driven architecture for interacting with devices.
+which provides an event-driven architecture for interacting with devices in C. 
+For example, here's a typical program which blinks an LED once per second:
 
-(please note these instructions are in progress and not yet tested)
+```c
+#include <picofuse/picofuse.h>
+
+picofuse_state_t main_timer_init(picofuse_t *self,
+                           picofuse_state_t state,
+                           picofuse_event_t event,
+                           void *data)
+{
+   ((picofuse_timer_t *)data)->delay_ms = 1000;
+   return ANY;
+}
+
+int main()
+{
+    picofuse_t *picofuse = picofuse_init(PICOFUSE_DEBUG);
+    picofuse_register(picofuse, ANY, EV_TIMER_INIT, main_timer_init);
+    picofuse_register(picofuse, ANY, EV_TIMER, main_timer);
+    picofuse_main(picofuse);
+}
+```
 
 ## Dependencies
 
