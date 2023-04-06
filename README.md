@@ -29,7 +29,9 @@ brew install arm-none-eabi-gcc
 If you haven't done so already, [create an ssh key](https://www.digitalocean.com/community/tutorials/how-to-create-ssh-keys-with-openssh-on-macos-or-linux) and [add it to your 
 github account](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account).
 
-You can then proceed to download and configure the toolchain:
+## Configuration
+
+Download and configure the toolchain using the following set of commands in your terminal:
 
 ```bash
 install -d ${HOME}/projects && cd ${HOME}/projects
@@ -43,6 +45,8 @@ If this completes successfully then congratulations. If you are targetting a dif
 board then the Pico W then here are some values for PICO_BOARD you can use instead:
 
 TODO
+
+Whenever you target a different board, use `make clean` before `make config`.
 
 ## Blink
 
