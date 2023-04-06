@@ -1,8 +1,9 @@
-# pico-frame
+# pico-fuse
+
+This is a library to use with the Raspberry Pi Pico boards using the RP2040 microprocessor,
+which provides an event-driven architecture for interacting with devices.
 
 (please note these instructions are in progress and not yet tested)
-
-These are some experiments with the Raspberry Pi Pico W.
 
 ## Dependencies
 
