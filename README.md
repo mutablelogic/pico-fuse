@@ -35,18 +35,14 @@ You can then proceed to download and configure the toolchain:
 install -d ${HOME}/projects && cd ${HOME}/projects
 git clone git@github.com:mutablelogic/pico-frame.git
 cd pico-frame
-make config
+PICO_BOARD=pico_w make config
+make picotool
 ```
 
-Finally, you need to install the compile and install the toolchain binaries:
+If this completes successfully then congratulations. If you are targetting a different
+board then the Pico W then here are some values for PICO_BOARD you can use instead:
 
 TODO
-
-You should end up with three tools in your `${HOME}/bin` folder:
-
-  * `picotool` - Tool used for flashing the Pico
-  * `pioasm` - Assembler for the Pico
-  * `elf2uf2` - Converts ELF files to UF2 files
 
 ## Blink
 
@@ -56,7 +52,8 @@ Pico. Then run the following command:
 
 ```bash
 cd ${HOME}/projects/pico-frame
-/opt/bin/picotool load  -f -x build/src/blink/blink.uf2
+make src/blink
+build/src/picotool/picotool load  -f -x build/src/blink/blink.uf2
 ```
 
 Fingers crossed, the LED should start blinking. The code for this example is in the [`src/blink`](src/blink) folder:
