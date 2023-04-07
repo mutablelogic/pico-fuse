@@ -15,4 +15,8 @@ extern void picofuse_handle_timer_init(picofuse_t *, picofuse_timer_t *);
 extern void picofuse_handle_timer(picofuse_t *, picofuse_timer_t *);
 extern void picofuse_handle_timer_deinit();
 
+// WiFi
+extern void picofuse_handle_wifi_init(picofuse_t *, picofuse_wifi_t *);
+extern void picofuse_handle_wifi_status(picofuse_t *, picofuse_wifi_t *);
+
 #endif

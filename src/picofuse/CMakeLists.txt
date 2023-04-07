@@ -6,6 +6,7 @@ add_library(pico_fuse STATIC
     ev_quit.c
     ev_led.c
     ev_timer.c
+    ev_wifi.c
 )
 
 target_include_directories(pico_fuse PRIVATE
@@ -24,3 +25,6 @@ target_link_libraries(pico_fuse
 endif()
 
 target_compile_definitions(pico_fuse PRIVATE PICO_DEBUG_MALLOC=1)
+if(PICO_CYW43_SUPPORTED)
+    target_compile_definitions(pico_fuse PRIVATE PICO_CYW43_SUPPORTED=1)
+endif()

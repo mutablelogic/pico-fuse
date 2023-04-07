@@ -35,6 +35,7 @@ struct picofuse_instance_t
 static picofuse_t *self = NULL;
 static picofuse_init_t picofuse_init_data;
 static picofuse_led_t picofuse_led_data;
+static picofuse_wifi_t picofuse_wifi_data;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Initialize the runloop structure
@@ -169,7 +170,7 @@ int picofuse_register(picofuse_t *self, picofuse_state_t state,
             picofuse_fire(self, EV_LED_INIT, &picofuse_led_data);
             break;
         case EV_WIFI_INIT:
-            picofuse_fire(self, EV_WIFI_INIT, NULL);
+            picofuse_fire(self, EV_WIFI_INIT, &picofuse_wifi_data);
             break;
     }
 
