@@ -1,8 +1,11 @@
 add_library(pico_fuse STATIC
     picofuse.c
     hashmap.c
+    ev.c
     ev_init.c
     ev_quit.c
+    ev_led.c
+    ev_timer.c
 )
 
 target_include_directories(pico_fuse PRIVATE
@@ -11,7 +14,13 @@ target_include_directories(pico_fuse PRIVATE
 
 target_link_libraries(pico_fuse
     pico_stdlib
-    hardware_adc
+    pico_unique_id
 )
+
+if(PICO_CYW43_SUPPORTED)
+target_link_libraries(pico_fuse
+    pico_cyw43_arch_none  
+)
+endif()
 
 target_compile_definitions(pico_fuse PRIVATE PICO_DEBUG_MALLOC=1)

@@ -14,6 +14,7 @@ all: config picotool src
 
 config: dependencies mkdir
 	@echo git submodule update pico-sdk
+	@${GIT} submodule update --init
 	@cd lib/pico-sdk && ${GIT} submodule update --init
 	@echo cmake config
 	@${CMAKE} -B ${BUILD_DIR} -DPICO_PLATFORM=${PICO_PLATFORM} -DPICO_BOARD=${PICO_BOARD}

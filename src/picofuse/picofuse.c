@@ -1,9 +1,13 @@
-#include <stdio.h>
 #include <stdlib.h>
 #include <pico/stdlib.h>
 #include <picofuse/picofuse.h>
+
 #include "ev.h"
 #include "hashmap.h"
+#include "debug.h"
+
+// Number of elements in the hashmap (so can register up to 100 handlers)
+#define HASHMAP_SIZE 100
 
 ///////////////////////////////////////////////////////////////////////////////
 // Structures
@@ -18,6 +22,7 @@ struct picofuse_node_t
 struct picofuse_instance_t
 {
     picofuse_state_t state;
+    picofuse_event_t event;
     picofuse_flags_t flags;
     struct picofuse_node_t *head;
     struct picofuse_node_t *tail;
@@ -27,8 +32,10 @@ struct picofuse_instance_t
 ///////////////////////////////////////////////////////////////////////////////
 // Global variables
 
-picofuse_t *self = NULL;
-picofuse_init_t picofuse_init_data;
+static picofuse_t *self = NULL;
+static picofuse_init_t picofuse_init_data;
+static picofuse_led_t picofuse_led_data;
+static picofuse_timer_t picofuse_timer_data;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Initialize the runloop structure
@@ -50,6 +57,15 @@ picofuse_t *picofuse_init(picofuse_flags_t flags)
     self->tail = NULL;
     self->state = ZERO;
     self->flags = flags;
+
+    // Create hashmap
+    self->hashmap = hashmap_init(HASHMAP_SIZE);
+    if (self->hashmap == NULL)
+    {
+        free(self);
+        self = NULL;
+        return NULL;
+    }
 
     // Add an EV_INIT event onto the queue to get things started
     if (picofuse_fire(self, EV_INIT, &picofuse_init_data))
@@ -130,9 +146,11 @@ void picofuse_callback(picofuse_t *self, picofuse_event_t event, void *data)
     }
     if (callback != NULL)
     {
-        picofuse_state_t state = callback(self, self->state, event, data);
-        if (state != ANY)
+        picofuse_debug("picofuse_callback: event=%s callback\n", picofuse_event_str(event));
+        picofuse_state_t state = callback(self, event, data);
+        if (state != ANY && state != self->state)
         {
+            picofuse_debug("picofuse_callback: event=%s state %d -> %d\n", picofuse_event_str(event), self->state, state);
             self->state = state;
         }
     }
@@ -145,7 +163,35 @@ void picofuse_callback(picofuse_t *self, picofuse_event_t event, void *data)
 int picofuse_register(picofuse_t *self, picofuse_state_t state,
                       picofuse_event_t event, picofuse_callback_t *callback)
 {
+    // Register init handlers
+    switch(event) {
+        case EV_LED:
+        case EV_LED_INIT:
+            picofuse_fire(self, EV_LED_INIT, &picofuse_led_data);
+            break;
+        case EV_TIMER:
+        case EV_TIMER_INIT:
+            picofuse_fire(self, EV_TIMER_INIT, &picofuse_timer_data);
+            break;
+    }
+
     return hashmap_put(self->hashmap, state, event, (void *)(callback));
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Return the current event
+
+inline picofuse_event_t picofuse_event(picofuse_t *self)
+{
+    return self->event;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Return the current state
+
+inline picofuse_state_t picofuse_state(picofuse_t *self)
+{
+    return self->state;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -153,13 +199,16 @@ int picofuse_register(picofuse_t *self, picofuse_state_t state,
 
 void picofuse_free(picofuse_t *self)
 {
-    while (!picofuse_is_empty(self))
+    if (self)
     {
-        void *data;
-        picofuse_next(self, &data);
+        while (!picofuse_is_empty(self))
+        {
+            void *data;
+            picofuse_next(self, &data);
+        }
+        hashmap_free(self->hashmap);
+        free(self);
     }
-    hashmap_free(self->hashmap);
-    free(self);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -167,6 +216,15 @@ void picofuse_free(picofuse_t *self)
 
 int picofuse_main(picofuse_t *self)
 {
+    // Initialize STDIO
+    stdio_init_all();
+
+    // Wait for 1500ms
+    sleep_ms(1500);
+
+    // Debug
+    picofuse_debug("picofuse_main: Starting run loop\n");
+
     int errorCode = 0;
     while (!errorCode)
     {
@@ -178,10 +236,13 @@ int picofuse_main(picofuse_t *self)
 
         // Get next event from the queue
         void *data;
-        picofuse_event_t type = picofuse_next(self, &data);
+        self->event = picofuse_next(self, &data);
+
+        // Debug
+        picofuse_debug("picofuse_main: state %d: %s\n", self->state, picofuse_event_str(self->event));
 
         // Process the event
-        switch (type)
+        switch (self->event)
         {
         case EV_NONE:
             break;
@@ -191,10 +252,28 @@ int picofuse_main(picofuse_t *self)
         case EV_QUIT:
             picofuse_handle_quit(self, (picofuse_init_t *)data);
             break;
+        case EV_LED_INIT:
+            picofuse_handle_led_init(self, (picofuse_led_t *)data);
+            break;
+        case EV_LED:
+            picofuse_handle_led(self, (picofuse_led_t *)data);
+            break;
+        case EV_TIMER_INIT:
+            picofuse_handle_timer_init(self, (picofuse_timer_t *)data);
+            break;
+        case EV_TIMER:
+            picofuse_handle_timer(self, (picofuse_timer_t *)data);
+            break;
         default:
-            printf("Unhandled event=%d data=%p\n", type, data);
+            picofuse_debug("picofuse_main: unhandled event=%s data=0x%08X\n", picofuse_event_str(self->event), data);
         }
     }
 
+    // Debug
+    picofuse_debug("picofuse_main: quit with errorCode=%d\n", errorCode);
+
+    // Return error code
     return errorCode;
 }
+
+

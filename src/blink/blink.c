@@ -1,20 +1,25 @@
 
 #include <picofuse/picofuse.h>
+#include <stdio.h>
 
-picofuse_state_t main_init(picofuse_t *self,
-                           picofuse_state_t state,
-                           picofuse_event_t event,
-                           void *data)
+picofuse_state_t main_init(picofuse_t *self, picofuse_event_t event, void *data)
 {
-    // TODO: Initialize
+    printf("main_init: deviceIdentifier=%s\n", ((picofuse_init_t* )data)->deviceIdentifier);
+
+    ((picofuse_init_t* )data)->countryCode = "DE";
+
+    return ANY;
 }
 
-picofuse_state_t main_led(picofuse_t *self,
-                           picofuse_state_t state,
-                           picofuse_event_t event,
-                           void *data)
+picofuse_state_t main_led_init(picofuse_t *self, picofuse_event_t event, void *data)
 {
-    // TODO: LED changed state
+    printf("main_led_init: gpio=%d value=%d\n", ((picofuse_led_t* )data)->gpio,((picofuse_led_t* )data)->value);
+
+    // Turn on the LED
+    ((picofuse_led_t* )data)->value = 1;
+    picofuse_fire(self, EV_LED, data);
+
+    return ANY;
 }
 
 int main()
@@ -24,7 +29,7 @@ int main()
 
     // Register callbacks
     picofuse_register(picofuse, ANY, EV_INIT, main_init);
-    picofuse_register(picofuse, ANY, EV_LED, main_led);
+    picofuse_register(picofuse, ANY, EV_LED_INIT, main_led_init);
 
     // Call main loop
     int errorCode = picofuse_main(picofuse);

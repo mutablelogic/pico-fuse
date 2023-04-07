@@ -1,5 +1,11 @@
 #include <stdlib.h>
+
 #include <picofuse/picofuse.h>
+
+#ifdef PICO_CYW43_SUPPORTED
+#include <pico/cyw43_arch.h>
+#endif
+
 #include "ev.h"
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -11,6 +17,13 @@ void picofuse_handle_quit(picofuse_t *self, picofuse_init_t *data)
     data->errorCode = -1;
 
     // Call the registered event handler
-    picofuse_callback(self, EV_QUIT, (void *)(data));
+    picofuse_callback(self, picofuse_event(self), (void *)(data));
+
+#ifdef PICO_CYW43_SUPPORTED
+    // Deinitialize WiFi driver
+    if(data->errorCode) {
+        cyw43_arch_deinit();
+    }
+#endif
 }
 

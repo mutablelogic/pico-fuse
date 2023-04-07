@@ -1,6 +1,7 @@
 
 #ifndef PICOFUSE_H
 #define PICOFUSE_H
+#include <stdbool.h>
 
 // picofuse flags
 typedef enum
@@ -10,10 +11,13 @@ typedef enum
 
 typedef enum
 {
-    EV_NONE, // No event
-    EV_INIT, // Initialize the runloop
-    EV_QUIT, // Quit the runloop
-    EV_LED,  // LED changed state
+    EV_NONE,       // No event
+    EV_INIT,       // Initialize the runloop
+    EV_QUIT,       // Quit the runloop
+    EV_LED_INIT,   // LED initialization hook
+    EV_LED,        // LED changed state
+    EV_TIMER_INIT, // Timer initialization hook
+    EV_TIMER,      // Timer fired
 } picofuse_event_t;
 
 // The current state of the picofuse. Use ANY to match any state
@@ -28,10 +32,7 @@ typedef enum
 typedef struct picofuse_instance_t picofuse_t;
 
 // Event callback
-typedef picofuse_state_t picofuse_callback_t(picofuse_t *,
-                                             picofuse_state_t,
-                                             picofuse_event_t,
-                                             void *);
+typedef picofuse_state_t picofuse_callback_t(picofuse_t *, picofuse_event_t, void *);
 
 // Initialize picofuse
 extern picofuse_t *picofuse_init(picofuse_flags_t);
@@ -53,6 +54,15 @@ extern int picofuse_register(picofuse_t *,
                              picofuse_event_t,
                              picofuse_callback_t *);
 
+// Return the current event
+extern picofuse_event_t picofuse_event(picofuse_t *);
+
+// Return the current state
+extern picofuse_state_t picofuse_state(picofuse_t *);
+
+// Return event as a string
+extern const char *picofuse_event_str(picofuse_event_t event);
+
 ///////////////////////////////////////////////////////////////////////////////
 // EV_INIT
 
@@ -63,5 +73,22 @@ typedef struct
     const char *deviceIdentifier; // Unique identifier for the device
     int errorCode;                // Error code, or 0
 } picofuse_init_t;
+
+///////////////////////////////////////////////////////////////////////////////
+// EV_LED
+
+typedef struct
+{
+    int gpio;        // Pin number
+    bool cyw43_arch; // Pico W;
+    bool value;      // LED value
+} picofuse_led_t;
+
+///////////////////////////////////////////////////////////////////////////////
+// EV_TIMER
+
+typedef struct
+{
+} picofuse_timer_t;
 
 #endif // PICOFUSE_H
