@@ -79,13 +79,26 @@ make picotool
 If this completes successfully then congratulations. If you are targetting a different
 board then the Pico W then here are some values for PICO_BOARD you can use instead:
 
+| Configuration Command | Board |
 |--|--|
 | `PICO_BOARD=pico make config` | Raspberry Pi Pico |
 | `PICO_BOARD=pico_w make config` | Raspberry Pi Pico W |
 | `PICO_BOARD=pimoroni_picolipo_4mb make config` | Pimironi Lipo with 4MB flash |
 | `PICO_BOARD=pimoroni_picolipo_16mb make config` | Pimironi Lipo with 16MB flash |
 
-Whenever you target a different board, use `make clean` before `make config`.
+Whenever you target a different board, use `make clean` before `make picotool` and `make config`.
+
+## Initialization
+
+## Scheduling Timers
+
+## The On-board LED
+
+## GPIO Input and Output
+
+## ADC Sampling
+
+## WiFi Access
 
 ## Blink
 

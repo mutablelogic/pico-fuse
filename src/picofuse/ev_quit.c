@@ -21,14 +21,15 @@ void picofuse_handle_quit(picofuse_t *self, picofuse_init_t *data)
 
 #ifdef PICO_CYW43_SUPPORTED
     // Deinitialize WiFi driver
-    if(data->errorCode) {
+    if (data->errorCode)
+    {
         cyw43_arch_deinit();
     }
 #endif
 
-    // Deinit timer pool
-    if(data->errorCode) {
-        picofuse_handle_timer_deinit();
+    // Destroy timer pool, cancel timers
+    if (data->errorCode)
+    {
+        picofuse_timer_deinit(self);
     }
 }
-

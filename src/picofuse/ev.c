@@ -27,6 +27,10 @@ const char *picofuse_event_str(picofuse_event_t event)
         return "EV_WIFI_INIT";
     case EV_WIFI:
         return "EV_WIFI";
+    case EV_GPIO_INIT:
+        return "EV_GPIO_INIT";
+    case EV_GPIO:
+        return "EV_GPIO";
     default:
         snprintf(strbuf, 40, "EV_UNKNOWN(0x%08X)", event);
         return strbuf;

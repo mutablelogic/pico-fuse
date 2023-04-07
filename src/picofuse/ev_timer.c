@@ -17,6 +17,30 @@ struct picofuse_timer_state_t
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+// Create and destroy the alarm pool
+
+int picofuse_timer_init(picofuse_t *self)
+{
+    // Create a timer pool
+    if (alarm_pool == NULL)
+    {
+        alarm_pool = alarm_pool_create_with_unused_hardware_alarm(PICO_PHEAP_MAX_ENTRIES);
+    }
+
+    // Return 0 on success
+    return alarm_pool != NULL;
+}
+
+void picofuse_timer_deinit(picofuse_t *self)
+{
+    if (alarm_pool != NULL)
+    {
+        alarm_pool_destroy(alarm_pool);
+        alarm_pool = NULL;
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // Callbacks for timer fired
 
 bool picofuse_handle_timer_repeating_fire(repeating_timer_t *timer)
@@ -120,17 +144,6 @@ bool picofuse_handle_timer_init_repeating(picofuse_t *self, picofuse_timer_t *da
 
 void picofuse_handle_timer_init(picofuse_t *self, picofuse_timer_t *data)
 {
-    // Create a timer pool
-    if (alarm_pool == NULL)
-    {
-        alarm_pool = alarm_pool_create_with_unused_hardware_alarm(PICO_PHEAP_MAX_ENTRIES);
-    }
-    if (alarm_pool == NULL)
-    {
-        picofuse_debug("picofuse_handle_timer_init: failed to create alarm pool\n");
-        return;
-    }
-
     // Call the registered event handler
     picofuse_callback(self, picofuse_event(self), (void *)(data));
 
@@ -172,13 +185,64 @@ void picofuse_handle_timer(picofuse_t *self, picofuse_timer_t *data)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// Handle the EVENT_TIMER event
+// Schedule a timer with a callback
 
-void picofuse_handle_timer_deinit()
+struct picofuse_schedule_state
 {
-    if (alarm_pool != NULL)
+    picofuse_t *self;
+    picofuse_schedule_callback_t callback;
+    alarm_id_t alarm;
+    uint32_t delay_ns;
+    void *data;
+};
+
+static int64_t picofuse_schedule_callback(alarm_id_t alarm, void *data)
+{
+    // If no callback, then don't do anything
+    struct picofuse_schedule_state *state = data;
+    if (state == NULL || state->callback == NULL)
     {
-        alarm_pool_destroy(alarm_pool);
-        alarm_pool = NULL;
+        return 0;
     }
+
+    // Reschedule the alarm or cancel it
+    if (!state->callback(state->self, state->data))
+    {
+        free(state);
+        return 0;
+    }
+    else
+    {
+        return state->delay_ns;
+    }
+}
+
+bool picofuse_schedule_ms(picofuse_t *self, uint32_t delay_ms, picofuse_schedule_callback_t callback, void *data)
+{
+    struct picofuse_schedule_state *state = malloc(sizeof(struct picofuse_schedule_state));
+    if (state == NULL)
+    {
+        return false;
+    }
+    else
+    {
+        state->self = self;
+        state->callback = callback;
+        state->data = data;
+        state->delay_ns = delay_ms * 1000;
+    }
+
+    alarm_id_t alarm = alarm_pool_add_alarm_in_ms(alarm_pool, delay_ms, picofuse_schedule_callback, state, true);
+    if (alarm < 1)
+    {
+        free(state);
+        return false;
+    }
+    else
+    {
+        state->alarm = alarm;
+    }
+
+    // Return success
+    return true;
 }

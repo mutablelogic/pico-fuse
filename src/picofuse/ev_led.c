@@ -1,6 +1,10 @@
 #include <picofuse/picofuse.h>
 #include <pico/stdlib.h>
 
+#ifdef PICO_CYW43_SUPPORTED
+#include <pico/cyw43_arch.h>
+#endif
+
 #include "ev.h"
 #include "debug.h"
 
@@ -9,18 +13,17 @@
 
 static void picofuse_set_led(picofuse_led_t *data)
 {
-    if (data->gpio != 0)
+    if (data->cyw43_arch)
     {
-        if (data->cyw43_arch)
-        {
 #ifdef PICO_CYW43_SUPPORTED
-            cyw43_arch_gpio_put(data->gpio, data->value);
+        cyw43_arch_gpio_put(data->gpio, data->value ? 1 : 0);
+#else
+        picofuse_debug("picofuse_set_led: PICO_CYW43_SUPPORTED not defined\n");
 #endif
-        }
-        else
-        {
-            gpio_put(data->gpio, data->value);
-        }
+    }
+    else if (data->gpio != -1)
+    {
+        gpio_put(data->gpio, data->value);
     }
 }
 
@@ -34,6 +37,8 @@ void picofuse_handle_led_init(picofuse_t *self, picofuse_led_t *data)
 #elif defined(CYW43_WL_GPIO_LED_PIN)
     data->cyw43_arch = true;
     data->gpio = CYW43_WL_GPIO_LED_PIN;
+#else
+    data->gpio = -1;
 #endif
 
     // Call the registered event handler

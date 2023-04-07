@@ -9,19 +9,69 @@
 #include "debug.h"
 
 ///////////////////////////////////////////////////////////////////////////////
+// Return the WiFi status string
+
+#ifdef PICO_CYW43_SUPPORTED
+static const char *picofuse_link_status_str(int status)
+{
+    switch (status)
+    {
+    case CYW43_LINK_DOWN:
+        return "link down";
+    case CYW43_LINK_JOIN:
+        return "joining";
+    case CYW43_LINK_NOIP:
+        return "no ip";
+    case CYW43_LINK_UP:
+        return "link up";
+    case CYW43_LINK_FAIL:
+        return "link fail";
+    case CYW43_LINK_NONET:
+        return "network fail";
+    case CYW43_LINK_BADAUTH:
+        return "bad auth";
+    }
+    return "unknown";
+}
+#endif
+
+///////////////////////////////////////////////////////////////////////////////
+// Poll WiFi driver
+
+void picofuse_wifi_poll(picofuse_t *self)
+{
+#if PICO_CYW43_SUPPORTED
+    cyw43_arch_poll();
+#endif
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Periodically poll the WiFi status
+
+#ifdef PICO_CYW43_SUPPORTED
+bool picofuse_handle_wifi_status(picofuse_t *self, void *data)
+{
+    int status = cyw43_wifi_link_status(&cyw43_state, CYW43_ITF_STA);
+    picofuse_debug("picofuse_handle_wifi_status: ssid=%s status=%s\n", ((picofuse_wifi_t *)data)->ssid, picofuse_link_status_str(status));
+    return true;
+}
+#endif
+
+///////////////////////////////////////////////////////////////////////////////
 // Handle the EVENT_WIFI_INIT event
 
-void picofuse_handle_wifi_init(picofuse_t * self, picofuse_wifi_t * data) {
+void picofuse_handle_wifi_init(picofuse_t *self, picofuse_wifi_t *data)
+{
     data->ssid = NULL;
     data->password = NULL;
-    
+
     // Call the registered event handler
     picofuse_callback(self, picofuse_event(self), (void *)(data));
 
-#ifdef PICO_CYW43_SUPPORTED
-    // Connect
+    //  Connect
     if (data->ssid != NULL)
     {
+#ifdef PICO_CYW43_SUPPORTED
         // TODO: Allow AP mode
         cyw43_arch_enable_sta_mode();
 
@@ -30,13 +80,12 @@ void picofuse_handle_wifi_init(picofuse_t * self, picofuse_wifi_t * data) {
         {
             picofuse_debug("picofuse_handle_wifi_init: Failed to connect to wifi ssid=%s err=%d\n", data->ssid, err);
         }
-        else
+        else if (!picofuse_schedule_ms(self, 1000, picofuse_handle_wifi_status, data))
         {
-            // TODO start repeating timer for cyw43_wifi_link_status
-            picofuse_debug("picofuse_handle_wifi_init: Connecting to wifi ssid=%s\n", data->ssid);
+            picofuse_debug("picofuse_handle_wifi_init: Failed to schedule picofuse_handle_wifi_status\n");
         }
-    }
 #else
-    picofuse_debug("picofuse_handle_wifi_init: PICO_CYW43_SUPPORTED not defined\n");
+        picofuse_debug("picofuse_handle_wifi_init: PICO_CYW43_SUPPORTED not defined\n");
 #endif
+    }
 }

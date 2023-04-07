@@ -10,7 +10,7 @@ picofuse_timer_t timer_1 = {
 };
 
 picofuse_timer_t timer_2 = {
-    .id = 2,
+    .id = 0,
     .delay_ms = 500,
     .periodic = true,
 };
@@ -21,6 +21,13 @@ picofuse_state_t main_init(picofuse_t *self, picofuse_event_t event, void *data)
     ((picofuse_init_t *)data)->countryCode = "DE";
     picofuse_fire(self, EV_TIMER_INIT, &timer_1);
     picofuse_fire(self, EV_TIMER_INIT, &timer_2);
+    return ANY;
+}
+
+// Set initial state of GPIO pins
+picofuse_state_t main_gpio_init(picofuse_t *self, picofuse_event_t event, void *data)
+{
+    printf("GPIO init gpio=%d\n", ((picofuse_gpio_t *)data)->gpio);
     return ANY;
 }
 
@@ -35,15 +42,12 @@ picofuse_state_t main_led_init(picofuse_t *self, picofuse_event_t event, void *d
 picofuse_state_t main_timer(picofuse_t *self, picofuse_event_t event, void *data)
 {
     picofuse_timer_t *timer = (picofuse_timer_t *)data;
-    if (timer->id == -1)
-    {
-        printf("Alarm caught!\n");
-    }
-    else
+    if (timer->id >= 0)
     {
         timer->id++;
         if (timer->id == 10)
         {
+            // Cancel timer
             timer->periodic = false;
         }
     }
@@ -75,6 +79,7 @@ int main()
 
     // Register callbacks
     picofuse_register(picofuse, ANY, EV_INIT, main_init);
+    picofuse_register(picofuse, ANY, EV_GPIO_INIT, main_gpio_init);
     picofuse_register(picofuse, ANY, EV_LED_INIT, main_led_init);
     picofuse_register(picofuse, ANY, EV_WIFI_INIT, main_wifi_init);
     picofuse_register(picofuse, ANY, EV_TIMER, main_timer);

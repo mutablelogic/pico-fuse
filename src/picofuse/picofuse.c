@@ -36,6 +36,7 @@ static picofuse_t *self = NULL;
 static picofuse_init_t picofuse_init_data;
 static picofuse_led_t picofuse_led_data;
 static picofuse_wifi_t picofuse_wifi_data;
+static picofuse_gpio_t picofuse_gpio_data[NUM_BANK0_GPIOS];
 
 ///////////////////////////////////////////////////////////////////////////////
 // Initialize the runloop structure
@@ -134,7 +135,8 @@ int picofuse_fire(picofuse_t *self, picofuse_event_t type, void *data)
     return 0;
 }
 
-inline int picofuse_fire_bool(picofuse_t * self,picofuse_event_t event,bool value) {
+inline int picofuse_fire_bool(picofuse_t *self, picofuse_event_t event, bool value)
+{
     return picofuse_fire(self, event, (void *)(value ? 1 : 0));
 }
 
@@ -176,6 +178,19 @@ int picofuse_register(picofuse_t *self, picofuse_state_t state,
         break;
     case EV_WIFI_INIT:
         picofuse_fire(self, EV_WIFI_INIT, &picofuse_wifi_data);
+        break;
+    case EV_GPIO_INIT:
+        for (int i = 0; i < NUM_BANK0_GPIOS; i++)
+        {
+            picofuse_gpio_t *data = &picofuse_gpio_data[i];
+            data->gpio = i;
+            data->func = GPIO_IN;
+            data->pulldown = false;
+            data->pullup = false;
+            data->irqfall = false;
+            data->irqrise = false;
+            picofuse_fire(self, EV_GPIO_INIT, data);
+        }
         break;
     }
 
@@ -234,6 +249,7 @@ int picofuse_main(picofuse_t *self)
     {
         if (picofuse_is_empty(self))
         {
+            picofuse_wifi_poll(self);
             sleep_ms(10);
             continue;
         }
@@ -255,6 +271,9 @@ int picofuse_main(picofuse_t *self)
             break;
         case EV_QUIT:
             picofuse_handle_quit(self, (picofuse_init_t *)data);
+            break;
+        case EV_GPIO_INIT:
+            picofuse_handle_gpio_init(self, (picofuse_gpio_t *)data);
             break;
         case EV_LED_INIT:
             picofuse_handle_led_init(self, (picofuse_led_t *)data);

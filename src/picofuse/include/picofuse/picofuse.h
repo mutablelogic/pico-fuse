@@ -21,6 +21,8 @@ typedef enum
     EV_TIMER,      // Timer fired
     EV_WIFI_INIT,  // WiFi initialization hook
     EV_WIFI,       // WiFi changed state
+    EV_GPIO_INIT,  // GPIO initialization hook
+    EV_GPIO,       // GPIO changed state
 } picofuse_event_t;
 
 // The current state of the picofuse. Use ANY to match any state
@@ -53,8 +55,8 @@ extern int picofuse_fire(picofuse_t *,
 
 // Fire an event with boolean state on the runloop, returns -1 on error or 0 on success
 extern int picofuse_fire_bool(picofuse_t *,
-                         picofuse_event_t,
-                         bool);
+                              picofuse_event_t,
+                              bool);
 
 // Register an event handler
 extern int picofuse_register(picofuse_t *,
@@ -91,6 +93,26 @@ typedef struct
     bool cyw43_arch; // Pico W;
     bool value;      // LED value
 } picofuse_led_t;
+
+///////////////////////////////////////////////////////////////////////////////
+// EV_GPIO
+
+typedef enum
+{
+    GPIO_FUNC_INPUT,  // GPIO is an input
+    GPIO_FUNC_OUTPUT, // GPIO is an output
+} picofuse_gpio_func_t;
+
+typedef struct
+{
+    int gpio;                  // Pin number
+    bool value;                // The GPIO value
+    picofuse_gpio_func_t func; // The GPIO function
+    bool pullup;               // Enable pullup
+    bool pulldown;             // Enable pulldown (setting both pulls enables a "bus keep" function)
+    bool irqrise;              // The GPIO level GPIO_IRQ_LEVEL_RISE
+    bool irqfall;              // The GPIO level GPIO_IRQ_LEVEL_FALL
+} picofuse_gpio_t;
 
 ///////////////////////////////////////////////////////////////////////////////
 // EV_TIMER

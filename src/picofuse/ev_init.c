@@ -34,6 +34,14 @@ static const char *get_unique_board_id()
 
 void picofuse_handle_init(picofuse_t *self, picofuse_init_t *data)
 {
+    // Initialise timer pool
+    if (!picofuse_timer_init(self))
+    {
+        picofuse_debug("picofuse_main: Unable to create alarm pool\n");
+        data->errorCode = -1;
+        return;
+    }
+
     // Set the deviceIdentifier
     data->deviceIdentifier = get_unique_board_id();
 
@@ -67,5 +75,4 @@ void picofuse_handle_init(picofuse_t *self, picofuse_init_t *data)
         data->errorCode = errorCode;
     }
 #endif
-
 }
