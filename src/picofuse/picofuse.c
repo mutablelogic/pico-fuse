@@ -164,14 +164,15 @@ int picofuse_register(picofuse_t *self, picofuse_state_t state,
                       picofuse_event_t event, picofuse_callback_t *callback)
 {
     // Register init handlers
-    switch(event) {
-        case EV_LED:
-        case EV_LED_INIT:
-            picofuse_fire(self, EV_LED_INIT, &picofuse_led_data);
-            break;
-        case EV_WIFI_INIT:
-            picofuse_fire(self, EV_WIFI_INIT, &picofuse_wifi_data);
-            break;
+    switch (event)
+    {
+    case EV_LED:
+    case EV_LED_INIT:
+        picofuse_fire(self, EV_LED_INIT, &picofuse_led_data);
+        break;
+    case EV_WIFI_INIT:
+        picofuse_fire(self, EV_WIFI_INIT, &picofuse_wifi_data);
+        break;
     }
 
     return hashmap_put(self->hashmap, state, event, (void *)(callback));
@@ -255,7 +256,7 @@ int picofuse_main(picofuse_t *self)
             picofuse_handle_led_init(self, (picofuse_led_t *)data);
             break;
         case EV_LED:
-            picofuse_handle_led(self, (picofuse_led_t *)data);
+            picofuse_handle_led(self, &picofuse_led_data, (bool)data);
             break;
         case EV_TIMER_INIT:
             picofuse_handle_timer_init(self, (picofuse_timer_t *)data);
@@ -277,5 +278,3 @@ int picofuse_main(picofuse_t *self)
     // Return error code
     return errorCode;
 }
-
-

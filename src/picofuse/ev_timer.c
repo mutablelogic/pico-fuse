@@ -23,33 +23,26 @@ bool picofuse_handle_timer_repeating_fire(repeating_timer_t *timer)
 {
     struct picofuse_timer_state_t *state = (struct picofuse_timer_state_t *)timer->user_data;
 
-    picofuse_debug("picofuse_handle_timer_repeating_fire: repeating timer fired with id=%d\n", state->data->id);
-
-    // Call the registered event handler
-    if (picofuse_fire(state->self, EV_TIMER, state->data))
-    {
-        picofuse_debug("picofuse_handle_timer_repeating_fire: timer could not be fired with id=%d\n", state->data->id);
-    }
-
-    // Return true to continue repeating, false to stop
+    // Call the registered event handler when periodic, and reschedule
     if (state->data->periodic)
     {
+        if (picofuse_fire(state->self, EV_TIMER, state->data))
+        {
+            picofuse_debug("picofuse_handle_timer_repeating_fire: timer could not be fired with id=%d\n", state->data->id);
+        }
         return true;
     }
-    else
-    {
-        picofuse_debug("picofuse_handle_timer_repeating_fire: periodic timer canceled with id=%d\n", state->data->id);
-        free(timer);
-        free(state);
-        return false;
-    }
+
+    // Cancel timer
+    picofuse_debug("picofuse_handle_timer_repeating_fire: periodic timer canceled with id=%d\n", state->data->id);
+    free(timer);
+    free(state);
+    return false;
 }
 
 int64_t picofuse_handle_timer_alarm_fire(alarm_id_t id, void *user_data)
 {
     struct picofuse_timer_state_t *state = (struct picofuse_timer_state_t *)user_data;
-
-    picofuse_debug("picofuse_handle_timer_alarm_fire: timer fired\n");
 
     // Call the registered event handler
     if (picofuse_fire(state->self, EV_TIMER, state->data))
@@ -111,7 +104,7 @@ bool picofuse_handle_timer_init_repeating(picofuse_t *self, picofuse_timer_t *da
         free(state);
         return false;
     }
-    if (!alarm_pool_add_repeating_timer_ms(alarm_pool, data->delay_ms, picofuse_handle_timer_repeating_fire, data, timer))
+    if (!alarm_pool_add_repeating_timer_ms(alarm_pool, data->delay_ms, picofuse_handle_timer_repeating_fire, state, timer))
     {
         free(state);
         free(timer);
