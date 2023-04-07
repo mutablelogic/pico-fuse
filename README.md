@@ -7,13 +7,28 @@ For example, here's a typical program which blinks an LED once per second:
 ```c
 #include <picofuse/picofuse.h>
 
+typedef enum {
+   LED_OFF = 100,
+   LED_ON,
+} picofuse_event_t;
+
 picofuse_state_t main_timer_init(picofuse_t *self,
                            picofuse_state_t state,
                            picofuse_event_t event,
                            void *data)
 {
    ((picofuse_timer_t *)data)->delay_ms = 1000;
-   return ANY;
+   return LED_ON;
+}
+
+picofuse_state_t main_timer(picofuse_t *self,
+                           picofuse_state_t state,
+                           picofuse_event_t event,
+                           void *data)
+{
+    // TODO: Send event to LED driver
+    // New state
+    return (state==LED_OFF ? LED_ON : LED_OFF);
 }
 
 int main()
@@ -55,8 +70,8 @@ Download and configure the toolchain using the following set of commands in your
 
 ```bash
 install -d ${HOME}/projects && cd ${HOME}/projects
-git clone git@github.com:mutablelogic/pico-frame.git
-cd pico-frame
+git clone git@github.com:mutablelogic/pico-fuse.git
+cd pico-fuse
 PICO_BOARD=pico_w make config
 make picotool
 ```
@@ -75,7 +90,7 @@ To load the example onto your Pico W, plug it in using the USB cable whilst hold
 Pico. Then run the following command:
 
 ```bash
-cd ${HOME}/projects/pico-frame
+cd ${HOME}/projects/pico-fuse
 make src/blink
 build/src/picotool/picotool load  -f -x build/src/blink/blink.uf2
 ```
