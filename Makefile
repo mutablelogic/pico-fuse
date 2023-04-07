@@ -13,12 +13,14 @@ PICO_BOARD ?= pico_w
 all: config picotool src
 
 config: dependencies mkdir
-	@echo cmake config
+	@echo git submodule update pico-sdk
 	@cd lib/pico-sdk && ${GIT} submodule update --init
-	@cd lib/picotool && ${GIT} submodule update --init
+	@echo cmake config
 	@${CMAKE} -B ${BUILD_DIR} -DPICO_PLATFORM=${PICO_PLATFORM} -DPICO_BOARD=${PICO_BOARD}
 
 picotool: config
+	@echo git submodule update picotool
+	@cd lib/picotool && ${GIT} submodule update --init
 	@echo make picotool
 	@PICO_SDK_PATH=../../../lib/pico-sdk ${CMAKE} -S lib/picotool -B ${BUILD_DIR}/lib/picotool
 	@make -C ${BUILD_DIR}/lib/picotool
