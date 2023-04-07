@@ -51,6 +51,11 @@ extern int picofuse_fire(picofuse_t *,
                          picofuse_event_t,
                          void *);
 
+// Fire an event with boolean state on the runloop, returns -1 on error or 0 on success
+extern int picofuse_fire_bool(picofuse_t *,
+                         picofuse_event_t,
+                         bool);
+
 // Register an event handler
 extern int picofuse_register(picofuse_t *,
                              picofuse_state_t,

@@ -134,6 +134,10 @@ int picofuse_fire(picofuse_t *self, picofuse_event_t type, void *data)
     return 0;
 }
 
+inline int picofuse_fire_bool(picofuse_t * self,picofuse_event_t event,bool value) {
+    return picofuse_fire(self, event, (void *)(value ? 1 : 0));
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Call a handler and update state as needed
 

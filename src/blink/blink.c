@@ -4,14 +4,14 @@
 #include "opts.h"
 
 picofuse_timer_t timer_1 = {
-    .id = 1,
-    .delay_ms = 100,
+    .id = -1,
+    .delay_ms = 10000,
     .periodic = false,
 };
 
 picofuse_timer_t timer_2 = {
     .id = 2,
-    .delay_ms = 100,
+    .delay_ms = 500,
     .periodic = true,
 };
 
@@ -35,14 +35,21 @@ picofuse_state_t main_led_init(picofuse_t *self, picofuse_event_t event, void *d
 picofuse_state_t main_timer(picofuse_t *self, picofuse_event_t event, void *data)
 {
     picofuse_timer_t *timer = (picofuse_timer_t *)data;
-    timer->id++;
-    if (timer->id == 10)
+    if (timer->id == -1)
     {
-        timer->periodic = false;
+        printf("Alarm caught!\n");
+    }
+    else
+    {
+        timer->id++;
+        if (timer->id == 10)
+        {
+            timer->periodic = false;
+        }
     }
 
     // Set the LED value
-    picofuse_fire(self, EV_LED, picofuse_state(self) ? (void*)1 : (void*)0);
+    picofuse_fire_bool(self, EV_LED, picofuse_state(self) ? 1 : 0);
 
     // Set the state to an alternative value
     return picofuse_state(self) ? 0 : 1;
