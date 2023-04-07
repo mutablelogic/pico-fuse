@@ -1,24 +1,54 @@
 
 #include <picofuse/picofuse.h>
 #include <stdio.h>
+#include "opts.h"
 
+picofuse_timer_t timer_1 = {
+    .id = 1,
+    .delay_ms = 1000,
+    .periodic = true,
+};
+
+picofuse_timer_t timer_2 = {
+    .id = 2,
+    .delay_ms = 1000,
+    .periodic = false,
+};
+
+// Set countrycode and create two timers
 picofuse_state_t main_init(picofuse_t *self, picofuse_event_t event, void *data)
 {
-    printf("main_init: deviceIdentifier=%s\n", ((picofuse_init_t* )data)->deviceIdentifier);
-
-    ((picofuse_init_t* )data)->countryCode = "DE";
-
+    ((picofuse_init_t *)data)->countryCode = "DE";
+    picofuse_fire(self, EV_TIMER_INIT, &timer_1);
+    picofuse_fire(self, EV_TIMER_INIT, &timer_2);
     return ANY;
 }
 
+// Set initial state of the LED
 picofuse_state_t main_led_init(picofuse_t *self, picofuse_event_t event, void *data)
 {
-    printf("main_led_init: gpio=%d value=%d\n", ((picofuse_led_t* )data)->gpio,((picofuse_led_t* )data)->value);
+    ((picofuse_led_t *)data)->value = 1;
+    return ANY;
+}
 
-    // Turn on the LED
-    ((picofuse_led_t* )data)->value = 1;
-    picofuse_fire(self, EV_LED, data);
+// Timer fired
+picofuse_state_t main_timer(picofuse_t *self, picofuse_event_t event, void *data)
+{
+    picofuse_timer_t *timer = (picofuse_timer_t *)data;
+    printf("main_timer: timer id=%d\n", timer->id);
+    return ANY;
+}
 
+// WiFi initialization
+picofuse_state_t main_wifi_init(picofuse_t *self, picofuse_event_t event, void *data)
+{
+    picofuse_wifi_t *wifi = (picofuse_wifi_t *)data;
+#ifdef WIFI_SSID
+    wifi->ssid = WIFI_SSID;
+#ifdef WIFI_PASSWORD
+    wifi->password = WIFI_PASSWORD;
+#endif
+#endif
     return ANY;
 }
 
@@ -30,6 +60,8 @@ int main()
     // Register callbacks
     picofuse_register(picofuse, ANY, EV_INIT, main_init);
     picofuse_register(picofuse, ANY, EV_LED_INIT, main_led_init);
+    picofuse_register(picofuse, ANY, EV_TIMER, main_timer);
+    picofuse_register(picofuse, ANY, EV_WIFI_INIT, main_wifi_init);
 
     // Call main loop
     int errorCode = picofuse_main(picofuse);

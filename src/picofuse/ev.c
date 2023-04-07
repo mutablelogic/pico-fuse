@@ -23,8 +23,12 @@ const char *picofuse_event_str(picofuse_event_t event)
         return "EV_TIMER_INIT";
     case EV_TIMER:
         return "EV_TIMER";
+    case EV_WIFI_INIT:
+        return "EV_WIFI_INIT";
+    case EV_WIFI:
+        return "EV_WIFI";
     default:
-        snprintf(strbuf, 40, "EV_UNKNOWN(%02X)", event);
+        snprintf(strbuf, 40, "EV_UNKNOWN(0x%08X)", event);
         return strbuf;
     }
 }

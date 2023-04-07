@@ -6,6 +6,10 @@ target_include_directories(blink PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/../picofuse/include
 )
 
+target_include_directories(blink PRIVATE
+    ${CMAKE_CURRENT_LIST_DIR}/..
+)
+
 target_link_directories(blink PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/../picofuse
 )

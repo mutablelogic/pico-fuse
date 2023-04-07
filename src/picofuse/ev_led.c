@@ -5,6 +5,26 @@
 #include "debug.h"
 
 ///////////////////////////////////////////////////////////////////////////////
+// Set LED value
+
+static void picofuse_set_led(picofuse_led_t * data) {
+    // Set the LED value
+    if (data->gpio != 0)
+    {
+        if (data->cyw43_arch)
+        {
+#ifdef PICO_CYW43_SUPPORTED
+            cyw43_arch_gpio_put(data->gpio, data->value);
+#endif
+        }
+        else
+        {
+            gpio_put(data->gpio, data->value);
+        }
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // Handle the EVENT_LED_INIT event
 
 void picofuse_handle_led_init(picofuse_t * self, picofuse_led_t * data) {
@@ -26,7 +46,10 @@ void picofuse_handle_led_init(picofuse_t * self, picofuse_led_t * data) {
             gpio_init(data->gpio);
             gpio_set_dir(data->gpio, GPIO_OUT);
         }
-    }    
+    } 
+
+    // Set initial LED value
+    picofuse_set_led(data);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -36,18 +59,6 @@ void picofuse_handle_led(picofuse_t * self, picofuse_led_t * data) {
     // Call the registered event handler
     picofuse_callback(self, picofuse_event(self), (void *)(data));
 
-    // Set the LED value
-    if (data->gpio != 0)
-    {
-        if (data->cyw43_arch)
-        {
-#ifdef PICO_CYW43_SUPPORTED
-            cyw43_arch_gpio_put(data->gpio, data->value);
-#endif
-        }
-        else
-        {
-            gpio_put(data->gpio, data->value);
-        }
-    }
+    // Set LED value
+    picofuse_set_led(data);
 }

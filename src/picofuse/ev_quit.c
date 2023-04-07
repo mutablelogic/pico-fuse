@@ -25,5 +25,10 @@ void picofuse_handle_quit(picofuse_t *self, picofuse_init_t *data)
         cyw43_arch_deinit();
     }
 #endif
+
+    // Deinit timer pool
+    if(data->errorCode) {
+        picofuse_handle_timer_deinit();
+    }
 }
 

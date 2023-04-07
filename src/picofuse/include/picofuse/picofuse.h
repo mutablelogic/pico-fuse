@@ -2,6 +2,7 @@
 #ifndef PICOFUSE_H
 #define PICOFUSE_H
 #include <stdbool.h>
+#include <pico/stdlib.h>
 
 // picofuse flags
 typedef enum
@@ -18,6 +19,8 @@ typedef enum
     EV_LED,        // LED changed state
     EV_TIMER_INIT, // Timer initialization hook
     EV_TIMER,      // Timer fired
+    EV_WIFI_INIT,  // WiFi initialization hook
+    EV_WIFI,       // WiFi changed state
 } picofuse_event_t;
 
 // The current state of the picofuse. Use ANY to match any state
@@ -89,6 +92,18 @@ typedef struct
 
 typedef struct
 {
+    int id;           // Timer ID
+    int32_t delay_ms; // Delay in milliseconds
+    bool periodic;    // Periodic timer (set to false to cancel the timer)
 } picofuse_timer_t;
+
+///////////////////////////////////////////////////////////////////////////////
+// EV_WIFI
+
+typedef struct
+{
+    const char *ssid;     // The SSID of the network
+    const char *password; // The password of the network, or NULL
+} picofuse_wifi_t;
 
 #endif // PICOFUSE_H
