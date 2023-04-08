@@ -2,6 +2,7 @@
     "files.associations": {
         "*.hcl": "terraform",
         "unique_id.h": "c",
-        "adc.h": "c"
+        "adc.h": "c",
+        "opts.h": "c"
     }
 }

@@ -21,12 +21,11 @@ target_link_libraries(pico_fuse
 
 if(PICO_CYW43_SUPPORTED)
 target_link_libraries(pico_fuse
-    pico_cyw43_arch_none  
     pico_cyw43_arch_lwip_threadsafe_background
 )
 endif()
 
-target_compile_definitions(pico_fuse PRIVATE PICO_DEBUG_MALLOC=1)
+target_compile_definitions(pico_fuse PRIVATE PICO_DEBUG_MALLOC=0)
 if(PICO_CYW43_SUPPORTED)
     target_compile_definitions(pico_fuse PRIVATE PICO_CYW43_SUPPORTED=1)
 endif()

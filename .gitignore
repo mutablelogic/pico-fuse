@@ -1,4 +1,5 @@
 build
 
-# ignore the options file which may contain passwords
-src/opts.h
+# ignore
+include/opts.h
+src/old

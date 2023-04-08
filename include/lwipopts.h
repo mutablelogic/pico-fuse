@@ -2,6 +2,7 @@
 #define _LWIPOPTS_EXAMPLE_COMMONH_H
 
 #define MEMP_NUM_SYS_TIMEOUT            (LWIP_NUM_SYS_TIMEOUT_INTERNAL+1) 
+#define LWIP_DEBUG 1
 
 // allow override in some examples
 #ifndef NO_SYS
@@ -57,7 +58,7 @@
 #endif
 
 #define ETHARP_DEBUG                LWIP_DBG_OFF
-#define NETIF_DEBUG                 LWIP_DBG_OFF
+#define NETIF_DEBUG                 LWIP_DBG_ON
 #define PBUF_DEBUG                  LWIP_DBG_OFF
 #define API_LIB_DEBUG               LWIP_DBG_OFF
 #define API_MSG_DEBUG               LWIP_DBG_OFF

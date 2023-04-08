@@ -6,10 +6,6 @@ target_include_directories(blink PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/../../include
 )
 
-target_link_directories(blink PRIVATE
-    ${CMAKE_CURRENT_LIST_DIR}/../picofuse
-)
-
 target_link_libraries(blink 
     pico_fuse
 )

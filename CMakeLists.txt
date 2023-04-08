@@ -11,3 +11,6 @@ pico_sdk_init()
 
 add_subdirectory(src/picofuse)
 add_subdirectory(examples/blink)
+add_subdirectory(examples/wifijoin)
+
+

@@ -51,7 +51,9 @@ void picofuse_wifi_poll(picofuse_t *self)
 #ifdef PICO_CYW43_SUPPORTED
 bool picofuse_handle_wifi_status(picofuse_t *self, void *data)
 {
+    cyw43_arch_lwip_begin();
     int status = cyw43_wifi_link_status(&cyw43_state, CYW43_ITF_STA);
+    cyw43_arch_lwip_end();
     picofuse_debug("picofuse_handle_wifi_status: ssid=%s status=%s\n", ((picofuse_wifi_t *)data)->ssid, picofuse_link_status_str(status));
     return true;
 }
@@ -75,7 +77,9 @@ void picofuse_handle_wifi_init(picofuse_t *self, picofuse_wifi_t *data)
         // TODO: Allow AP mode
         cyw43_arch_enable_sta_mode();
 
+        cyw43_arch_lwip_begin();
         int err = cyw43_arch_wifi_connect_async(data->ssid, data->password, CYW43_AUTH_WPA2_MIXED_PSK);
+        cyw43_arch_lwip_end();
         if (err != 0)
         {
             picofuse_debug("picofuse_handle_wifi_init: Failed to connect to wifi ssid=%s err=%d\n", data->ssid, err);

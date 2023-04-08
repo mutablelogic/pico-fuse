@@ -194,9 +194,12 @@ int picofuse_register(picofuse_t *self, picofuse_state_t state,
         break;
     }
 
-    if (callback) {
+    if (callback)
+    {
         return hashmap_put(self->hashmap, state, event, (void *)(callback));
-    } else {
+    }
+    else
+    {
         return 0;
     }
 }
@@ -251,10 +254,16 @@ int picofuse_main(picofuse_t *self)
     int errorCode = 0;
     while (!errorCode)
     {
+#if PICO_CYW43_ARCH_POLL
+        cyw43_arch_poll();
+#endif
         if (picofuse_is_empty(self))
         {
-            picofuse_wifi_poll(self);
+#if PICO_CYW43_ARCH_POLL
+            cyw43_arch_wait_for_work_until(make_timeout_time_ms(10));
+#else
             sleep_ms(10);
+#endif
             continue;
         }
 

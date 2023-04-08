@@ -1,5 +1,5 @@
 BUILD_DIR := build
-SRC_DIR := $(filter-out src/lwipopts.h, $(wildcard src/*))
+SRC_DIR := $(filter-out src/old, $(wildcard src/*))
 EXAMPLES_DIR := $(wildcard examples/*)
 
 # Paths to tools needed in dependencies
@@ -11,7 +11,7 @@ PICO_PLATFORM ?= rp2040
 PICO_BOARD ?= pico_w
 
 # Targets
-all: config picotool src
+all: config picotool src examples
 
 config: dependencies mkdir
 	@echo git submodule update pico-sdk
