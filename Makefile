@@ -1,5 +1,6 @@
 BUILD_DIR := build
 SRC_DIR := $(filter-out src/lwipopts.h, $(wildcard src/*))
+EXAMPLES_DIR := $(wildcard examples/*)
 
 # Paths to tools needed in dependencies
 GIT := $(shell which git)
@@ -28,7 +29,13 @@ picotool: config
 
 src: $(SRC_DIR)
 
+examples: $(EXAMPLES_DIR)
+
 $(SRC_DIR): dependencies mkdir
+	@echo make $(notdir $@)
+	@make -C ${BUILD_DIR}/$@
+
+$(EXAMPLES_DIR): dependencies mkdir
 	@echo make $(notdir $@)
 	@make -C ${BUILD_DIR}/$@
 

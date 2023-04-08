@@ -194,7 +194,11 @@ int picofuse_register(picofuse_t *self, picofuse_state_t state,
         break;
     }
 
-    return hashmap_put(self->hashmap, state, event, (void *)(callback));
+    if (callback) {
+        return hashmap_put(self->hashmap, state, event, (void *)(callback));
+    } else {
+        return 0;
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

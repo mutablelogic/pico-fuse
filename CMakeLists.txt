@@ -10,5 +10,4 @@ project(picofuse CXX C ASM)
 pico_sdk_init()
 
 add_subdirectory(src/picofuse)
-add_subdirectory(src/blink)
-
+add_subdirectory(examples/blink)
