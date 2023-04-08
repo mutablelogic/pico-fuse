@@ -123,8 +123,8 @@ Pico. Then run the following command:
 
 ```bash
 cd ${HOME}/projects/pico-fuse
-make src/blink
-build/src/picotool/picotool load  -f -x build/src/blink/blink.uf2
+PICO_BOARD=pico make config && make picotool && make examples/blink
+build/lib/picotool/picotool load build/examples/blink/blink.uf2 -x -f
 ```
 
 Fingers crossed, the LED should start blinking. The code for this example is in the [`src/blink`](src/blink) folder:
