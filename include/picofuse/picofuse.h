@@ -127,10 +127,30 @@ typedef struct
 ///////////////////////////////////////////////////////////////////////////////
 // EV_WIFI
 
+#define WIFI_ADDR_STRLEN 20
+
+typedef enum
+{
+    WIFI_UNKNOWN = -1,
+    WIFI_DOWN,
+    WIFI_JOINING,
+    WIFI_NOIP,
+    WIFI_FAIL,
+    WIFI_BADAUTH,
+    WIFI_UP
+} picofuse_wifi_status_t;
+
 typedef struct
 {
-    const char *ssid;     // The SSID of the network
-    const char *password; // The password of the network, or NULL
+    const char *ssid;                     // The SSID of the network
+    const char *password;                 // The password of the network, or NULL
+    picofuse_wifi_status_t status;        // The status of the WiFi connection
+    char addr[WIFI_ADDR_STRLEN];    // The IP address once connected
+    char netmask[WIFI_ADDR_STRLEN]; // The netmask once connected
+    char gateway[WIFI_ADDR_STRLEN]; // The gateway once connected
 } picofuse_wifi_t;
+
+// Return status as a astring
+extern const char *picofuse_wifi_status_string(picofuse_wifi_status_t);
 
 #endif // PICOFUSE_H

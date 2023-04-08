@@ -5,6 +5,7 @@
 extern void picofuse_callback(picofuse_t *, picofuse_event_t, void *);
 extern void picofuse_handle_init(picofuse_t *, picofuse_init_t *);
 extern void picofuse_handle_quit(picofuse_t *, picofuse_init_t *);
+extern bool picofuse_is_empty(picofuse_t *);
 
 // GPIO
 extern void picofuse_handle_gpio_init(picofuse_t *, picofuse_gpio_t *);
@@ -24,7 +25,7 @@ extern void picofuse_handle_timer(picofuse_t *, picofuse_timer_t *);
 extern bool picofuse_schedule_ms(picofuse_t *, uint32_t, picofuse_schedule_callback_t, void *);
 
 // WiFi
-extern void picofuse_wifi_poll(picofuse_t *);
+extern bool picofuse_wifi_poll(picofuse_t *self, int delay_ms);
 extern void picofuse_handle_wifi_init(picofuse_t *, picofuse_wifi_t *);
 // extern void picofuse_handle_wifi_status(picofuse_t *, picofuse_wifi_t *);
 

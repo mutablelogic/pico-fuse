@@ -254,16 +254,8 @@ int picofuse_main(picofuse_t *self)
     int errorCode = 0;
     while (!errorCode)
     {
-#if PICO_CYW43_ARCH_POLL
-        cyw43_arch_poll();
-#endif
-        if (picofuse_is_empty(self))
-        {
-#if PICO_CYW43_ARCH_POLL
-            cyw43_arch_wait_for_work_until(make_timeout_time_ms(10));
-#else
-            sleep_ms(10);
-#endif
+        // Poll for events. If nothing to do, then try again
+        if(!picofuse_wifi_poll(self, 10)) {
             continue;
         }
 

@@ -2,7 +2,6 @@
 #define _LWIPOPTS_EXAMPLE_COMMONH_H
 
 #define MEMP_NUM_SYS_TIMEOUT            (LWIP_NUM_SYS_TIMEOUT_INTERNAL+1) 
-#define LWIP_DEBUG 1
 
 // allow override in some examples
 #ifndef NO_SYS
@@ -70,7 +69,7 @@
 #define RAW_DEBUG                   LWIP_DBG_OFF
 #define MEM_DEBUG                   LWIP_DBG_OFF
 #define MEMP_DEBUG                  LWIP_DBG_OFF
-#define SYS_DEBUG                   LWIP_DBG_OFF
+#define SYS_DEBUG                   LWIP_DBG_ON
 #define TCP_DEBUG                   LWIP_DBG_OFF
 #define TCP_INPUT_DEBUG             LWIP_DBG_OFF
 #define TCP_OUTPUT_DEBUG            LWIP_DBG_OFF
@@ -84,6 +83,6 @@
 #define TCPIP_DEBUG                 LWIP_DBG_OFF
 #define PPP_DEBUG                   LWIP_DBG_OFF
 #define SLIP_DEBUG                  LWIP_DBG_OFF
-#define DHCP_DEBUG                  LWIP_DBG_OFF
+#define DHCP_DEBUG                  LWIP_DBG_ON
 
 #endif /* __LWIPOPTS_H__ */

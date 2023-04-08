@@ -1,4 +1,4 @@
-
+#include <stdio.h>
 #include <picofuse/picofuse.h>
 #include "opts.h"
 
@@ -24,6 +24,15 @@ picofuse_state_t main_wifi_init(picofuse_t *self, picofuse_event_t event, void *
     return ANY;
 }
 
+
+// WiFi status
+picofuse_state_t main_wifi_status(picofuse_t *self, picofuse_event_t event, void *data)
+{
+    picofuse_wifi_t *wifi = (picofuse_wifi_t *)data;
+    printf("WiFi status=%s addr=%s netmask=%s gateway=%s \n", picofuse_wifi_status_string(wifi->status),wifi->addr,wifi->netmask,wifi->gateway);
+    return ANY;
+}
+
 int main()
 {
     // Initialize the picofuse object with debugging enabled
@@ -32,6 +41,7 @@ int main()
     // Register callbacks
     picofuse_register(picofuse, ANY, EV_INIT, main_init);
     picofuse_register(picofuse, ANY, EV_WIFI_INIT, main_wifi_init);
+    picofuse_register(picofuse, ANY, EV_WIFI, main_wifi_status);
 
     // Call main loop
     picofuse_main(picofuse);
