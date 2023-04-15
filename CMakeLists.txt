@@ -10,7 +10,8 @@ project(picofuse CXX C ASM)
 pico_sdk_init()
 
 add_subdirectory(src/picofuse)
+add_subdirectory(src/fuse)
+add_subdirectory(src/rp2040)
+add_subdirectory(examples/fusetest)
 add_subdirectory(examples/blink)
 add_subdirectory(examples/wifijoin)
-
-

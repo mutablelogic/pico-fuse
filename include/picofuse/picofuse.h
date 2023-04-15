@@ -1,6 +1,7 @@
 
 #ifndef PICOFUSE_H
 #define PICOFUSE_H
+
 #include <stdbool.h>
 #include <pico/stdlib.h>
 
@@ -10,6 +11,9 @@ typedef enum
     PICOFUSE_DEBUG = (1 << 0), // Enable debug output
 } picofuse_flags_t;
 
+/*
+ * Events
+ */
 typedef enum
 {
     EV_NONE,       // No event
@@ -39,6 +43,13 @@ typedef struct picofuse_instance_t picofuse_t;
 // Event callback
 typedef picofuse_state_t picofuse_callback_t(picofuse_t *, picofuse_event_t, void *);
 
+// Driver structure
+typedef struct
+{
+    const char *name;           // Driver name
+    void (*init)(picofuse_t *); // Driver initialization hook
+} picofuse_driver_t;
+
 // Initialize picofuse
 extern picofuse_t *picofuse_init(picofuse_flags_t);
 
@@ -47,6 +58,9 @@ extern int picofuse_main(picofuse_t *);
 
 // Free the picofuse structure
 extern void picofuse_free(picofuse_t *);
+
+// Register a driver
+extern void picofuse_register_driver(picofuse_t *, picofuse_driver_t *);
 
 // Fire an event on the runloop, returns -1 on error or 0 on success
 extern int picofuse_fire(picofuse_t *,
@@ -142,9 +156,9 @@ typedef enum
 
 typedef struct
 {
-    const char *ssid;                     // The SSID of the network
-    const char *password;                 // The password of the network, or NULL
-    picofuse_wifi_status_t status;        // The status of the WiFi connection
+    const char *ssid;               // The SSID of the network
+    const char *password;           // The password of the network, or NULL
+    picofuse_wifi_status_t status;  // The status of the WiFi connection
     char addr[WIFI_ADDR_STRLEN];    // The IP address once connected
     char netmask[WIFI_ADDR_STRLEN]; // The netmask once connected
     char gateway[WIFI_ADDR_STRLEN]; // The gateway once connected
