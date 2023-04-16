@@ -11,6 +11,35 @@
 typedef struct fuse_instance fuse_t;
 
 /*
+ * Represents a fuse driver instance
+ */
+typedef void fuse_driver_t;
+
+/*
+ * Representation of an action which occurs when an event is fired
+ */
+typedef void (*fuse_action_t)(fuse_t *fuse, fuse_driver_t *driver, fuse_event_t event, void *data);
+
+/*
+ * Represents a fuse event handler
+ */
+typedef struct
+{
+    // The event which the driver can handle (must not have already been registered)
+    fuse_event_t event;
+
+    // The name of the event
+    const char *name;
+
+    // The driver for the event
+    fuse_driver_t* driver;
+
+    // The finalizer function for the driver, which is called once the event has been
+    // fired and all actions have been called
+    fuse_action_t finalizer;
+} fuse_driver_event_t;
+
+/*
  * Represents a fuse driver
  */
 typedef struct
@@ -20,13 +49,11 @@ typedef struct
 
     // The init function for the driver, which returns a pointer to
     // the driver's instance, or NULL if an error occurred
-    void *(*init)(fuse_t *fuse, void *user_data);
-} fuse_driver_params_t;
+    fuse_driver_t *(*init)(fuse_t *fuse, void *user_data);
 
-/*
- * Representation of an action which occurs when an event is fired
- */
-typedef void (*fuse_action_t)(fuse_t *fuse, fuse_event_t event, void *data);
+    // The events which the driver can handle
+    fuse_driver_event_t events[];
+} fuse_driver_params_t;
 
 /*
  * Flags for the fuse application
@@ -80,22 +107,62 @@ void fuse_main(fuse_t *fuse);
 bool fuse_is(fuse_t *fuse, fuse_flag_t flag);
 
 /*
+ * Return the name of an event, or NULL if the event is invalid
+ *
+ * @param fuse             The fuse application
+ * @param event            The event
+ * @return                 Returns the name of the event, or NULL if the event is invalid
+ */
+const char *fuse_event_name(fuse_t *fuse, fuse_event_t event);
+
+/*
  * Register a driver with the fuse application
  *
  * @param fuse             The fuse application
  * @param params           The parameters for the driver
  * @return                 Returns a pointer to the driver's instance, or NULL
  */
-void *fuse_register_driver(fuse_t *fuse, const fuse_driver_params_t *params, void *user_data);
+fuse_driver_t *fuse_register_driver(fuse_t *fuse, const fuse_driver_params_t *params, void *user_data);
 
 /*
  * Register an action for an event firing
  *
  * @param fuse             The fuse application
  * @param event            The event that has been fired
+ * @param driver           The driver associated with the event action
  * @param action           The action to perform when the event is fired
  * @return                 Returns false if an error occurred
  */
-bool fuse_register_action(fuse_t *fuse, void *driver, fuse_event_t event, fuse_action_t action);
+bool fuse_register_action(fuse_t *fuse, fuse_event_t event, fuse_driver_t *driver, fuse_action_t action);
+
+/*
+ * Fire an event, to be picked up by the run loop
+ *
+ * @param fuse             The fuse application
+ * @param driver           The driver associated with the event
+ * @param event            The event that has been fired
+ * @param data             The data associated with the event
+ */
+bool fuse_event_fire(fuse_t *fuse, fuse_event_t event, void *data);
+
+/*
+ * Fire an event with a boolean argument
+ *
+ * @param fuse             The fuse application
+ * @param driver           The driver associated with the event
+ * @param event            The event that has been fired
+ * @param data             The boolean data associated with the event
+ */
+bool fuse_event_fire_bool(fuse_t *fuse, fuse_event_t event, bool data);
+
+/*
+ * fuse_malloc allocates a block of memory from the pool
+ *
+ * @param fuse             The fuse application
+ * @param size             The size of the memory block
+ * @return                 A pointer to the memory block, or
+ *                         NULL if the pool is full
+ */
+void *fuse_malloc(fuse_t *fuse, size_t size);
 
 #endif

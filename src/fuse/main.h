@@ -1,8 +1,9 @@
 #ifndef FUSE_PRIVATE_MAIN_H
 #define FUSE_PRIVATE_MAIN_H
 
-#include <fuse/pool.h>
-#include <fuse/main.h>
+#include <fuse/fuse.h>
+#include "queue.h"
+#include "hashmap.h"
 
 /*
  * Represents an instance of a fuse application
@@ -18,15 +19,15 @@ struct fuse_instance
     // The return code from the application. Set as non-zero to
     // quit the application.
     int status;
-};
 
-/*
- * Represents an event node
- */
-struct fuse_node_instance
-{
-    void *data;
-    struct fuse_node_instance *next;
+    // Actions to fire when an event is fired
+    hashmap_t* actions;
+
+    // Registered events
+    hashmap_t* events;
+
+    // The event queue
+    fuse_queue_t *queue;
 };
 
 #endif

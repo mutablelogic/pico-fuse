@@ -1,5 +1,8 @@
 add_library(rp2040 STATIC
     gpio.c
+    led.c
+    pwm.c
+    timer.c
 )
 
 target_include_directories(rp2040 PRIVATE
@@ -8,4 +11,6 @@ target_include_directories(rp2040 PRIVATE
 
 target_link_libraries(rp2040
     pico_stdlib
+    hardware_pwm
+    fuse
 )

@@ -1,5 +1,4 @@
 #include <stddef.h>
-#include <assert.h>
 #include <stdlib.h>
 
 #include <fuse/fuse.h>
