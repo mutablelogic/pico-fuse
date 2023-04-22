@@ -29,7 +29,6 @@ void rp2040_gpio_irq(uint gpio, uint32_t events)
 {
     assert(_gpio);
     assert(_gpio->fuse);
-
     gpio_pin_t *pin = &_gpio->pins[gpio];
     pin->irqrise = events & GPIO_IRQ_EDGE_RISE ? true : false;
     pin->irqfall = events & GPIO_IRQ_EDGE_FALL ? true : false;
@@ -99,6 +98,8 @@ static void rp2040_gpio_init_pin_finalizer(fuse_t *fuse, fuse_driver_t *driver, 
     case GPIO_INPUT:
         gpio_set_function(pin->gpio, GPIO_FUNC_SIO);
         gpio_set_dir(pin->gpio, GPIO_IN);
+        gpio_set_pulls(pin->gpio, pin->pullup, pin->pulldown);
+
         // set interrupts
         if (pin->irqrise)
         {
@@ -112,11 +113,14 @@ static void rp2040_gpio_init_pin_finalizer(fuse_t *fuse, fuse_driver_t *driver, 
     case GPIO_OUTPUT:
         gpio_set_function(pin->gpio, GPIO_FUNC_SIO);
         gpio_set_dir(pin->gpio, GPIO_OUT);
-        gpio_set_pulls(pin->gpio, pin->pullup, pin->pulldown);
         break;
     case GPIO_PWM:
         gpio_set_function(pin->gpio, GPIO_FUNC_PWM);
         fuse_event_fire(fuse, EV_GPIO_PWM_INIT, pin);
+        break;
+    case GPIO_SPI:
+        gpio_set_function(pin->gpio, GPIO_FUNC_SPI);
+        fuse_event_fire(fuse, EV_GPIO_SPI_INIT, pin);
         break;
     default:
         gpio_set_function(pin->gpio, GPIO_FUNC_NULL);
@@ -168,4 +172,5 @@ fuse_driver_params_t rp2040_gpio = {
         {.event = EV_GPIO_INIT, .name = "EV_GPIO_INIT", .finalizer = rp2040_gpio_init_pin_finalizer},
         {.event = EV_GPIO, .name = "EV_GPIO"},
         {.event = EV_GPIO_PWM_INIT, .name = "EV_GPIO_PWM_INIT"},
-        {.event = 0}}};
+        {.event = EV_GPIO_SPI_INIT, .name = "EV_GPIO_SPI_INIT"},
+        {}}};

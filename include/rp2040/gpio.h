@@ -9,6 +9,7 @@
 #define EV_GPIO_INIT (fuse_event_t)(0x0101)
 #define EV_GPIO (fuse_event_t)(0x0102)
 #define EV_GPIO_PWM_INIT (fuse_event_t)(0x0103)
+#define EV_GPIO_SPI_INIT (fuse_event_t)(0x0104)
 
 /*
  * GPIO functions
@@ -19,6 +20,7 @@ typedef enum
     GPIO_INPUT,
     GPIO_OUTPUT,
     GPIO_PWM,
+    GPIO_SPI,
 } gpio_func_t;
 
 /*

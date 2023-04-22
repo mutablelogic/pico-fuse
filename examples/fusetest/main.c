@@ -72,7 +72,8 @@ void pwm_init(fuse_t *fuse, fuse_driver_t *driver, fuse_event_t event, void *dat
 
     // Set 75% duty cycle at 1Hz
     pwm->freq = 8;
-    pwm->duty_cycle = 1;
+    pwm->duty_cycle = 75;
+    pwm->irqwrap = true;
 }
 
 int main()
@@ -92,6 +93,7 @@ int main()
     fuse_register_action(app, EV_GPIO, NULL, bootsel_select);
     fuse_register_action(app, EV_TIMER, NULL, timer_fired);
     fuse_register_action(app, EV_PWM_INIT, NULL, pwm_init);
+    //fuse_register_action(app, EV_PWM, NULL, pwm_rollover);
 
     // Runloop until exit
     fuse_main(app);

@@ -34,13 +34,16 @@ void rp2040_pwm_irq()
     assert(_pwm->fuse);
 
     // Clear the interrupt flag that brought us here
-    pwm_clear_irq(pwm_gpio_to_slice_num(PIN));
-    fuse_event_fire(_gpio->fuse, EV_PWM, pin);
-}
-
-void on_pwm_wrap()
-{
-    // printf("Wrapping\n");
+    uint32_t irq = pwm_get_irq_status_mask();
+    for (uint slice = 0; slice < PWM_COUNT; slice++, irq >>= 1)
+    {
+        if (irq & 1)
+        {
+            pwm_clear_irq(slice);
+            assert(_pwm);
+            fuse_event_fire(_pwm->fuse, EV_PWM, (void *)slice);
+        }
+    }
 }
 
 // Returns: floor((16*F + offset) / div16)
@@ -129,6 +132,7 @@ static void rp2040_pwm_init(fuse_t *fuse, fuse_driver_t *driver, fuse_event_t ev
     pwm->channel = pwm_gpio_to_channel(pin->gpio);
     pwm->freq = 0;
     pwm->duty_cycle = 75;
+    pwm->irqwrap = false;
 
     // Fire EV_PWM_INIT
     if (!fuse_event_fire(fuse, EV_PWM_INIT, pwm))
@@ -180,16 +184,20 @@ static void rp2040_pwm_finalizer(fuse_t *fuse, fuse_driver_t *driver, fuse_event
         }
         else
         {
-            pwm_set_wrap(pwm->slice, 65535);
-            pwm_set_chan_level(pwm->slice, pwm->channel, (uint16_t)(65535 * pwm->duty_cycle / 100));
+            pwm_set_wrap(pwm->slice, 0xFFFF);
+            pwm_set_clkdiv_mode(pwm->slice, PWM_DIV_FREE_RUNNING);
+            pwm_set_chan_level(pwm->slice, pwm->channel, (uint16_t)(0xFFFF * pwm->duty_cycle / 100));
             pwm_set_enabled(pwm->slice, true);
         }
     }
 
     // Set IRQ
-    // pwm_set_irq_enabled(pwm->slice, true);
-    // irq_set_exclusive_handler(PWM_IRQ_WRAP, on_pwm_wrap);
-    // irq_set_enabled(PWM_IRQ_WRAP, true);
+    if (pwm->irqwrap)
+    {
+        pwm_set_irq_enabled(pwm->slice, true);
+        irq_set_exclusive_handler(PWM_IRQ_WRAP, rp2040_pwm_irq);
+        irq_set_enabled(PWM_IRQ_WRAP, true);
+    }
 }
 
 /*
@@ -229,4 +237,5 @@ fuse_driver_params_t rp2040_pwm = {
     .init = rp2040_pwm_register,
     .events = {
         {.event = EV_PWM_INIT, .name = "EV_PWM_INIT", .finalizer = rp2040_pwm_finalizer},
-        {.event = 0, .name = NULL}}};
+        {.event = EV_PWM, .name = "EV_PWM"},
+        {}}};

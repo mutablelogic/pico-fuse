@@ -8,6 +8,7 @@
  * Events
  */
 #define EV_PWM_INIT (fuse_event_t)(0x0301)
+#define EV_PWM (fuse_event_t)(0x0302)
 
 /*
  * PWM configuration
@@ -23,12 +24,16 @@ typedef struct
     // The PWM channel, a=0 or b=1
     int channel;
 
-    // The frequency of the PWM channel, in Hz
+    // The frequency of the PWM slice, in Hz
     // Set to zero to disable the PWM
     uint32_t freq;
 
-    // The duty cycle percentage for channel A
+    // The duty cycle percentage for the channel, set between
+    // 0 and 100
     int duty_cycle;
+
+    // Fire an event when the slice counter is wrapped
+    bool irqwrap;
 } pwm_t;
 
 /*

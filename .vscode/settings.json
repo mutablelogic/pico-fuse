@@ -4,6 +4,7 @@
         "unique_id.h": "c",
         "adc.h": "c",
         "opts.h": "c",
-        "gpio.h": "c"
+        "gpio.h": "c",
+        "picodisplay.h": "c"
     }
 }
