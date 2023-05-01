@@ -7,8 +7,8 @@
 /*
  * Events
  */
-#define EV_TIMER_INIT (fuse_event_t)(0x0401)
-#define EV_TIMER (fuse_event_t)(0x0402)
+#define EV_TIMER_INIT (fuse_event_t)(0x0501)
+#define EV_TIMER (fuse_event_t)(0x0502)
 
 /*
  * Define the GPIO driver

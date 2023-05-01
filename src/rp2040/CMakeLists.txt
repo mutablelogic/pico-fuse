@@ -2,6 +2,7 @@ add_library(rp2040 STATIC
     gpio.c
     led.c
     pwm.c
+    spi.c
     timer.c
 )
 

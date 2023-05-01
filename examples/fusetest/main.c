@@ -78,7 +78,7 @@ void pwm_init(fuse_t *fuse, fuse_driver_t *driver, fuse_event_t event, void *dat
 
 int main()
 {
-    // Create application
+    // Create application using 64K of memory
     fuse_t *app = fuse_init(64 * 1024, FUSE_FLAG_DEBUG);
 
     // Register drivers
