@@ -5,6 +5,7 @@
         "adc.h": "c",
         "opts.h": "c",
         "gpio.h": "c",
-        "picodisplay.h": "c"
+        "picodisplay.h": "c",
+        "cstdlib": "c"
     }
 }

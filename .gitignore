@@ -1,5 +1,5 @@
 build
+doc
 
 # ignore
 opts.h
-src/old
