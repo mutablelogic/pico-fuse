@@ -12,21 +12,24 @@
  */
 fuse_pool_t *fuse_pool_new(size_t size, fuse_flag_t flags)
 {
-    assert(size > 0);
-
     // Allocate a single block of memory which includes both the
     // memory pool and the required memory
-    fuse_pool_t *self = (fuse_pool_t *)malloc(sizeof(struct fuse_pool_instance) + size);
+    fuse_pool_t *self = (fuse_pool_t *)malloc(sizeof(struct fuse_pool_instance));
     if (self == NULL)
     {
         return NULL;
     }
 
     // Set the instance properties
-    self->size = size + sizeof(struct fuse_pool_instance);
-    self->used = sizeof(struct fuse_pool_instance);
+    self->size = size;
     self->flags = flags;
-    self->next = NULL;
+    self->used = 0;
+    self->first = NULL;
+    self->last = NULL;
+
+    // Set the alloc and free functions
+    self->alloc = fuse_pool_std_alloc;
+    self->free = fuse_pool_std_free;
 
     // Return success
     return self;
@@ -39,6 +42,14 @@ void fuse_pool_destroy(fuse_pool_t *pool)
 {
     assert(pool);
 
+    // Free the elements in the memory pool
+    struct fuse_pool_header *header = pool->first;
+    while (header != NULL)
+    {
+        pool->free(pool, header);
+        header = header->next;
+    }
+
     // Free the memory pool
     free(pool);
 }
@@ -47,7 +58,8 @@ void fuse_pool_destroy(fuse_pool_t *pool)
  * Return statistics about the memory pool
  * 
  * @param pool The memory pool
- * @param size A pointer to the total size of the memory pool, to be filled in or NULL
+ * @param size A pointer to the total size of the memory pool, to be filled in or NULL. Sets to
+ *            zero if the memory pool is unbounded
  * @param used A pointer to the amount of memory used in the memory pool, to be filled in or NULL
  */
 void fuse_pool_stats(fuse_pool_t *pool, size_t *size, size_t *used)
@@ -76,25 +88,16 @@ void fuse_pool_stats(fuse_pool_t *pool, size_t *size, size_t *used)
 void* fuse_pool_alloc(fuse_pool_t *pool, size_t size) {
     assert(pool);
 
-    void* next = pool->next;
-    if (next == NULL) {
-        // Allocate the first block
-        struct fuse_pool_header* header = pool + sizeof(struct fuse_pool_instance);
-        header->ptr = header + sizeof(struct fuse_pool_header);
-        header->size = size;
-        header->used = true;
-        header->next = NULL;
-
-        // Increment the pool state
-        pool->next = header;
-        pool->used += size + sizeof(struct fuse_pool_header);
-
-        // Return pointer to the allocated memory
-        return header->ptr;
+    // Allocate the memory block
+    struct fuse_pool_header *header = pool->alloc(pool, size);
+    if (header == NULL) {
+        return NULL;
     }
 
-    // Return error
-    return NULL;
+    // TODO: Link memory block into the linked list of memory blocks
+
+    // Return pointer to allocation
+    return header->ptr;
 }
 
 /*
@@ -103,8 +106,15 @@ void* fuse_pool_alloc(fuse_pool_t *pool, size_t size) {
  * @param pool The memory pool
  * @param ptr A pointer to the memory block
  */
-void fuse_pool_free(void *ptr) {
-    assert(ptr);
+void fuse_pool_free(fuse_pool_t *pool, void *ptr) {
+    assert(pool);
+
+    // If the pointer is NULL, then return
+    if(ptr == NULL) {
+        return;
+    }
+
+    // Obtain the header for the memory block
 
     // TODO
 }

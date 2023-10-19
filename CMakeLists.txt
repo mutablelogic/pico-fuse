@@ -7,16 +7,16 @@ project(fuse CXX C ASM)
 
 if($ENV{PICO_BOARD} STREQUAL "linux")
     message(STATUS "TARGET=linux")
+    add_compile_definitions(TARGET=linux)
+elseif($ENV{PICO_BOARD} STREQUAL "darwin")
+    message(STATUS "TARGET=darwin")
+    add_compile_definitions(TARGET=darwin)
 else()
     message(STATUS "TARGET=pico, ${PICO_BOARD}")
+    add_compile_definitions(TARGET=pico)
     include(lib/pico-sdk/pico_sdk_init.cmake)
     pico_sdk_init()
 endif()
-
-# Add compile definitions
-add_compile_definitions(
-    TARGET=$ENV{PICO_BOARD}
-)
 
 # Libraries
 add_subdirectory(src/fuse)
