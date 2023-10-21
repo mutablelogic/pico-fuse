@@ -20,6 +20,7 @@ typedef struct fuse_instance fuse_t;
 #include <fuse/flags.h>
 #include <fuse/pool.h>
 #include <fuse/sleep.h>
+#include <fuse/string.h>
 
 /** @brief Create a new fuse application
  *
