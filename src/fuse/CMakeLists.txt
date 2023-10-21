@@ -3,6 +3,7 @@ add_library(fuse STATIC
     fuse.c
     panic.c
     pool.c
+    pool_std.c
     sleep.c
 )
 

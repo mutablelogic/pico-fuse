@@ -24,3 +24,4 @@ add_subdirectory(src/fuse)
 # Tests
 add_subdirectory(tests/panic)
 add_subdirectory(tests/pool)
+add_subdirectory(tests/fuseapp)

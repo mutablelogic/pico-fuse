@@ -3,7 +3,7 @@
 // PUBLIC METHODS
 
 #ifdef TARGET
-#if TARGET==linux
+#if TARGET==linux || TARGET==darwin
 
 #include <stdint.h>
 #include <time.h>

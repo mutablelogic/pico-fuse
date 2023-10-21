@@ -1,10 +1,12 @@
+/** @file pool.h
+ *  @brief Private function prototypes and structure definitions for memory pools
+ */
 #ifndef FUSE_PRIVATE_POOL_H
 #define FUSE_PRIVATE_POOL_H
 
 #include <fuse/fuse.h>
 
-/*
- * @brief Represents a memory block header
+/** @brief Represents a memory block header
  */
 struct fuse_pool_header
 {
@@ -13,10 +15,11 @@ struct fuse_pool_header
     bool used;                     ///< Whether the memory block is used
     struct fuse_pool_header *prev; ///< The previous memory block header, or NULL if this is the first memory block header
     struct fuse_pool_header *next; ///< The next memory block header, or NULL if this is the last memory block header
+    const char *file;              ///< The file where the allocation was made
+    int line;                      ///< The line of the file where the allocation was made
 };
 
-/*
- * @brief Represents an instance of a fuse memory pool
+/** @brief Represents an instance of a fuse memory pool
  */
 struct fuse_pool_instance
 {
@@ -29,23 +32,7 @@ struct fuse_pool_instance
     // Allocate and free implementations
     struct fuse_pool_header *(*alloc)(fuse_pool_t *self, size_t size); ///< The memory allocator function
     void (*free)(fuse_pool_t *self, struct fuse_pool_header *header);  ///< The memory deallocator function
+    struct fuse_pool_header *(*map)(fuse_pool_t *self, void *ptr);     ///< Map the void pointer to a header
 };
-
-/*
- * Allocator function which is implemented directly by malloc
- *
- * @param self The memory pool
- * @param size The size of the memory block to allocate
- * @return A pointer to the allocated memory block, or NULL if no memory could be allocated
- */
-struct fuse_pool_header *fuse_pool_std_alloc(fuse_pool_t *self, size_t size);
-
-/*
- * Deallocator function which is implemented directly by free
- *
- * @param self The memory pool
- * @param ptr A pointer to the memory block to deallocate
- */
-void fuse_pool_std_free(fuse_pool_t *self, struct fuse_pool_header *ptr);
 
 #endif
