@@ -15,12 +15,12 @@ typedef struct fuse_str fuse_str_t;
 /** @brief Create a new string from a c-string
  *
  *  @param fuse The fuse application
- *  @param str Pointer to the c-string, or NULL if an zero-sized string is to be created
+ *  @param ptr Pointer to the c-string, or NULL if an zero-sized string is to be created
  *  @param file The file where the string is created
  *  @param line The line of the file where the string is created
  *  @return Returns a pointer to a string instance, or NULL if the string could not be allocated
  */
-fuse_str_t *fuse_str_new_ex(fuse_t *fuse, const char *str, const char *file, int line);
+fuse_str_t *fuse_str_new_ex(fuse_t *fuse, const char *ptr, const char *file, int line);
 
 #ifdef DEBUG
 #define fuse_str_new(self, ptr) \
@@ -32,8 +32,9 @@ fuse_str_t *fuse_str_new_ex(fuse_t *fuse, const char *str, const char *file, int
 
 /** @brief Deallocate a string
  *
- *  @param ptr Pointer to the string
+ *  @param fuse The fuse application
+ *  @param str Pointer to the string
  */
-fuse_str_t *fuse_str_destroy(fuse_t *fuse, fuse_str_t *str);
+void fuse_str_destroy(fuse_t *fuse, fuse_str_t *str);
 
 #endif
