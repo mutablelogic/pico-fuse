@@ -144,9 +144,9 @@ void fuse_pool_free(fuse_pool_t *pool, void *ptr)
         header->next->prev = header->prev;
     }
 
-    // Free the memory block
-    pool->free(pool, header);
-
     // Adjust used memory
     pool->used -= header->size;
+
+    // Free the memory block
+    pool->free(pool, header);
 }

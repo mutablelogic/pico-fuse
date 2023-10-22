@@ -15,6 +15,7 @@ struct fuse_pool_header *fuse_pool_std_alloc(fuse_pool_t *self, size_t size)
     // Calculate additional size needed, and check size
     size_t alloc_size = sizeof(struct fuse_pool_header) + size;
     if(self->size > 0 && self->used + alloc_size > self->size) {
+        fuse_debugf(NULL, "DEBUG: in fuse_pool_std_alloc failed during size test self->size=%lu self->used=%lu alloc_size=%lu\n",self->size,self->used,alloc_size);
         return NULL;
     }
 
@@ -22,6 +23,7 @@ struct fuse_pool_header *fuse_pool_std_alloc(fuse_pool_t *self, size_t size)
     struct fuse_pool_header *header = (struct fuse_pool_header *)malloc(alloc_size);
     if (header == NULL)
     {
+        fuse_debugf(NULL, "DEBUG: in fuse_pool_std_alloc failed during malloc\n");
         return NULL;
     }
 
