@@ -7,7 +7,7 @@ int run(fuse_t *fuse)
     fuse_debugf(fuse, "In run()\n");
     bool value = true;
     for(int i = 0; i < 10; i++) {
-        picofuse_led_set(!value);
+        fuse_led_set(value);
         value = !value;
         sleep_ms(500);
     }
@@ -16,5 +16,5 @@ int run(fuse_t *fuse)
 
 int main()
 {
-    return picofuse_main(FUSE_FLAG_DEBUG, run);
+    return fuse_main(FUSE_FLAG_DEBUG, run);
 }

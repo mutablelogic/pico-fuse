@@ -9,7 +9,7 @@
 // PUBLIC METHODS
 
 
-void picofuse_led_new()
+void fuse_led_new()
 {
 #if defined(PICO_DEFAULT_LED_PIN)
         fuse_debugf(NULL, "picofuse_led_new: gpio %d\n",PICO_DEFAULT_LED_PIN);
@@ -18,7 +18,7 @@ void picofuse_led_new()
 #endif
 }
 
-void picofuse_led_destroy()
+void fuse_led_destroy()
 {
 #if defined(PICO_DEFAULT_LED_PIN)
         fuse_debugf(NULL, "picofuse_led_destroy: gpio %d\n",PICO_DEFAULT_LED_PIN);
@@ -26,7 +26,7 @@ void picofuse_led_destroy()
 #endif
 }
 
-void picofuse_led_set(bool value)
+void fuse_led_set(bool value)
 {
 #if defined(CYW43_WL_GPIO_LED_PIN)
         fuse_debugf(NULL, "picofuse_led_set: %s on cyw43 gpio %d\n", value ? "true" : "false", CYW43_WL_GPIO_LED_PIN);

@@ -5,7 +5,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // PUBLIC METHODS
 
-void picofuse_stdio_init()
+void fuse_stdio_init()
 {
     // Initialize STDIO
     stdio_init_all();

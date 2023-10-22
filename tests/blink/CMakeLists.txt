@@ -1,4 +1,4 @@
-set(NAME "led")
+set(NAME "blink")
 add_executable(${NAME} 
     main.c
 )

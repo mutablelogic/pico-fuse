@@ -6,6 +6,6 @@
 
 /** @brief Initialize the standard input and output
  */
-void picofuse_stdio_init();
+void fuse_stdio_init();
 
 #endif

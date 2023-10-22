@@ -116,10 +116,8 @@ void TEST_005()
 
 int main()
 {
-    #if TARGET == pico
-    picofuse_stdio_init();
-    #endif
-    
+    fuse_stdio_init();
+        
     TEST_001();
     TEST_002();
     TEST_003();

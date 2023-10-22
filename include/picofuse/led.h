@@ -8,14 +8,14 @@
  * 
  *  @param value The value to set the LED to
  */
-void picofuse_led_set(bool value);
+void fuse_led_set(bool value);
 
 /** @brief Initialise a GPIO for the on-board LED
  */
-void picofuse_led_new();
+void fuse_led_new();
 
 /** @brief  Resets a GPIO back for the on-board LED
  */
-void picofuse_led_destroy();
+void fuse_led_destroy();
 
 #endif

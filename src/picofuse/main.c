@@ -4,10 +4,10 @@
 ///////////////////////////////////////////////////////////////////////////////
 // PUBLIC METHODS
 
-int picofuse_main(fuse_flag_t flags, int main(fuse_t *fuse))
+int fuse_main(fuse_flag_t flags, int main(fuse_t *fuse))
 {
 #if TARGET == pico
-    picofuse_stdio_init();
+    fuse_stdio_init();
 #endif
     fuse_debugf(NULL, "picofuse_main: flags=%d\n", flags);
 
@@ -16,14 +16,14 @@ int picofuse_main(fuse_flag_t flags, int main(fuse_t *fuse))
     assert(fuse);
 
     // Initialize the LED
-    picofuse_led_new();
+    fuse_led_new();
 
     // Call the main function
     // If the exit code is non-zero then print
     int exit_code = main(fuse);
 
     // De-initialize the LED
-    picofuse_led_destroy();
+    fuse_led_destroy();
 
     // Release the fuse application
     fuse_destroy(fuse);

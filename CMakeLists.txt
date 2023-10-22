@@ -41,7 +41,7 @@ if(${TARGET} STREQUAL "pico")
 endif()
 
 # Tests
+add_subdirectory(tests/blink)
+add_subdirectory(tests/fuseapp)
 add_subdirectory(tests/panic)
 add_subdirectory(tests/pool)
-add_subdirectory(tests/fuseapp)
-add_subdirectory(tests/led)
