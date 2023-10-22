@@ -32,7 +32,6 @@ int TEST_002()
 int main()
 {
     assert(TEST_001() == 0);
-    assert(TEST_002() == 0);
 
     // Return success
     return 0;

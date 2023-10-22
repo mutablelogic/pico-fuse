@@ -3,7 +3,7 @@
 // PUBLIC METHODS
 
 #ifdef TARGET
-#if TARGET==linux || TARGET==darwin
+#if TARGET != pico
 
 #include <stdint.h>
 #include <time.h>

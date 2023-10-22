@@ -1,4 +1,4 @@
-set(NAME "pool")
+set(NAME "led")
 add_executable(${NAME} 
     main.c
 )
@@ -6,7 +6,8 @@ add_executable(${NAME}
 target_include_directories(${NAME} PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/../../include
 )
-target_link_libraries(${NAME}
+
+target_link_libraries(${NAME} 
     picofuse
 )
 

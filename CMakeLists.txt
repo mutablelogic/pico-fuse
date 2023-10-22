@@ -24,19 +24,24 @@ elseif(PICO_BOARD STREQUAL "darwin")
 else()
     set(TARGET "pico")
     include(lib/pico-sdk/pico_sdk_init.cmake)
-    pico_sdk_init()
 endif()
 
 # Define project
 project(fuse CXX C ASM)
-
 message("Set TARGET to ${TARGET}")
 add_compile_definitions(TARGET=${TARGET})
 
 # Libraries
 add_subdirectory(src/fuse)
 
+# Pico libraries
+if(${TARGET} STREQUAL "pico")
+    pico_sdk_init()
+    add_subdirectory(src/picofuse)
+endif()
+
 # Tests
 add_subdirectory(tests/panic)
 add_subdirectory(tests/pool)
 add_subdirectory(tests/fuseapp)
+add_subdirectory(tests/led)

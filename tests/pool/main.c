@@ -1,5 +1,8 @@
 
 #include <fuse/fuse.h>
+#if TARGET == pico
+#include <picofuse/picofuse.h>
+#endif
 
 void TEST_001()
 {
@@ -113,11 +116,22 @@ void TEST_005()
 
 int main()
 {
+    #if TARGET == pico
+    picofuse_stdio_init();
+    #endif
+    
     TEST_001();
     TEST_002();
     TEST_003();
     TEST_004();
     TEST_005();
+
+    // Endless loop on the pico
+#if TARGET == pico
+    while(1) {
+        sleep_ms(1000);
+    }
+#endif
 
     // Return success
     return 0;
