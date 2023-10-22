@@ -1,4 +1,4 @@
-set(NAME fuseapp)
+set(NAME "fuseapp")
 add_executable(${NAME} 
     main.c
 )
@@ -11,8 +11,10 @@ target_link_libraries(${NAME}
     fuse
 )
 
-target_compile_definitions(${NAME} PRIVATE DEBUG=1)
+target_compile_definitions(${NAME} PRIVATE DEBUG=1 PICO_DEBUG_MALLOC=1)
 
 if(${TARGET} STREQUAL "pico")
+    pico_enable_stdio_usb(${NAME} 1)
+    pico_enable_stdio_uart(${NAME} 0)
     pico_add_extra_outputs(${NAME})
 endif()
