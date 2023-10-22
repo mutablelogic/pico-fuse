@@ -15,18 +15,19 @@ typedef enum
     FUSE_GPIO_PULLDN, ///< The GPIO pin is an input with a pull-down resistor
     FUSE_GPIO_OUT,    ///< The GPIO pin is an output
     FUSE_GPIO_PWM,    ///< The GPIO pin is used for PWM
-    FUSE_GPIO_SPI,    ///< The GPIO pin is used for SPI
+    FUSE_GPIO_SPI,    ///< The GPIO pin is used for SPI communication
     FUSE_GPIO_ADC,    ///< The GPIO pin is used for ADC
-    FUSE_GPIO_I2C,    ///< The GPIO pin is used for I2C
+    FUSE_GPIO_I2C,    ///< The GPIO pin is used for I2C communication
+    FUSE_GPIO_UART,   ///< The GPIO pin is used for UART communication
 } picofuse_func_t;
 
 /** @brief Return the number of GPIO pins
- * 
+ *
  *  The pins are referenced from index 0, so the maximum pin argument is
  *  one less than the count.
- * 
+ *
  *  @return Returns the pin count
-*/
+ */
 uint8_t fuse_gpio_count();
 
 /** @brief Initialize a GPIO pin with a function

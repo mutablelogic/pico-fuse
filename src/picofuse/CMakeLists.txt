@@ -1,5 +1,6 @@
 set(NAME "picofuse")
 add_library(${NAME} STATIC
+    adc.c
     gpio.c
     led.c
     main.c
@@ -17,6 +18,7 @@ target_link_libraries(${NAME}
 if(${TARGET} STREQUAL "pico")
     target_link_libraries(${NAME}
         pico_stdlib
+        hardware_adc        
     )
 endif()
 
