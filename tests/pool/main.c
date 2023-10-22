@@ -28,10 +28,33 @@ void TEST_002()
     fuse_pool_destroy(pool);
 }
 
+void TEST_003()
+{
+    fuse_debugf(NULL, "Allocating 64k bytes in the pool\n");
+    fuse_pool_t *pool = fuse_pool_new(64 * 1024, FUSE_FLAG_DEBUG);
+    assert(pool);
+
+    // Allocate ten regions
+    for(int i = 0; i < 10; i++) {
+        size_t size = 1024 * i;
+        fuse_debugf(NULL, "%d: Allocating %lu bytes from the pool\n",i,size);
+        void *ptr = fuse_pool_alloc(pool, size);
+        assert(ptr);
+
+        // Free memory
+        fuse_debugf(NULL, "%d: Free memory in the pool\n",i);
+        fuse_pool_free(pool, ptr);
+    }
+
+    // Destroy the pool    
+    fuse_pool_destroy(pool);
+}
+
 int main()
 {
     TEST_001();
     TEST_002();
+    TEST_003();
 
     // Return success
     return 0;
