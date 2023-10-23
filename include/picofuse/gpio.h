@@ -57,4 +57,17 @@ void fuse_gpio_set(uint8_t pin, bool value);
  */
 bool fuse_gpio_get(uint8_t pin);
 
+/** @brief Enable events on a GPIO pin for rising and/or falling edges
+ * 
+ *  Call this function after initializing the GPIO pin with the input function
+ *  to queue events in the fuse application. Events are disabled if both rising and 
+ *  falling are false.
+ *
+ *  @param fuse The fuse instance
+ *  @param pin The GPIO pin number
+ *  @param rising Enable events on a rising edge when true
+ *  @param falling Enable events on a falling edge when true
+ */
+void fuse_gpio_event_enable(fuse_t *fuse, uint8_t pin, bool rising, bool falling);
+
 #endif

@@ -65,23 +65,42 @@ void fuse_gpio_new(uint8_t pin, picofuse_func_t func)
     }
 }
 
+picofuse_func_t fuse_gpio_func(uint8_t pin) {
+    assert(pin < fuse_gpio_count());
+
+    // Get the GPIO function
+    uint gpio_func = gpio_get_function(pin);
+    switch(gpio_func) {
+        default:
+            assert(false);
+    }
+}
+
 void fuse_gpio_destroy(uint8_t pin)
 {
     assert(pin < fuse_gpio_count());
 
-    // TODO: If the pin is the temperature sensor, then disable it
+    // If the pin is set to ADC, then disable it
+    if(fuse_adc_channel(pin) != FUSE_ADC_INVALID) {
+        fuse_adc_destroy(pin);
+    }
 
     gpio_deinit(pin);
 }
 
-void fuse_gpio_set(uint8_t pin, bool value)
+inline void fuse_gpio_set(uint8_t pin, bool value)
 {
     assert(pin < fuse_gpio_count());
     gpio_put(pin, value);
 }
 
-bool fuse_gpio_get(uint8_t pin)
+inline bool fuse_gpio_get(uint8_t pin)
 {
     assert(pin < fuse_gpio_count());
     return gpio_get(pin);
 }
+
+void fuse_gpio_event_enable(fuse_t *fuse, uint8_t pin, bool rising, bool falling) {
+
+}
+
