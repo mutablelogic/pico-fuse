@@ -19,7 +19,11 @@ inline void fuse_debugf(fuse_t *fuse, const char *format, ...)
 
 inline void fuse_panic(const char *expr, const char *file, int line)
 {
-    printf("PANIC: %s (%s:%d)\n", expr, file, line);
+    if(file != NULL && line > 0) {
+        printf("PANIC: %s (%s:%d)\n", expr, file, line);
+    } else {
+        printf("PANIC: %s\n", expr);
+    }
     sleep_ms(1000);
     abort();
 }

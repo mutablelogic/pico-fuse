@@ -10,9 +10,9 @@
  */
 struct fuse_instance
 {
-    fuse_pool_t *pool; ///< The memory pool for the application
-    fuse_flag_t flags; ///< The flags which affect the behaviour of the application
-    int exit_code;     ///< Exit code of the application
+    fuse_pool_t *pool;                 ///< The memory pool for the application
+    fuse_flag_t flags;                 ///< The flags which affect the behaviour of the application
+    int exit_code;                     ///< Exit code of the application
 };
 
 #endif

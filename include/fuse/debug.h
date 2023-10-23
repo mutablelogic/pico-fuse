@@ -26,7 +26,10 @@ void fuse_panic(const char *expr, const char *file, int line);
 #ifdef assert
 #undef assert
 #endif
+#ifdef DEBUG
 #define assert(e) \
     ((void)((e) ? 0 : fuse_panic(#e, __FILE__, __LINE__)))
-
+#else
+#define assert(e) \
+    ((void)((e) ? 0 : fuse_panic(#e, NULL, 0)))
 #endif

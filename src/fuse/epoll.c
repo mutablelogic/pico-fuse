@@ -25,8 +25,9 @@ struct fuse_epoll_instance *fuse_epoll_new(fuse_t *fuse)
 
     // Initialize the epoll file descriptor
     int fd = epoll_create(0);
-    if(fd < 0) {
-        fuse_debugf(fuse,"fuse_epoll_new: %s",strerror(errno));        
+    if (fd < 0)
+    {
+        fuse_debugf(fuse, "fuse_epoll_new: %s", strerror(errno));
         return NULL;
     }
 
@@ -53,8 +54,9 @@ void fuse_epoll_destroy(fuse_t *fuse, struct fuse_epoll_instance *epoll)
 
     // Close the file descriptor
     assert(epoll->fd);
-    if(close(epoll->fd) != 0) {
-        fuse_debugf(fuse,"fuse_epoll_destroy: %s",strerror(errno));     
+    if (close(epoll->fd) != 0)
+    {
+        fuse_debugf(fuse, "fuse_epoll_destroy: %s", strerror(errno));
     }
 
     // Free epoll
