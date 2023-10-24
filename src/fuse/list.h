@@ -3,7 +3,6 @@
  */
 #ifndef FUSE_PRIVATE_LIST_H
 #define FUSE_PRIVATE_LIST_H
-
 #include <fuse/fuse.h>
 
 /* @brief Represents an instance of a fuse linked list

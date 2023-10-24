@@ -3,6 +3,7 @@ add_library(${NAME} STATIC
     debug.c
     epoll.c
     fuse.c
+    map.c
     panic.c
     pool.c
     pool_std.c

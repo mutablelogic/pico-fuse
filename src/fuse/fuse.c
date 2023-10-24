@@ -42,10 +42,11 @@ int fuse_destroy(fuse_t *fuse)
     int exit_code = fuse->exit_code;
 
     // Free the application
+    fuse_pool_t* pool = fuse->pool;
     fuse_pool_free(fuse->pool, fuse);
 
     // Free the pool
-    fuse_pool_destroy(fuse->pool);
+    fuse_pool_destroy(pool);
 
     // Return the exit code
     return exit_code;
