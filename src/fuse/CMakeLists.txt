@@ -1,16 +1,15 @@
-add_library(fuse STATIC
-    action.c
+set(NAME "fuse")
+add_library(${NAME} STATIC
     debug.c
-    hashmap.c
-    main.c
+    epoll.c
+    fuse.c
+    panic.c
     pool.c
-    queue.c
+    pool_std.c
+    sleep.c
+    string.c
 )
 
-target_include_directories(fuse PRIVATE
+target_include_directories(${NAME} PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/../../include
-)
-
-target_link_libraries(fuse
-    pico_stdlib
 )

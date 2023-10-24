@@ -1,19 +1,14 @@
 #include <stdio.h>
 #include <stdarg.h>
-
-#include <pico/stdlib.h>
+#include <stdlib.h>
 #include <fuse/fuse.h>
-#include "main.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // PUBLIC METHODS
 
-/*
- * Debug to stdout if the debug flag is set
- */
 inline void fuse_debugf(fuse_t *fuse, const char *format, ...)
 {
-    if (fuse && fuse_is(fuse, FUSE_FLAG_DEBUG))
+    if (fuse==NULL || fuse_is(fuse, FUSE_FLAG_DEBUG))
     {
         va_list args;
         va_start(args, format);
@@ -22,12 +17,13 @@ inline void fuse_debugf(fuse_t *fuse, const char *format, ...)
     }
 }
 
-/*
- * Debug to stdout if the debug flag is set
- */
 inline void fuse_panic(const char *expr, const char *file, int line)
 {
-    printf("PANIC: %s (%s:%d)\n", expr, file, line);
+    if(file != NULL && line > 0) {
+        printf("PANIC: %s (%s:%d)\n", expr, file, line);
+    } else {
+        printf("PANIC: %s\n", expr);
+    }
     sleep_ms(1000);
-    panic(expr);
+    abort();
 }

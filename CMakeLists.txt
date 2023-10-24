@@ -1,22 +1,48 @@
+# Versions
 cmake_minimum_required(VERSION 3.12)
-
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 
-include(lib/pico-sdk/pico_sdk_init.cmake)
+# PICO_BOARD
+if (DEFINED ENV{PICO_BOARD})
+    set(PICO_BOARD $ENV{PICO_BOARD})
+    message("Using PICO_BOARD from environment ('${PICO_BOARD}')")
+else()
+    if (NOT PICO_BOARD)
+        set(PICO_BOARD "pico")
+        message("Defaulting PICO target board to ${PICO_BOARD} since not specified")
+    else()
+        message("PICO target board is ${PICO_BOARD}")
+    endif()    
+endif()
 
-project(picofuse CXX C ASM)
+# TARGET set to linux, darwin or pico depending on PICO_BOARD
+if(PICO_BOARD STREQUAL "linux")
+    set(TARGET "linux")
+elseif(PICO_BOARD STREQUAL "darwin")
+    set(TARGET "darwin")
+else()
+    set(TARGET "pico")
+    include(lib/pico-sdk/pico_sdk_init.cmake)
+endif()
 
-pico_sdk_init()
+# Define project
+project(fuse CXX C ASM)
+message("Set TARGET to ${TARGET}")
+add_compile_definitions(TARGET=${TARGET})
 
 # Libraries
 add_subdirectory(src/fuse)
-add_subdirectory(src/rp2040)
-add_subdirectory(src/pimoroni)
 
-# Examples
-add_subdirectory(examples/inkypack)
-add_subdirectory(examples/picodisplay)
+# Pico libraries
+if(${TARGET} STREQUAL "pico")
+    pico_sdk_init()
+    add_subdirectory(src/picofuse)
+endif()
 
-
-
+# Tests
+add_subdirectory(tests/blink)
+add_subdirectory(tests/fuseapp)
+add_subdirectory(tests/panic)
+add_subdirectory(tests/pool)
+add_subdirectory(tests/temperature)

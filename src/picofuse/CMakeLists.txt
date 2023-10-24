@@ -1,31 +1,30 @@
-add_library(pico_fuse STATIC
-    picofuse.c
-    hashmap.c
-    ev.c
-    ev_init.c
-    ev_quit.c
-    ev_gpio.c
-    ev_led.c
-    ev_timer.c
-    ev_wifi.c
+set(NAME "picofuse")
+add_library(${NAME} STATIC
+    adc.c
+    gpio.c
+    led.c
+    main.c
+    stdio.c
 )
 
-target_include_directories(pico_fuse PRIVATE
+target_include_directories(${NAME} PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/../../include
 )
 
-target_link_libraries(pico_fuse
-    pico_stdlib
-    pico_unique_id
+target_link_libraries(${NAME} 
+    fuse
 )
 
-if(PICO_CYW43_SUPPORTED)
-target_link_libraries(pico_fuse
-    pico_cyw43_arch_lwip_threadsafe_background
-)
+if(${TARGET} STREQUAL "pico")
+    target_link_libraries(${NAME}
+        pico_stdlib
+        hardware_adc        
+    )
 endif()
 
-target_compile_definitions(pico_fuse PRIVATE PICO_DEBUG_MALLOC=0)
 if(PICO_CYW43_SUPPORTED)
-    target_compile_definitions(pico_fuse PRIVATE PICO_CYW43_SUPPORTED=1)
+    target_link_libraries(${NAME}
+        pico_cyw43_arch_lwip_threadsafe_background
+    )
+    target_compile_definitions(${NAME} PRIVATE PICO_CYW43_SUPPORTED=1)
 endif()
