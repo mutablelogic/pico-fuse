@@ -1,8 +1,9 @@
 
-pico-fuse: event-driven library for the Raspberry Pi Pico
-https://github.com/mutablelogic/pico-fuse/
+pico-fuse: An event-driven architecture library for interacting 
+with a RP2040 Pico host.
 
 Copyright 2023 David Thorpe
+https://github.com/mutablelogic/pico-fuse/
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
