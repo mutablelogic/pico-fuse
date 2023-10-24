@@ -18,6 +18,7 @@ typedef struct fuse_instance fuse_t;
 
 #include <fuse/debug.h>
 #include <fuse/flags.h>
+#include <fuse/list.h>
 #include <fuse/pool.h>
 #include <fuse/sleep.h>
 #include <fuse/string.h>
