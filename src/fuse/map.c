@@ -7,7 +7,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // PUBLIC METHODS
 
-fuse_map_t *fuse_map_new_ex(fuse_t *fuse, size_t size, const char *file, int line)
+fuse_map_t *fuse_map_new_ex(fuse_t *fuse, size_t size, size_t (*hashfunc)(void *), const char *file, int line)
 {
     assert(fuse);
     assert(size > 0);
@@ -25,7 +25,7 @@ fuse_map_t *fuse_map_new_ex(fuse_t *fuse, size_t size, const char *file, int lin
     instance->count = 0;
     instance->size = size;
     instance->nodes = (struct fuse_map_node *)(instance + 1);
-    instance->hashfunc = NULL;
+    instance->hashfunc = hashfunc;
 
     // Return success
     return instance;

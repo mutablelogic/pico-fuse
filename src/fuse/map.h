@@ -5,7 +5,7 @@
 #define FUSE_PRIVATE_MAP_H
 #include <fuse/fuse.h>
 
-/* @brief Represents an instance of a map
+/** @brief Represents an instance of a map
  */
 struct fuse_map_instance
 {
@@ -15,7 +15,7 @@ struct fuse_map_instance
     size_t (*hashfunc)(void *);   ///< The hash function for the map
 };
 
-/* @brief Represents a node in a map
+/** @brief Represents a node in a map
  */
 struct fuse_map_node
 {
