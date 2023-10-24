@@ -22,8 +22,10 @@ fuse_map_t *fuse_map_new_ex(fuse_t *fuse, size_t size, const char *file, int lin
 
     // Set the instance properties
     memset(instance, 0, alloc_size);
+    instance->count = 0;
     instance->size = size;
     instance->nodes = (struct fuse_map_node *)(instance + 1);
+    instance->hashfunc = NULL;
 
     // Return success
     return instance;
@@ -50,7 +52,7 @@ size_t fuse_map_stats(fuse_map_t *self, size_t *size)
 
 /** @brief This is the hash function for void* keys
  */
-inline size_t fuse_map_hashfunc(void *key)
+size_t fuse_map_hashfunc(void *key)
 {
     if (key == 0)
     {
@@ -64,21 +66,6 @@ inline size_t fuse_map_hashfunc(void *key)
     return x;
 }
 
-/** @brief Set a key-value pair in the map
- *
- *  @param self The map
- *  @param key The key to insert. The key cannot be a NULL value.
- *  @param value The value to insert. If the value is NULL, then the key is removed from the map.
- *  @return True on success, or false if the map is full
- */
-bool fuse_map_set(fuse_map_t *self, void *key, void *value)
-{
-    assert(self);
-    assert(key);
-
-    // TODO
-}
-
 /** @brief Get a value from the map
  *
  *  @param self The map
@@ -90,5 +77,74 @@ void *fuse_map_get(fuse_map_t *self, void *key)
     assert(self);
     assert(key);
 
-    // TODO
+    // Obtain the hash value for the key, and the index into the map
+    size_t hash = self->hashfunc ? self->hashfunc(key) : fuse_map_hashfunc(key);
+    size_t first = hash % self->size;
+    size_t index = first;
+
+    // Walk through the nodes in the map, starting at the index
+    while (self->nodes[index].key != 0)
+    {
+        if (self->nodes[index].key == key && self->nodes[index].value != 0)
+        {
+            return self->nodes[index].value;
+        }
+        index = (index + 1) % self->size;
+        if (index == first)
+        {
+            // Key not found
+            return NULL;
+        }
+    }
+
+    // Key not found
+    return NULL;
+}
+
+/** @brief Set a value in the map
+ *
+ *  @param self The map
+ *  @param key The key, cannot be a NULL value.
+ *  @param value The value. If the value is NULL, then the key is deleted from the map.
+ *  @return Returns false if the map is full.
+ */
+bool fuse_map_set(fuse_map_t *self, void *key, void* value)
+{
+    assert(self);
+    assert(key);
+
+    // Obtain the hash value for the key, and the index into the map
+    size_t hash = self->hashfunc ? self->hashfunc(key) : fuse_map_hashfunc(key);
+    size_t first = hash % self->size;
+    size_t index = first;
+
+    // Walk through the nodes in the map, starting at the index
+    while (self->nodes[index].key != 0)
+    {
+        // If the key already exists
+        if (self->nodes[index].key == key || self->nodes[index].value == 0)
+        {
+            self->nodes[index].value = value;
+            self->count += value ? 1 : -1;
+            return true;
+        }
+
+        index = (index + 1) % self->size;
+        if (index == first)
+        {
+            // Full table, cannot set key
+            return false;
+        }
+    }
+
+    // If the value is not null, then add the key to the map
+    if (value)
+    {
+        self->nodes[index].key = key;
+        self->nodes[index].value = value;
+        self->count++;
+    }
+
+    // Key not found
+    return true;
 }

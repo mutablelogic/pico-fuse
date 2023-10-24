@@ -12,6 +12,7 @@ struct fuse_map_instance
     size_t size;                 ///< The maximum number of nodes in the instance
     size_t count;                ///< The number of nodes in the instance
     struct fuse_map_node *nodes; ///< The nodes in the instance
+    size_t (*hashfunc)(void *);   ///< The hash function for the map
 };
 
 /* @brief Represents a node in a map
