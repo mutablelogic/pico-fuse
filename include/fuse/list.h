@@ -7,10 +7,27 @@
 #ifndef FUSE_LIST_H
 #define FUSE_LIST_H
 #include "fuse.h"
+#include "value.h"
 
 /** @brief Linked list defintion
  */
 typedef struct fuse_list_instance fuse_list_t;
+
+/** @brief Create a new empty linked list
+ *  @param fuse The fuse application
+ *  @returns A new empty linked list, or NULL if memory could not be allocated
+ */
+fuse_list_t *fuse_list_new(fuse_t *fuse);
+
+#ifndef NO_DOC
+#ifdef DEBUG
+#define fuse_list_new(self) \
+    (fuse_list_new_ex((self), , __FILE__, __LINE__))
+#else
+#define fuse_list_new(self) \
+    (fuse_list_new_ex((self), NULL, 0))
+#endif /* DEBUG */
+#endif /* NO_DOC */
 
 /** @brief Create a new empty linked list
  *  @param fuse The fuse application
@@ -20,17 +37,6 @@ typedef struct fuse_list_instance fuse_list_t;
  */
 fuse_list_t *fuse_list_new_ex(fuse_t *fuse, const char *file, int line);
 
-/** @brief Create a new empty linked list
- *  @param fuse The fuse application
- *  @returns A new empty linked list, or NULL if memory could not be allocated
- */
-fuse_list_t *fuse_list_new(fuse_t *fuse);
-
-#ifndef NO_DOC
-#define fuse_list_new(self) \
-    (fuse_list_new_ex((self), __FILE__, __LINE__))
-#endif /* NO_DOC */
-
 /** @brief Deallocate a fuse linked list
  *
  *  @param fuse The fuse application
@@ -38,42 +44,42 @@ fuse_list_t *fuse_list_new(fuse_t *fuse);
  */
 void fuse_list_destroy(fuse_t *fuse, fuse_list_t *self);
 
-/** @brief Return the number of nodes in the list
+/** @brief Return the number of values in the list
  *
  *  @param self The linked list
- *  @returns The number of nodes in the list
+ *  @returns The number of values in the list
  */
 size_t fuse_list_count(fuse_list_t *self);
 
-/** @brief Return the next node in the list
+/** @brief Return the next value in the list
  *
  *  @param self The linked list
- *  @param ptr  The current node, or NULL if the first node should be returned
- *  @returns The next node in the linked list, or NULL if there is no next node
+ *  @param cur  The current value, or NULL if the first value should be returned
+ *  @returns The next value in the linked list, or NULL if there is no next value
  */
-void *fuse_list_next(fuse_list_t *self, void *ptr);
+fuse_value_t *fuse_list_next(fuse_list_t *self, fuse_value_t *cur);
 
-/** @brief Return the previous node in the list
+/** @brief Return the previous value in the list
  *
  *  @param self The linked list
- *  @param ptr  The current node, or NULL if the last node should be returned
- *  @returns The previous node in the linked list, or NULL if there is no previous node
+ *  @param ptr  The current value, or NULL if the last value should be returned
+ *  @returns The previous value in the linked list, or NULL if there is no previous value
  */
-void *fuse_list_prev(fuse_list_t *self, void *ptr);
+fuse_value_t *fuse_list_prev(fuse_list_t *self, fuse_value_t *ptr);
 
-/** @brief Add a node at the end of the list
+/** @brief Add a value at the end of the list
  *
  *  @param self The linked list
- *  @param ptr  The new node to add to the end of the list
+ *  @param ptr  The new value to add to the end of the list
  *  @returns Returns true if successful, false otherwise
  */
-void *fuse_list_push(fuse_list_t *self, void *ptr);
+fuse_value_t *fuse_list_push(fuse_list_t *self, fuse_value_t *ptr);
 
-/** @brief Remove a node from the beginning of the list
+/** @brief Remove a value from the beginning of the list
  *
  *  @param self The linked list
- *  @returns Returns the node removed from the beginning of the list, or NULL if the list is empty
+ *  @returns Returns the value removed from the beginning of the list, or NULL if the list is empty
  */
-void *fuse_list_pop(fuse_list_t *self);
+fuse_value_t *fuse_list_pop(fuse_list_t *self);
 
 #endif // FUSE_LIST_H

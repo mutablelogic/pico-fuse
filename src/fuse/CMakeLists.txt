@@ -11,7 +11,7 @@ add_library(${NAME} STATIC
     random_pico.c
     random_posix.c
     sleep_posix.c
-    string.c
+    value.c
 )
 
 target_include_directories(${NAME} PRIVATE
