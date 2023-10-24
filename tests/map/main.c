@@ -28,41 +28,41 @@ int TEST_001()
     return fuse_destroy(fuse);
 }
 
-int TEST_002()
+int TEST_002(uint64_t sz)
 {
     fuse_debugf(NULL, "Creating a fuse application\n");
     fuse_t *fuse = fuse_new(FUSE_FLAG_DEBUG);
     assert(fuse);
 
     // Create a map
-    fuse_debugf(NULL, "Creating a map of 10 items\n");
-    fuse_map_t *map = fuse_map_new(fuse, 10);
+    fuse_debugf(NULL, "Creating a map of %lu items\n",sz);
+    fuse_map_t *map = fuse_map_new(fuse, sz);
     assert(map);
 
-    // Add 10 items
-    for (int i = 1; i <= 10; i++)
+    // Add items
+    for (uint64_t i = 1; i <= sz; i++)
     {
-        fuse_debugf(NULL, "Adding item %d=> %d\n", i, i);
+        fuse_debugf(NULL, "Adding item %lu=> %lu\n", i, i);
         assert(fuse_map_set(map, (void *)i, (void *)i));
         assert(fuse_map_stats(map, NULL) == i);
     }
 
-    // Get 10 items
-    for (int i = 1; i <= 10; i++)
+    // Get items
+    for (uint64_t i = 1; i <= sz; i++)
     {
-        void* j = fuse_map_get(map, (void *)i);
+        void *j = fuse_map_get(map, (void *)i);
         assert(j == (void *)i);
-        fuse_debugf(NULL, "Getting item %d => %d\n", i, j);
+        fuse_debugf(NULL, "Getting item %lu => %lu\n", i, j);
     }
 
-    // Deleting 10 items
-    for (int i = 1; i <= 10; i++)
+    // Deleting items
+    for (uint64_t i = 1; i <= sz; i++)
     {
         assert(fuse_map_set(map, (void *)i, 0));
-        void* j = fuse_map_get(map, (void *)i);
-        fuse_debugf(NULL, "Deleting item %d => %d (should be zero)\n", i, j);
+        void *j = fuse_map_get(map, (void *)i);
+        fuse_debugf(NULL, "Deleting item %lu => %lu (should be zero)\n", i, j);
         assert(j == 0);
-        assert(fuse_map_stats(map, NULL) == 10 - i);
+        assert(fuse_map_stats(map, NULL) == sz - i);
     }
 
     // Destroy the map
@@ -75,7 +75,8 @@ int TEST_002()
 int main()
 {
     assert(TEST_001() == 0);
-    assert(TEST_002() == 0);
+    assert(TEST_002(10) == 0);
+    assert(TEST_002(100) == 0);
 
     // Return success
     return 0;

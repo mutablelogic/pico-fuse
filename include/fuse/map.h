@@ -19,18 +19,29 @@
 typedef struct fuse_map_instance fuse_map_t;
 
 /** @brief Create a new empty map
+ * 
  *  @param fuse The fuse application
  *  @param size The initial size of the map
+ *  @param hashfunc The hash function to use for the map. If NULL, then the default hash function is used
+ *  @param file The file from which the map is allocated
+ *  @param line The line in the file from which the map is allocated
  *  @returns A new empty map, or NULL if memory could not be allocated
  */
-fuse_map_t *fuse_map_new_ex(fuse_t *fuse, size_t size, const char *file, int line);
+fuse_map_t *fuse_map_new_ex(fuse_t *fuse, size_t size, size_t (*hashfunc)(void *), const char *file, int line);
 
 #ifdef DEBUG
 #define fuse_map_new(self, size) \
-    (fuse_map_new_ex((self), (size), __FILE__, __LINE__))
+    (fuse_map_new_ex((self), (size), NULL, __FILE__, __LINE__))
 #else
+
+/** @brief Create a new empty map 
+ *  
+ *  @param fuse The fuse application
+ *  @param size The initial size of the map
+ *  @returns A new empty map, or NULL if memory could not be allocated
+*/
 #define fuse_map_new(self, size) \
-    (fuse_map_new_ex((self), (size), 0, 0))
+    (fuse_map_new_ex((self), (size), NULL, 0, 0))
 #endif
 
 /** @brief Deallocate a map
