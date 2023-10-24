@@ -41,7 +41,7 @@ fuse_map_t *fuse_map_new_ex(fuse_t *fuse, size_t size, const char *file, int lin
 void fuse_map_destroy(fuse_t *fuse, fuse_map_t *self);
 
 /** @brief Return statistics about the map
- * 
+ *
  *  Test for the number of elements in the map. If the size argument is not NULL,
  *  then the current maximum number of elements in the map is passed back. If this
  *  equals the count then the map is full.
@@ -61,12 +61,12 @@ size_t fuse_map_stats(fuse_map_t *self, size_t *size);
  */
 void *fuse_map_get(fuse_map_t *self, void *key);
 
-/** @brief Set a key-value pair in the map
+/** @brief Set a value in the map
  *
  *  @param self The map
- *  @param key The key to insert. The key cannot be a NULL value.
- *  @param value The value to insert. If the value is NULL, then the key is removed from the map.
- *  @return True on success, or false if the map is full
+ *  @param key The key, cannot be a NULL value.
+ *  @param value The value. If the value is NULL, then the key is deleted from the map.
+ *  @return Returns false if the map is full.
  */
 bool fuse_map_set(fuse_map_t *self, void *key, void *value);
 
