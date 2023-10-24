@@ -6,11 +6,20 @@ is available here:
 
   * https://mutablelogic.github.io/pico-fuse/
 
+The library consists of ``fuse`` which provides data structures and methods for memory pools,
+hash maps, linked lists and strings, plus ``picofuse`` which contains device- and platform-
+specific code for the Raspberry Pi Pico. It's possible to use ``fuse`` on its own, but
+``picofuse`` depends on ``fuse``.
+
 The following sections provide more information on how to use this library:
 
   * [Dependencies](#dependencies)
   * [Configuration](#configuration)
   * [References](#references)
+
+The library is published under the Apache license, so feel free to use and fork it, but
+please acknowledge the source in any forks. See the [LICENSE](LICENSE) file for more
+information.
 
 ## Dependencies
 
