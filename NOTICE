@@ -1,4 +1,7 @@
 
+pico-fuse: event-driven library for the Raspberry Pi Pico
+https://github.com/mutablelogic/pico-fuse/
+
 Copyright 2023 David Thorpe
 
 Licensed under the Apache License, Version 2.0 (the "License");
