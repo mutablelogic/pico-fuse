@@ -7,7 +7,9 @@ add_library(${NAME} STATIC
     panic.c
     pool.c
     pool_std.c
-    sleep.c
+    random_pico.c
+    random_posix.c
+    sleep_posix.c
     string.c
 )
 

@@ -1,8 +1,4 @@
-#if TARGET == darwin
-// Noop
-#elif TARGET == pico
-// Noop
-#elif TARGET == linux
+#ifdef TARGET_LINUX
 
 ///////////////////////////////////////////////////////////////////////////////
 // PUBLIC METHODS
@@ -63,4 +59,4 @@ void fuse_epoll_destroy(fuse_t *fuse, struct fuse_epoll_instance *epoll)
     fuse_free(fuse, epoll);
 }
 
-#endif // TARGET == linux
+#endif // TARGET_LINUX

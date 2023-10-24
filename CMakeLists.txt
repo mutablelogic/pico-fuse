@@ -19,17 +19,20 @@ endif()
 # TARGET set to linux, darwin or pico depending on PICO_BOARD
 if(PICO_BOARD STREQUAL "linux")
     set(TARGET "linux")
+    add_compile_definitions(TARGET_LINUX)
+    add_compile_definitions(TARGET_POSIX)
 elseif(PICO_BOARD STREQUAL "darwin")
     set(TARGET "darwin")
+    add_compile_definitions(TARGET_DARWIN)
+    add_compile_definitions(TARGET_POSIX)
 else()
     set(TARGET "pico")
+    add_compile_definitions(TARGET_PICO)
     include(lib/pico-sdk/pico_sdk_init.cmake)
 endif()
 
 # Define project
 project(fuse CXX C ASM)
-message("Set TARGET to ${TARGET}")
-add_compile_definitions(TARGET=${TARGET})
 add_compile_definitions(DEBUG=1)
 
 # Libraries
@@ -41,10 +44,14 @@ if(${TARGET} STREQUAL "pico")
     add_subdirectory(src/picofuse)
 endif()
 
-# Tests
-add_subdirectory(tests/blink)
+# Tests - fuse
 add_subdirectory(tests/fuseapp)
 add_subdirectory(tests/map)
 add_subdirectory(tests/panic)
 add_subdirectory(tests/pool)
+add_subdirectory(tests/random)
+
+# Tests - picofuse
+add_subdirectory(tests/blink)
 add_subdirectory(tests/temperature)
+

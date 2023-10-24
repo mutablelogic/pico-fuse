@@ -1,4 +1,4 @@
-set(NAME "map")
+set(NAME "random")
 add_executable(${NAME} 
     main.c
 )

@@ -2,8 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // PUBLIC METHODS
 
-#ifdef TARGET
-#if TARGET == darwin || TARGET == linux
+#ifdef TARGET_POSIX
 
 #include <stdint.h>
 #include <time.h>
@@ -28,5 +27,4 @@ void sleep_ms(uint32_t ms)
     } while (result && errno == EINTR);  // Repeat if interrupted by a signal
 }
 
-#endif
 #endif
