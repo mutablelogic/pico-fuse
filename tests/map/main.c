@@ -77,6 +77,7 @@ int main()
     assert(TEST_001() == 0);
     assert(TEST_002(10) == 0);
     assert(TEST_002(100) == 0);
+    assert(TEST_002(1000) == 0);
 
     // Return success
     return 0;
