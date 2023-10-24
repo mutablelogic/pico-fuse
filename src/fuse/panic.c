@@ -3,8 +3,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // PUBLIC METHODS
 
-#ifdef TARGET
-#if TARGET==linux
+#ifdef TARGET_POSIX
 /*
  * Debug to stdout if the debug flag is set
  */
@@ -13,5 +12,4 @@ void panic(const char* unused)
     abort();
 }
 
-#endif
 #endif

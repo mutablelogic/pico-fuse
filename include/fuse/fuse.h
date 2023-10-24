@@ -21,6 +21,7 @@ typedef struct fuse_instance fuse_t;
 #include <fuse/list.h>
 #include <fuse/map.h>
 #include <fuse/pool.h>
+#include <fuse/random.h>
 #include <fuse/sleep.h>
 #include <fuse/string.h>
 
