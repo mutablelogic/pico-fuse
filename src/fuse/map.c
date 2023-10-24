@@ -108,7 +108,7 @@ void *fuse_map_get(fuse_map_t *self, void *key)
  *  @param value The value. If the value is NULL, then the key is deleted from the map.
  *  @return Returns false if the map is full.
  */
-bool fuse_map_set(fuse_map_t *self, void *key, void* value)
+bool fuse_map_set(fuse_map_t *self, void *key, void *value)
 {
     assert(self);
     assert(key);
@@ -121,28 +121,35 @@ bool fuse_map_set(fuse_map_t *self, void *key, void* value)
     // Walk through the nodes in the map, starting at the index
     while (self->nodes[index].key != 0)
     {
-        // If the key already exists
-        if (self->nodes[index].key == key || self->nodes[index].value == 0)
+        // If the key already exists or the value has been deleted, then set the value
+        // and return success. If the value is NULL then effectively the key is deleted,
+        // or else it is set.
+        if (self->nodes[index].key == key)
         {
-            self->nodes[index].value = value;
-            self->count += value ? 1 : -1;
+            if (self->nodes[index].value != value)
+            {
+                self->nodes[index].value = value;
+                self->count += value ? 1 : -1;
+            }
             return true;
         }
 
+        // Move to the next node, wrapping around if necessary
+        // If the index is the same as the first index, then the table is full
+        // so return false, if the value is not null.
         index = (index + 1) % self->size;
         if (index == first)
         {
-            // Full table, cannot set key
-            return false;
+            return value ? false : true;
         }
     }
 
     // If the value is not null, then add the key to the map
-    if (value)
+    self->nodes[index].key = key;
+    if (self->nodes[index].value != value)
     {
-        self->nodes[index].key = key;
         self->nodes[index].value = value;
-        self->count++;
+        self->count += value ? 1 : -1;
     }
 
     // Key not found
