@@ -23,7 +23,7 @@ typedef struct fuse_instance fuse_t;
 #include <fuse/pool.h>
 #include <fuse/random.h>
 #include <fuse/sleep.h>
-#include <fuse/string.h>
+#include <fuse/value.h>
 
 /** @brief Create a new fuse application
  *

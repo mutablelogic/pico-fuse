@@ -51,8 +51,12 @@ add_subdirectory(tests/map)
 add_subdirectory(tests/panic)
 add_subdirectory(tests/pool)
 add_subdirectory(tests/random)
+add_subdirectory(tests/value)
 
 # Tests - picofuse
-add_subdirectory(tests/blink)
-add_subdirectory(tests/temperature)
+if(${TARGET} STREQUAL "pico")
+    add_subdirectory(tests/blink)
+    add_subdirectory(tests/temperature)
+endif()
+
 

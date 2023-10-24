@@ -20,8 +20,8 @@ fuse_list_t *fuse_list_new_ex(fuse_t *fuse, const char *file, int line)
 
     // Set the instance properties
     self->count = 0;
-    self->first = NULL;
-    self->last = NULL;
+    self->head = NULL;
+    self->tail = NULL;
 
     // Return success
     return self;
@@ -41,4 +41,3 @@ inline size_t fuse_list_count(fuse_list_t *self)
     assert(self);
     return self->count;
 }
-
