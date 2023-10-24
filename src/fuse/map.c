@@ -40,7 +40,7 @@ void fuse_map_destroy(fuse_t *fuse, fuse_map_t *self)
     fuse_free(fuse, self);
 }
 
-size_t fuse_map_stats(fuse_map_t *self, size_t *size)
+inline size_t fuse_map_stats(fuse_map_t *self, size_t *size)
 {
     assert(self);
     if (size)
