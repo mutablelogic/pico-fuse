@@ -1,7 +1,16 @@
 # pico-fuse
 
 This is a library to use with the Raspberry Pi Pico boards using the RP2040 microprocessor,
-which provides an event-driven architecture for interacting with devices in C. 
+which provides an event-driven architecture for interacting with devices in C. The API documentation
+is available here:
+
+  * https://mutablelogic.github.io/pico-fuse/
+
+The following sections provide more information on how to use this library:
+
+  * [Dependencies](#dependencies)
+  * [Configuration](#configuration)
+  * [References](#references)
 
 ## Dependencies
 
@@ -56,37 +65,6 @@ board then the Pico W then here are some values for PICO_BOARD you can use inste
 | `PICO_BOARD=pimoroni_picolipo_16mb make config` | Pimironi Lipo with 16MB flash |
 
 Whenever you target a different board, use `make clean` before `make picotool` and `make config`.
-
-## Initialization
-
-## Scheduling Timers
-
-## The On-board LED
-
-## GPIO Input and Output
-
-## ADC Sampling
-
-## WiFi Access
-
-## Blink
-
-The blink example is a simple example that blinks the LED on the Pico W board (so pretty much just tests that the board is working).
-To load the example onto your Pico W, plug it in using the USB cable whilst holding down the "BOOTSEL" button on the top of the
-Pico. Then run the following command:
-
-```bash
-cd ${HOME}/projects/pico-fuse
-PICO_BOARD=pico make config && make picotool && make examples/blink
-build/lib/picotool/picotool load build/examples/blink/blink.uf2 -x -f
-```
-
-Fingers crossed, the LED should start blinking. The code for this example is in the [`src/blink`](src/blink) folder:
-
-  * The `CMakeLists.txt` file defines how to build the example
-  * The `blink.c` file contains the source code for the example
-
-This one is a little complicated as the Pico hardware and the Pico W hardware use different GPIO pins for the LED.
 
 ## References
 
