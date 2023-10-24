@@ -46,6 +46,7 @@ endif()
 
 # Tests - fuse
 add_subdirectory(tests/fuseapp)
+add_subdirectory(tests/list)
 add_subdirectory(tests/map)
 add_subdirectory(tests/panic)
 add_subdirectory(tests/pool)

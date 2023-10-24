@@ -14,22 +14,36 @@ typedef struct fuse_list_instance fuse_list_t;
 
 /** @brief Create a new empty linked list
  *  @param fuse The fuse application
+ *  @param file The file from which the linked list is allocated
+ *  @param line The line in the file from which the linked list is allocated
+ *  @returns A new empty linked list, or NULL if memory could not be allocated
+ */
+fuse_list_t *fuse_list_new_ex(fuse_t *fuse, const char *file, int line);
+
+/** @brief Create a new empty linked list
+ *  @param fuse The fuse application
  *  @returns A new empty linked list, or NULL if memory could not be allocated
  */
 fuse_list_t *fuse_list_new(fuse_t *fuse);
 
+#ifndef NO_DOC
+#define fuse_list_new(self) \
+    (fuse_list_new_ex((self), __FILE__, __LINE__))
+#endif /* NO_DOC */
+
 /** @brief Deallocate a fuse linked list
  *
+ *  @param fuse The fuse application
  *  @param self The linked list to deallocate
  */
-void fuse_list_destroy(fuse_list_t *self);
+void fuse_list_destroy(fuse_t *fuse, fuse_list_t *self);
 
 /** @brief Return the number of nodes in the list
  *
  *  @param self The linked list
  *  @returns The number of nodes in the list
  */
-void fuse_list_count(fuse_list_t *self);
+size_t fuse_list_count(fuse_list_t *self);
 
 /** @brief Return the next node in the list
  *

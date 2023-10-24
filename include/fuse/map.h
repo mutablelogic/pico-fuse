@@ -64,6 +64,15 @@ void fuse_map_destroy(fuse_t *fuse, fuse_map_t *self);
  */
 size_t fuse_map_stats(fuse_map_t *self, size_t *size);
 
+
+/** @brief Return the number of elements in the map
+ *
+ *  @param self The map
+ *  @return The number of elements in the map
+ */
+#define fuse_map_count(self) \
+    (fuse_map_stats((self), NULL))
+
 /** @brief Get a value from the map
  *
  *  @param self The map
