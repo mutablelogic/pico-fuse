@@ -30,6 +30,7 @@ endif()
 project(fuse CXX C ASM)
 message("Set TARGET to ${TARGET}")
 add_compile_definitions(TARGET=${TARGET})
+add_compile_definitions(DEBUG=1)
 
 # Libraries
 add_subdirectory(src/fuse)
@@ -43,6 +44,7 @@ endif()
 # Tests
 add_subdirectory(tests/blink)
 add_subdirectory(tests/fuseapp)
+add_subdirectory(tests/map)
 add_subdirectory(tests/panic)
 add_subdirectory(tests/pool)
 add_subdirectory(tests/temperature)
