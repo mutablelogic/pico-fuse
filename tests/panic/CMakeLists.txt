@@ -3,6 +3,7 @@ add_executable(${NAME}
     main.c
 )
 add_test(NAME ${NAME} COMMAND ${NAME})
+set_tests_properties(${NAME} PROPERTIES WILL_FAIL TRUE)
 
 target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/../../include)
 target_link_libraries(${NAME} fuse)

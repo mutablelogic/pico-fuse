@@ -116,7 +116,9 @@ void TEST_005()
 
 int main()
 {
+#ifdef TARGET_PICO
     fuse_stdio_init();
+#endif
         
     TEST_001();
     TEST_002();
@@ -125,7 +127,7 @@ int main()
     TEST_005();
 
     // Endless loop on the pico
-#if TARGET == pico
+#ifdef TARGET_PICO    
     while(1) {
         sleep_ms(1000);
     }
