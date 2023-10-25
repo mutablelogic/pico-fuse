@@ -22,7 +22,7 @@ fuse_list_t *fuse_list_new(fuse_t *fuse);
 #ifndef NO_DOC
 #ifdef DEBUG
 #define fuse_list_new(self) \
-    (fuse_list_new_ex((self), , __FILE__, __LINE__))
+    (fuse_list_new_ex((self), __FILE__, __LINE__))
 #else
 #define fuse_list_new(self) \
     (fuse_list_new_ex((self), NULL, 0))
