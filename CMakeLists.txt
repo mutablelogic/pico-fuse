@@ -33,19 +33,26 @@ endif()
 
 # Define project
 project(fuse CXX C ASM)
-add_compile_definitions(DEBUG=1)
 
-# Libraries
-add_subdirectory(src/fuse)
+# TODO!!!
+add_compile_definitions(DEBUG)
 
 # Pico libraries
 if(${TARGET} STREQUAL "pico")
     pico_sdk_init()
+endif()
+
+# Libraries
+add_subdirectory(src/fuse)
+if(${TARGET} STREQUAL "pico")
     add_subdirectory(src/picofuse)
 endif()
 
+# Tests
+include(CTest)
+
 # Tests - fuse
-add_subdirectory(tests/fuseapp)
+add_subdirectory(tests/app)
 add_subdirectory(tests/list)
 add_subdirectory(tests/map)
 add_subdirectory(tests/panic)
@@ -58,5 +65,4 @@ if(${TARGET} STREQUAL "pico")
     add_subdirectory(tests/blink)
     add_subdirectory(tests/temperature)
 endif()
-
 

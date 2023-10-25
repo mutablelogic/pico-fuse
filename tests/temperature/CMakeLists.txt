@@ -2,18 +2,12 @@ set(NAME "temperature")
 add_executable(${NAME} 
     main.c
 )
+add_test(NAME ${NAME} COMMAND ${NAME})
 
-target_include_directories(${NAME} PRIVATE
-    ${CMAKE_CURRENT_LIST_DIR}/../../include
-)
-
-target_link_libraries(${NAME} 
-    picofuse
-)
-
-target_compile_definitions(${NAME} PRIVATE DEBUG=1 PICO_DEBUG_MALLOC=1)
-
+target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/../../include)
+target_link_libraries(${NAME} fuse)
 if(${TARGET} STREQUAL "pico")
+    target_link_libraries(${NAME} picofuse)
     pico_enable_stdio_usb(${NAME} 1)
     pico_enable_stdio_uart(${NAME} 0)
     pico_add_extra_outputs(${NAME})

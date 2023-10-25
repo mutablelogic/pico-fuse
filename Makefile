@@ -12,7 +12,10 @@ PICO_PLATFORM ?= rp2040
 PICO_BOARD ?= pico_w
 
 # Targets
-all: config picotool src tests examples
+all: config picotool test examples
+
+test: config
+	@make -C ${BUILD_DIR} all test
 
 config: dependencies mkdir
 	@echo git submodule update pico-sdk
