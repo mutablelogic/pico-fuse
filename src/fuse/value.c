@@ -29,10 +29,6 @@ fuse_value_t *fuse_new_ptr(fuse_t *fuse, void *ptr) {
     // Set the pointer
     value->ptr = ptr;
 
-    // Set the reference count to zero - which means
-    // the ptr does not have an allocation
-    value->ref = 0;
-
     // Return the value
     return value;
 }

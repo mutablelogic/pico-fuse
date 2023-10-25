@@ -65,3 +65,4 @@ if(${TARGET} STREQUAL "pico")
     add_subdirectory(tests/blink)
     add_subdirectory(tests/temperature)
 endif()
+
