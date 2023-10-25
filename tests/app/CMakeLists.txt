@@ -1,4 +1,4 @@
-set(NAME "value")
+set(NAME "app")
 add_executable(${NAME} 
     main.c
 )
