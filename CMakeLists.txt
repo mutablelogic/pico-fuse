@@ -43,6 +43,7 @@ if(${TARGET} STREQUAL "pico")
 endif()
 
 # Libraries
+add_subdirectory(src/alloc)
 add_subdirectory(src/fuse)
 if(${TARGET} STREQUAL "pico")
     add_subdirectory(src/picofuse)
@@ -50,6 +51,10 @@ endif()
 
 # Tests
 include(CTest)
+
+# Tests - alloc
+add_subdirectory(tests/alloc)
+add_subdirectory(tests/fuse)
 
 # Tests - fuse
 add_subdirectory(tests/app)
