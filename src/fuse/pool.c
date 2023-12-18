@@ -1,98 +1,152 @@
-#include <stddef.h>
 #include <stdlib.h>
-
 #include <fuse/fuse.h>
 
-///////////////////////////////////////////////////////////////////////////////
-
-// Alignment of pool memory on uint32_t boundary
-#define FUSE_POOL_ALIGN 4
-
-/*
- * Represents a memory pool of objects
- */
-struct fuse_pool_instance
-{
-    void *mem;   // Memory pool
-    size_t size; // Size of the memory pool
-    size_t used; // Used bytes in the memory pool
-};
+// Private includes
+#include "pool.h"
+#include "pool_std.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // PUBLIC METHODS
 
-/*
- * fuse_pool_new creates a new fixed-size memory pool
- *
- * @param size             The size of the memory pool
- * @return                 A pointer to the memory pool
- */
-fuse_pool_t *fuse_pool_new(size_t size)
+fuse_pool_t *fuse_pool_new(size_t size, fuse_flag_t flags)
 {
-    assert(size > 0);
-
-    // Allocate room for the pool structure
-    fuse_pool_t *pool = (fuse_pool_t *)malloc(sizeof(fuse_pool_t));
-    if (pool == NULL)
+    // Allocate a memory for the instance
+    fuse_pool_t *self = (fuse_pool_t *)malloc(sizeof(struct fuse_pool_instance));
+    if (self == NULL)
     {
         return NULL;
     }
 
-    // Allocate the memory pool
-    pool->mem = malloc(size);
-    if (pool->mem == NULL)
-    {
-        free(pool);
-        return NULL;
-    }
+    // Set the instance properties
+    self->size = size;
+    self->flags = flags;
+    self->used = 0;
+    self->first = NULL;
+    self->last = NULL;
 
-    // Set the pool properties
-    pool->size = size;
-    pool->used = 0;
+    // Set the alloc and free functions
+    self->alloc = fuse_pool_std_alloc;
+    self->free = fuse_pool_std_free;
+    self->map = fuse_pool_std_map;
 
     // Return success
-    return pool;
+    return self;
 }
 
-/*
- * fuse_pool_delete frees resources from a memory pool
- *
- * @param pool             The memory pool
- */
-void fuse_pool_delete(fuse_pool_t *pool)
+void fuse_pool_destroy(fuse_pool_t *pool)
 {
     assert(pool);
-    free(pool->mem);
+
+    // Free the elements in the memory pool, until the
+    // next element is NULL, indicating there are no more
+    // allocated memory blocks
+    struct fuse_pool_header *header = pool->first;
+    while (header != NULL)
+    {
+        pool->free(pool, header);
+        header = header->next;
+    }
+
+    // Free the memory pool
     free(pool);
 }
 
-/*
- * fuse_pool_alloc allocates a block of memory from the pool
- *
- * @param pool             The memory pool
- * @param size             The size of the memory block
- * @return                 A pointer to the memory block, or
- *                         NULL if the pool is full
- */
-void *fuse_pool_alloc(fuse_pool_t *pool, size_t size)
+void fuse_pool_stats(fuse_pool_t *pool, size_t *size, size_t *used)
 {
     assert(pool);
 
-    // Check size - if zero return NULL
-    if (size == 0)
+    if (size != NULL)
+    {
+        *size = pool->size;
+    }
+
+    if (used != NULL)
+    {
+        *used = pool->used;
+    }
+}
+
+void *fuse_pool_alloc_ex(fuse_pool_t *pool, size_t size, const char *file, int line)
+{
+    assert(pool);
+
+    // Allocate the memory block using the expected function
+    struct fuse_pool_header *header = pool->alloc(pool, size);
+    if (header == NULL)
     {
         return NULL;
     }
 
-    // Align size on boundary
-    size = (size + FUSE_POOL_ALIGN - 1) & ~(FUSE_POOL_ALIGN - 1);
-    if (pool->used + size > pool->size)
+    // First memory block
+    if (pool->first == NULL)
     {
-        return NULL;
+        pool->first = header;
     }
-    void *ptr = pool->mem + pool->used;
-    pool->used += size;
 
-    // Return success
-    return ptr;
+    // Last memory block
+    if (pool->last == NULL)
+    {
+        header->prev = NULL;
+    }
+    else
+    {
+        // Set as the last header in the linked list
+        pool->last->next = header;
+        header->prev = pool->last;
+    }
+    header->next = NULL;
+    pool->last = header;
+
+    // Set file and line
+    header->file = file;
+    header->line = line;
+
+    // Adjust used memory
+    pool->used += header->size;
+
+    // Return pointer to allocation
+    return header->ptr;
+}
+
+/*
+ * Free a memory block in the memory pool
+ *
+ * @param pool The memory pool
+ * @param ptr A pointer to the memory block
+ */
+void fuse_pool_free(fuse_pool_t *pool, void *ptr)
+{
+    assert(pool);
+    assert(ptr);
+
+    // Map the pointer to a memory header
+    struct fuse_pool_header *header = pool->map(pool, ptr);
+    assert(header);
+
+    // First memory block
+    if (header->prev == NULL)
+    {
+        assert(pool->first == header);
+        pool->first = header->next;
+    }
+    else
+    {
+        header->prev->next = header->next;
+    }
+
+    // Last memory block
+    if (pool->last == header)
+    {
+        pool->last = header->prev;
+    }
+    else
+    {
+        header->next->prev = header->prev;
+    }
+
+    // Adjust used memory
+    pool->used -= header->size;
+
+    // Free the memory block
+    pool->free(pool, header);
 }

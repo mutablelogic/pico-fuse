@@ -1,71 +1,43 @@
 # pico-fuse
 
 This is a library to use with the Raspberry Pi Pico boards using the RP2040 microprocessor,
-which provides an event-driven architecture for interacting with devices in C. 
-For example, here's a typical program which blinks an LED once per second:
+which provides an event-driven architecture for interacting with devices in C. The API documentation
+is available here:
 
-```c
-#include <picofuse/picofuse.h>
+  * https://mutablelogic.github.io/pico-fuse/
 
-// Timer which is used to toggle the LED
-picofuse_timer_t timer = {
-    .delay_ms = 1000,
-    .periodic = true,
-};
+The library consists of ``fuse`` which provides data structures and methods for memory pools,
+hash maps, linked lists and strings, plus ``picofuse`` which contains device- and platform-
+specific code for the Raspberry Pi Pico. It's possible to use ``fuse`` on its own, but
+``picofuse`` depends on ``fuse``.
 
-// Create timer on initialization
-picofuse_state_t main_init(picofuse_t *self, picofuse_event_t event, void *data)
-{
-    picofuse_fire(self, EV_TIMER_INIT, &timer);
-    return ANY;
-}
+The following sections provide more information on how to use this library:
 
-// Toggle the LED
-picofuse_state_t main_timer(picofuse_t *self, picofuse_event_t event, void *data)
-{
-    picofuse_timer_t *timer = (picofuse_timer_t *)data;
+  * [Dependencies](#dependencies)
+  * [Configuration](#configuration)
+  * [References](#references)
 
-    // Cancel timer after 10 firings
-    if (timer->id++ > 10)
-    {
-        // Cancel timer
-        timer->periodic = false;
-    }
-
-    // Set the LED value
-    picofuse_fire_bool(self, EV_LED, picofuse_state(self) ? 1 : 0);
-
-    // Set the state to the alternative value
-    return picofuse_state(self) ? 0 : 1;
-}
-
-int main()
-{
-    // Initialize the picofuse object with debugging enabled
-    picofuse_t *picofuse = picofuse_init(PICOFUSE_DEBUG);
-
-    // Register things we're going to use
-    picofuse_register(picofuse, ANY, EV_INIT, main_init);
-    picofuse_register(picofuse, ANY, EV_TIMER, main_timer);
-    picofuse_register(picofuse, ANY, EV_LED, NULL);
-
-    // Call main loop
-    picofuse_main(picofuse);
-}
-
-```
+The library is published under the Apache license, so feel free to use and fork it, but
+please acknowledge the source in any forks. See the [LICENSE](LICENSE) file for more
+information.
 
 ## Dependencies
 
 On Fedora Linux, the following packages need installed:
 
 ```bash
-sudo dnf install gcc-arm-linux-gnu \
+sudo dnf install cmake gcc-arm-linux-gnu \
  arm-none-eabi-gcc-cs-c++ \
  arm-none-eabi-gcc-cs \
  arm-none-eabi-binutils \
  arm-none-eabi-newlib \
  libusb1-devel
+```
+
+On Debian Linux, the following packages need to be installed:
+
+```bash
+sudo apt install cmake gcc-arm-none-eabi libusb-1.0-0-dev
 ```
 
 On Mac with homebrew, the following packages need installed:
@@ -102,37 +74,6 @@ board then the Pico W then here are some values for PICO_BOARD you can use inste
 | `PICO_BOARD=pimoroni_picolipo_16mb make config` | Pimironi Lipo with 16MB flash |
 
 Whenever you target a different board, use `make clean` before `make picotool` and `make config`.
-
-## Initialization
-
-## Scheduling Timers
-
-## The On-board LED
-
-## GPIO Input and Output
-
-## ADC Sampling
-
-## WiFi Access
-
-## Blink
-
-The blink example is a simple example that blinks the LED on the Pico W board (so pretty much just tests that the board is working).
-To load the example onto your Pico W, plug it in using the USB cable whilst holding down the "BOOTSEL" button on the top of the
-Pico. Then run the following command:
-
-```bash
-cd ${HOME}/projects/pico-fuse
-PICO_BOARD=pico make config && make picotool && make examples/blink
-build/lib/picotool/picotool load build/examples/blink/blink.uf2 -x -f
-```
-
-Fingers crossed, the LED should start blinking. The code for this example is in the [`src/blink`](src/blink) folder:
-
-  * The `CMakeLists.txt` file defines how to build the example
-  * The `blink.c` file contains the source code for the example
-
-This one is a little complicated as the Pico hardware and the Pico W hardware use different GPIO pins for the LED.
 
 ## References
 

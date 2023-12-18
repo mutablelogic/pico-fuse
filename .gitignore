@@ -1,5 +1,4 @@
 build
-
-# ignore
-opts.h
-src/old
+Testing
+doc
+.vscode

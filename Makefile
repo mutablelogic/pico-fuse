@@ -1,6 +1,7 @@
 BUILD_DIR := build
 SRC_DIR := $(filter-out src/old, $(wildcard src/*))
 EXAMPLES_DIR := $(wildcard examples/*)
+TESTS_DIR := $(wildcard tests/*)
 
 # Paths to tools needed in dependencies
 GIT := $(shell which git)
@@ -11,7 +12,10 @@ PICO_PLATFORM ?= rp2040
 PICO_BOARD ?= pico_w
 
 # Targets
-all: config picotool src examples
+all: config picotool test examples
+
+test: config
+	@make -C ${BUILD_DIR} all test
 
 config: dependencies mkdir
 	@echo git submodule update pico-sdk
@@ -29,9 +33,15 @@ picotool: config
 
 src: $(SRC_DIR)
 
+tests: $(TESTS_DIR)
+
 examples: $(EXAMPLES_DIR)
 
 $(SRC_DIR): dependencies mkdir
+	@echo make $(notdir $@)
+	@make -C ${BUILD_DIR}/$@
+
+$(TESTS_DIR): dependencies mkdir
 	@echo make $(notdir $@)
 	@make -C ${BUILD_DIR}/$@
 
