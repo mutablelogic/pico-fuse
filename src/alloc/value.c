@@ -17,7 +17,7 @@ fuse_value_t *fuse_value_new_ex(fuse_t *self, uint16_t magic, size_t size, const
     }
 }
 
-fuse_value_t *fuse_value_new_null_ex(fuse_t *self, const char *file, int line)
+inline fuse_value_t *fuse_value_new_null_ex(fuse_t *self, const char *file, int line)
 {
     assert(self);
     return fuse_alloc_ex(self, 0, FUSE_MAGIC_NULL, file, line);
@@ -41,3 +41,17 @@ const char *fuse_value_cstr(fuse_t *self, fuse_value_t *value, char *buffer, siz
         return NULL;
     }
 }
+
+inline fuse_value_t *fuse_value_retain(fuse_t *self, fuse_value_t *value) {
+    assert(self);
+    assert(value);
+    fuse_allocator_retain(self->allocator, value);
+    return value;
+}
+
+inline fuse_value_t *fuse_value_release(fuse_t *self, fuse_value_t *value) {
+    assert(self);
+    assert(value);
+    return fuse_allocator_release(self->allocator, value) ? NULL : value;
+}
+

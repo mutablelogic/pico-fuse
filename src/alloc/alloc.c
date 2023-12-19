@@ -6,27 +6,41 @@
 ///////////////////////////////////////////////////////////////////////////////
 // PUBLIC METHODS
 
-void fuse_allocator_destroy(fuse_allocator_t *self)
+inline void fuse_allocator_destroy(fuse_allocator_t *self)
 {
     assert(self);
     self->destroy(self);
 }
 
-void *fuse_allocator_malloc(fuse_allocator_t *self, size_t size, uint16_t magic, const char *file, int line)
+inline void *fuse_allocator_malloc(fuse_allocator_t *self, size_t size, uint16_t magic, const char *file, int line)
 {
     assert(self);
     return self->malloc(self, size, magic, file, line);
 }
 
-void fuse_allocator_free(fuse_allocator_t *self, void *ptr)
+inline void fuse_allocator_free(fuse_allocator_t *self, void *ptr)
 {
     assert(self);
+    assert(ptr);
     self->free(self, ptr);
 }
 
-uint16_t fuse_allocator_magic(fuse_allocator_t *self, void *ptr) {
+inline uint16_t fuse_allocator_magic(fuse_allocator_t *self, void *ptr) {
     assert(self);
+    assert(ptr);
     return self->magic(self, ptr);
+}
+
+inline void fuse_allocator_retain(fuse_allocator_t *self, void *ptr) {
+    assert(self);
+    assert(ptr);
+    self->retain(self, ptr);
+}
+
+inline bool fuse_allocator_release(fuse_allocator_t *self, void *ptr) {
+    assert(self);
+    assert(ptr);
+    return self->release(self, ptr);
 }
 
 void *fuse_allocator_walk(fuse_allocator_t *self, void *ctx, fuse_allocator_walk_callback_t callback, void *user)

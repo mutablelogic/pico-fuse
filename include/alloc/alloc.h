@@ -9,6 +9,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 /** @brief Opaque type for an allocator
  */
@@ -55,6 +56,21 @@ void fuse_allocator_free(fuse_allocator_t *self, void *ptr);
  *  @returns The magic number for the memory block
  */
 uint16_t fuse_allocator_magic(fuse_allocator_t *self, void *ptr);
+
+/** @brief Retain a memory block by incrementing the reference counter
+ * 
+ * @param self The allocator object
+ * @param ptr A pointer to the memory block
+ */
+void fuse_allocator_retain(fuse_allocator_t *self, void *ptr);
+
+/** @brief Release a memory block by decrementing the reference counter
+ * 
+ * @param self The allocator object
+ * @param ptr A pointer to the memory block
+ * @returns True if the memory block was freed, false otherwise
+ */
+bool fuse_allocator_release(fuse_allocator_t *self, void *ptr);
 
 /** @brief Release all memory in the pool and destroy the allocator
  *

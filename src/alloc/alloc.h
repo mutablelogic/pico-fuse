@@ -30,6 +30,8 @@ struct fuse_allocator
     void (*free)(struct fuse_allocator *ctx, void *ptr);                                                  ///< Free function
     void (*destroy)(struct fuse_allocator *ctx);                                                          ///< Destroy function
     uint16_t (*magic)(struct fuse_allocator *ctx, void *ptr);                                             ///< Magic function
+    void (*retain)(struct fuse_allocator *ctx, void *ptr);                                                ///< Retain function
+    bool (*release)(struct fuse_allocator *ctx, void *ptr);                                               ///< Release function
 
     struct fuse_allocator_header *head; ///< The head of the list of memory blocks
     struct fuse_allocator_header *tail; ///< The tail of the list of memory blocks
@@ -40,5 +42,7 @@ void *fuse_allocator_builtin_malloc(struct fuse_allocator *ctx, size_t size, uin
 void fuse_allocator_builtin_free(struct fuse_allocator *ctx, void *ptr);
 void fuse_allocator_builtin_destroy(struct fuse_allocator *ctx);
 uint16_t fuse_allocator_builtin_magic(struct fuse_allocator *ctx, void *ptr);
+void fuse_allocator_builtin_retain(struct fuse_allocator *ctx, void *ptr);
+bool fuse_allocator_builtin_release(struct fuse_allocator *ctx, void *ptr);
 
 #endif

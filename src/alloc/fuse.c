@@ -30,6 +30,10 @@ fuse_t *fuse_new()
 
 void fuse_destroy_callback(void *ptr, size_t size, uint16_t magic, const char *file, int line, void *user)
 {
+    // Increment the count
+    (*((uint32_t *)user))++;
+
+    // Print any errors
     fuse_debugf("LEAK: %p %s (%d bytes)", ptr, fuse_magic_cstr(magic),size);
     if (file != NULL)
     {
@@ -52,12 +56,18 @@ int fuse_destroy(fuse_t *fuse)
     // Walk through any remaining memory blocks
 #ifdef DEBUG
     void *ctx = NULL;
-    while ((ctx = fuse_allocator_walk(allocator, ctx, fuse_destroy_callback, NULL)) != NULL)
+    uint32_t count = 0;
+    while ((ctx = fuse_allocator_walk(allocator, ctx, fuse_destroy_callback, &count)) != NULL)
     {
         // Do nothing
     }
+    // If the count is greater than zero, then there are memory leaks
+    if(count > 0)
+    {
+        exit_code = -1;
+    }
 #endif
-
+    
     // Free the allocator
     fuse_allocator_destroy(allocator);
 
