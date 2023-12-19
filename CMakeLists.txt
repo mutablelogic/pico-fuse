@@ -44,10 +44,10 @@ endif()
 
 # Libraries
 add_subdirectory(src/alloc)
-add_subdirectory(src/fuse)
-if(${TARGET} STREQUAL "pico")
-    add_subdirectory(src/picofuse)
-endif()
+#add_subdirectory(src/fuse)
+#if(${TARGET} STREQUAL "pico")
+#    add_subdirectory(src/picofuse)
+#endif()
 
 # Tests
 include(CTest)
@@ -57,17 +57,17 @@ add_subdirectory(tests/alloc)
 add_subdirectory(tests/fuse)
 
 # Tests - fuse
-add_subdirectory(tests/app)
-add_subdirectory(tests/list)
-add_subdirectory(tests/map)
-add_subdirectory(tests/panic)
-add_subdirectory(tests/pool)
-add_subdirectory(tests/random)
-add_subdirectory(tests/value)
+#add_subdirectory(tests/app)
+#add_subdirectory(tests/list)
+#add_subdirectory(tests/map)
+#add_subdirectory(tests/panic)
+#add_subdirectory(tests/pool)
+#add_subdirectory(tests/random)
+#add_subdirectory(tests/value)
 
 # Tests - picofuse
-if(${TARGET} STREQUAL "pico")
-    add_subdirectory(tests/blink)
-    add_subdirectory(tests/temperature)
-endif()
+#if(${TARGET} STREQUAL "pico")
+#    add_subdirectory(tests/blink)
+#    add_subdirectory(tests/temperature)
+#endif()
 

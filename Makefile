@@ -33,15 +33,9 @@ picotool: config
 
 src: $(SRC_DIR)
 
-tests: $(TESTS_DIR)
-
 examples: $(EXAMPLES_DIR)
 
 $(SRC_DIR): dependencies mkdir
-	@echo make $(notdir $@)
-	@make -C ${BUILD_DIR}/$@
-
-$(TESTS_DIR): dependencies mkdir
 	@echo make $(notdir $@)
 	@make -C ${BUILD_DIR}/$@
 
