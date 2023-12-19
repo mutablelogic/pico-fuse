@@ -142,7 +142,7 @@ void fuse_allocator_builtin_retain(struct fuse_allocator *ctx, void *ptr)
     struct fuse_allocator_header *block = ptr - sizeof(struct fuse_allocator_header);
     assert(block->ptr == ptr);
     assert(block->used);
-    assert(block->ref < UINT32_MAX);
+    assert(block->ref < UINT16_MAX);
 
     // Increment the reference count
     block->ref++;

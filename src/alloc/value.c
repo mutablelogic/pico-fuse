@@ -29,6 +29,11 @@ fuse_value_t *fuse_value_new_block_ex(fuse_t *self, size_t size, const char *fil
     return fuse_alloc_ex(self, size, (uint16_t)(FUSE_MAGIC_BLOCK), file, line);
 }
 
+fuse_value_t *fuse_value_new_list_ex(fuse_t *self, const char *file, int line) {
+    assert(self);
+}
+
+
 const char *fuse_value_cstr(fuse_t *self, fuse_value_t *value, char *buffer, size_t size)
 {
     assert(self);

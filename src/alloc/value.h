@@ -24,7 +24,12 @@ struct fuse_value
         int64_t i64;
         float f32;
         double f64;
+
+        // List and map element count
+        uint32_t count;
     } data;
+    struct fuse_value *next; ///< The first value - or next value - in the list
+    struct fuse_value *prev; ///< The last value - or previous value - in the list
 };
 
 /* @brief Creates a new NULL value
@@ -45,5 +50,14 @@ fuse_value_t *fuse_value_new_null_ex(fuse_t *self, const char *file, int line);
  * @return The new value or NULL if it can't be created
  */
 fuse_value_t *fuse_value_new_block_ex(fuse_t *self, size_t size, const char *file, int line);
+
+/* @brief Creates a new list value
+ *
+ * @param self The fuse instance
+ * @param file The file name where the function was called
+ * @param line The line number where the function was called
+ * @return A new empty list or NULL if it can't be created
+ */
+fuse_value_t *fuse_value_new_list_ex(fuse_t *self, const char *file, int line);
 
 #endif
