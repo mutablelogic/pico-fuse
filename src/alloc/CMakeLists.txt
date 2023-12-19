@@ -6,6 +6,8 @@ add_library(${NAME} STATIC
     fuse.c
     magic.c
     panic.c
+    random_pico.c
+    random_posix.c
     sleep_posix.c
     value.c
 )
