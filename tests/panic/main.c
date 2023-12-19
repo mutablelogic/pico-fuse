@@ -1,5 +1,5 @@
 
-#include <fuse/fuse.h>
+#include <alloc/fuse.h>
 #include <signal.h>
 #include <stdlib.h>
 
@@ -7,7 +7,7 @@
  * handle abort signal
  */
 void abort_handler(int sig) {
-    fuse_debugf(NULL, "Abort signal received\n");
+    fuse_debugf("Abort signal received\n");
     exit(sig);
 }
 

@@ -1,12 +1,12 @@
 
-#include <fuse/fuse.h>
+#include <alloc/fuse.h>
 
 int TEST_001()
 {
-    fuse_debugf(NULL, "Returning 100 random numbers - uint32\n");
+    fuse_debugf("Returning 100 random numbers - uint32\n");
 
     for(int i = 0; i < 100; i++) {
-        fuse_debugf(NULL, "Random number %d: %u\n", i, rand_u32());
+        fuse_debugf("Random number %d: %u\n", i, rand_u32());
     }
 
     // Return
@@ -15,10 +15,10 @@ int TEST_001()
 
 int TEST_002()
 {
-    fuse_debugf(NULL, "Returning 100 random numbers - uint64\n");
+    fuse_debugf("Returning 100 random numbers - uint64\n");
 
     for(int i = 0; i < 100; i++) {
-        fuse_debugf(NULL, "Random number %d: %lu\n", i, rand_u64());
+        fuse_debugf("Random number %d: %lu\n", i, rand_u64());
     }
 
     // Return

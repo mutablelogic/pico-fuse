@@ -35,6 +35,10 @@ src: $(SRC_DIR)
 
 examples: $(EXAMPLES_DIR)
 
+$(TESTS_DIR): dependencies mkdir
+	@echo make $(notdir $@)
+	@make -C ${BUILD_DIR}/$@
+
 $(SRC_DIR): dependencies mkdir
 	@echo make $(notdir $@)
 	@make -C ${BUILD_DIR}/$@

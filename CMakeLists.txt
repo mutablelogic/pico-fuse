@@ -55,15 +55,8 @@ include(CTest)
 # Tests - alloc
 add_subdirectory(tests/alloc)
 add_subdirectory(tests/fuse)
-
-# Tests - fuse
-#add_subdirectory(tests/app)
-#add_subdirectory(tests/list)
-#add_subdirectory(tests/map)
-#add_subdirectory(tests/panic)
-#add_subdirectory(tests/pool)
-#add_subdirectory(tests/random)
-#add_subdirectory(tests/value)
+add_subdirectory(tests/panic)
+add_subdirectory(tests/random)
 
 # Tests - picofuse
 #if(${TARGET} STREQUAL "pico")

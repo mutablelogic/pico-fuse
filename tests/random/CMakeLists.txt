@@ -1,11 +1,11 @@
-set(NAME "random")
+set(NAME "random_test")
 add_executable(${NAME} 
     main.c
 )
 add_test(NAME ${NAME} COMMAND ${NAME})
 
 target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/../../include)
-target_link_libraries(${NAME} fuse)
+target_link_libraries(${NAME} alloc)
 if(${TARGET} STREQUAL "pico")
     target_link_libraries(${NAME} picofuse)
     pico_enable_stdio_usb(${NAME} 1)
