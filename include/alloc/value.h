@@ -16,9 +16,17 @@ typedef struct fuse_value fuse_value_t;
 #ifdef DEBUG
 #define fuse_value_new(self, magic, size) \
     (fuse_value_new_ex((self), (magic), (size), __FILE__, __LINE__))
+#define fuse_value_new_null(self) \
+    (fuse_value_new_ex((self), FUSE_MAGIC_NULL, 0, __FILE__, __LINE__))
+#define fuse_value_new_list(self) \
+    (fuse_value_new_ex((self), FUSE_MAGIC_LIST, 0, __FILE__, __LINE__))
 #else
 #define fuse_value_new(self, magic, size) \
     (fuse_value_new_ex((self), (magic), (size), 0, 0))
+#define fuse_value_new_null(self) \
+    (fuse_value_new_ex((self), FUSE_MAGIC_NULL, 0, 0, 0))
+#define fuse_value_new_list(self) \
+    (fuse_value_new_ex((self), FUSE_MAGIC_LIST, 0, 0, 0))
 #endif
 
 /** @brief Create a new zero-based value
@@ -75,5 +83,29 @@ const char *fuse_value_cstr(fuse_t *self, fuse_value_t *value, char *buffer, siz
  *  @returns The number of elements in a list or map value
  */
 uint32_t fuse_value_count(fuse_t *self, fuse_value_t *value);
+
+/** @brief Append an element to the end of a list
+ *
+ *  The function will append a element to the end of a list. If adding the element would
+ *  create a circular reference, the function will panic. If the value is not a list, the
+ *  function will panic.
+ * 
+ *  @param self The fuse instance
+ *  @param value The value
+ *  @param element The element to append
+ */
+void fuse_value_append(fuse_t *self, fuse_value_t *value, fuse_value_t *element);
+
+/** @brief Prepend an element to the beginning of a list 
+ *
+ *  The function will prepend a element to the beginning of a list. If adding the element would
+ *  create a circular reference, the function will panic. If the value is not a list, the
+ *  function will panic.
+ * 
+ *  @param self The fuse instance
+ *  @param value The value
+ *  @param element The element to prepend
+ */
+void fuse_value_prepend(fuse_t *self, fuse_value_t *value, fuse_value_t *element);
 
 #endif /* FUSE_VALUE_H */
