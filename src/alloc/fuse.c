@@ -30,7 +30,7 @@ fuse_t *fuse_new()
 
 void fuse_destroy_callback(void *ptr, size_t size, uint16_t magic, const char *file, int line, void *user)
 {
-    fuse_debugf("LEAK: %p (%d bytes): %s", fuse_magic_cstr(magic));
+    fuse_debugf("LEAK: %p %s (%d bytes)", ptr, fuse_magic_cstr(magic),size);
     if (file != NULL)
     {
         fuse_debugf(" [allocated at %s:%d]", file, line);

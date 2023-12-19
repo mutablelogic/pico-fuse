@@ -20,8 +20,6 @@ int TEST_002()
     // Debug
     fuse_debugf("null: %s\n", fuse_value_cstr(app, null, NULL, 0));
 
-    // Release the value
-    fuse_value_release(app, null);
 
     // Release resources
     return fuse_destroy(app);

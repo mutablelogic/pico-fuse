@@ -36,7 +36,7 @@ const char *fuse_value_cstr(fuse_t *self, fuse_value_t *value, char *buffer, siz
 
     switch(fuse_allocator_magic(self->allocator, value)) {
         case (uint16_t)(FUSE_MAGIC_NULL):
-            return "NULL";  
+            return "null"; 
         default:
         return NULL;
     }
