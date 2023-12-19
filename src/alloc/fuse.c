@@ -28,6 +28,16 @@ fuse_t *fuse_new()
     return fuse;
 }
 
+void fuse_destroy_callback(void *ptr, size_t size, uint16_t magic, const char *file, int line, void *user)
+{
+    fuse_debugf("LEAK: %p (%d bytes): %s", fuse_magic_cstr(magic));
+    if (file != NULL)
+    {
+        fuse_debugf(" [allocated at %s:%d]", file, line);
+    }
+    fuse_debugf("\n");
+}
+
 int fuse_destroy(fuse_t *fuse)
 {
     assert(fuse);
@@ -40,7 +50,7 @@ int fuse_destroy(fuse_t *fuse)
     fuse_allocator_free(allocator, fuse);
 
     // Walk through any remaining memory blocks
-#ifdef FUSE_DEBUG
+#ifdef DEBUG
     void *ctx = NULL;
     while ((ctx = fuse_allocator_walk(allocator, ctx, fuse_destroy_callback, NULL)) != NULL)
     {
@@ -71,14 +81,4 @@ void fuse_free(fuse_t *self, void *ptr)
 {
     assert(self);
     fuse_allocator_free(self->allocator, ptr);
-}
-
-void fuse_destroy_callback(void *ptr, size_t size, uint16_t magic, const char *file, int line, void *user)
-{
-    fuse_debugf("LEAK: %p (%d bytes): %s", fuse_magic_cstr(magic));
-    if (file != NULL)
-    {
-        fuse_debugf(" allocated at %s:%d\n", file, line);
-    }
-    fuse_debugf("\n");
 }

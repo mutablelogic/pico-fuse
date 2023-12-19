@@ -24,6 +24,11 @@ void fuse_allocator_free(fuse_allocator_t *self, void *ptr)
     self->free(self, ptr);
 }
 
+uint16_t fuse_allocator_magic(fuse_allocator_t *self, void *ptr) {
+    assert(self);
+    return self->magic(self, ptr);
+}
+
 void *fuse_allocator_walk(fuse_allocator_t *self, void *ctx, fuse_allocator_walk_callback_t callback, void *user)
 {
     assert(self);

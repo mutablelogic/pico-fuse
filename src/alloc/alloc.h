@@ -29,13 +29,16 @@ struct fuse_allocator
     void *(*malloc)(struct fuse_allocator *ctx, size_t size, uint16_t magic, const char *file, int line); ///< Memory allocator
     void (*free)(struct fuse_allocator *ctx, void *ptr);                                                  ///< Free function
     void (*destroy)(struct fuse_allocator *ctx);                                                          ///< Destroy function
-    struct fuse_allocator_header *head;                                                                   ///< The head of the list of memory blocks
-    struct fuse_allocator_header *tail;                                                                   ///< The tail of the list of memory blocks
+    uint16_t (*magic)(struct fuse_allocator *ctx, void *ptr);                                             ///< Magic function
+
+    struct fuse_allocator_header *head; ///< The head of the list of memory blocks
+    struct fuse_allocator_header *tail; ///< The tail of the list of memory blocks
 };
 
 // Built-in methods
 void *fuse_allocator_builtin_malloc(struct fuse_allocator *ctx, size_t size, uint16_t magic, const char *file, int line);
 void fuse_allocator_builtin_free(struct fuse_allocator *ctx, void *ptr);
 void fuse_allocator_builtin_destroy(struct fuse_allocator *ctx);
+uint16_t fuse_allocator_builtin_magic(struct fuse_allocator *ctx, void *ptr);
 
 #endif

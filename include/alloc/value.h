@@ -56,11 +56,13 @@ fuse_value_t *fuse_value_release(fuse_t *self, fuse_value_t *value);
 
 /** @brief Convert a value to a zero-terminated string
  *
+ *  @param self The fuse instance
  *  @param value The value
  *  @param buffer The buffer to write the string to
  *  @param size The size of the buffer
- *  @returns A zero-terminated string representation of the magic number
+ *  @returns A zero-terminated string representation of the magic number, or NULL if the value could
+ *          not be converted
  */
-const char* fuse_value_cstr(fuse_value_t* value, char *buffer, size_t size);
+const char *fuse_value_cstr(fuse_t *self, fuse_value_t *value, char *buffer, size_t size);
 
 #endif /* FUSE_VALUE_H */
