@@ -1,5 +1,5 @@
 
-#include <alloc/alloc.h>
+#include <alloc/fuse.h>
 #include <stdio.h>
 
 void fuse_allocator_walk_callback(void *ptr, size_t size, uint16_t magic, const char *file, int line, void *data)
@@ -24,6 +24,7 @@ int TEST_002()
     void *ptrs[64];
 
     // Create 64 memory blocks
+    fuse_debugf("Allocating 64 memory blocks\n");
     for (int i = 0; i < 64; i++)
     {
         void *ptr = fuse_allocator_malloc(pool, 1024, 0xFF, __FILE__, __LINE__);
@@ -41,6 +42,7 @@ int TEST_002()
     assert(count == 64);
 
     // Free 64 memory blocks
+    fuse_debugf("Free 64 memory blocks\n");
     for (int i = 0; i < 64; i++)
     {
         fuse_allocator_free(pool, ptrs[i]);

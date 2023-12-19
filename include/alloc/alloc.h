@@ -8,9 +8,7 @@
 #define FUSE_ALLOC_H
 
 #include <stddef.h>
-
-#include "assert.h"
-#include "sleep.h"
+#include <stdint.h>
 
 /** @brief Opaque type for an allocator
  */

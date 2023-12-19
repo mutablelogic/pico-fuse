@@ -2,10 +2,8 @@
 #include <stdbool.h>
 #include <string.h>
 
-// Public includes
-#include <alloc/alloc.h>
-
-// Private includes
+// Includes
+#include <alloc/fuse.h>
 #include "alloc.h"
 
 ///////////////////////////////////////////////////////////////////////////////

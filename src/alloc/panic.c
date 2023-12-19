@@ -1,6 +1,9 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <alloc/alloc.h>
+
+
+// Includes
+#include <alloc/fuse.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 // PUBLIC METHODS

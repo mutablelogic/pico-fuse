@@ -2,53 +2,83 @@
 #include <alloc/fuse.h>
 #include "fuse.h"
 
-fuse_t *fuse_new() {
+fuse_t *fuse_new()
+{
     // Create an allocator
     fuse_allocator_t *allocator = fuse_allocator_builtin_new();
-    if (allocator == NULL) {
+    if (allocator == NULL)
+    {
         return NULL;
     }
 
     // Allocate a fuse application
-    fuse_t *fuse = fuse_allocator_malloc(allocator, sizeof(fuse_t), (uint16_t)(FUSE_MAGIC_APP), NULL,0);
-    if (fuse == NULL) {
+    fuse_t *fuse = fuse_allocator_malloc(allocator, sizeof(fuse_t), (uint16_t)(FUSE_MAGIC_APP), NULL, 0);
+    if (fuse == NULL)
+    {
         fuse_allocator_destroy(allocator);
         return NULL;
+    }
+    else
+    {
+        fuse->allocator = allocator;
+        fuse->exit_code = 0;
     }
 
     // Return the fuse application
     return fuse;
 }
 
-int fuse_destroy(fuse_t *fuse) {
+int fuse_destroy(fuse_t *fuse)
+{
     assert(fuse);
 
-    // Store the exit code
+    // Store the exit code and allocator object
     int exit_code = fuse->exit_code;
+    fuse_allocator_t *allocator = fuse->allocator;
 
     // Free the application
-    fuse_allocator_free(fuse->allocator, fuse);
+    fuse_allocator_free(allocator, fuse);
 
-    // TODO: Walk through any remaining memory blocks
+    // Walk through any remaining memory blocks
+#ifdef FUSE_DEBUG
+    void *ctx = NULL;
+    while ((ctx = fuse_allocator_walk(allocator, ctx, fuse_destroy_callback, NULL)) != NULL)
+    {
+        // Do nothing
+    }
+#endif
 
     // Free the allocator
-    fuse_allocator_destroy(fuse->allocator);
+    fuse_allocator_destroy(allocator);
 
     // Return the exit code
     return exit_code;
 }
 
-void *fuse_alloc_ex(fuse_t *self, size_t size, const char *file, int line) {
+void *fuse_alloc_ex(fuse_t *self, size_t size, uint16_t magic, const char *file, int line)
+{
     assert(self);
-    void *ptr = fuse_allocator_malloc(self->allocator, size, (uint16_t)(FUSE_MAGIC_BLOCK), file, line);
-    if (ptr == NULL) {
+    void *ptr = fuse_allocator_malloc(self->allocator, size, magic, file, line);
+    if (ptr == NULL)
+    {
         // TODO: Report error in debugging
         return NULL;
     }
     return ptr;
 }
 
-void fuse_free(fuse_t *self, void *ptr) {
+void fuse_free(fuse_t *self, void *ptr)
+{
     assert(self);
     fuse_allocator_free(self->allocator, ptr);
+}
+
+void fuse_destroy_callback(void *ptr, size_t size, uint16_t magic, const char *file, int line, void *user)
+{
+    fuse_debugf("LEAK: %p (%d bytes): %s", fuse_magic_cstr(magic));
+    if (file != NULL)
+    {
+        fuse_debugf(" allocated at %s:%d\n", file, line);
+    }
+    fuse_debugf("\n");
 }

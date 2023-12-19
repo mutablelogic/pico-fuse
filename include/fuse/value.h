@@ -11,7 +11,7 @@
 
 /** @brief Value defintion
  */
-typedef struct fuse_value_instance fuse_value_t;
+typedef struct fuse_value fuse_value_t;
 
 /** @brief Create a new NULL value
  *  @param fuse The fuse application

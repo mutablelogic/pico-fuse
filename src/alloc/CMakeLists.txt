@@ -1,10 +1,13 @@
 set(NAME "alloc")
 add_library(${NAME} STATIC
     alloc.c
-    builtin.c
+    alloc_builtin.c
+    debug.c
     fuse.c
+    magic.c
     panic.c
     sleep_posix.c
+    value.c
 )
 
 target_include_directories(${NAME} PRIVATE
