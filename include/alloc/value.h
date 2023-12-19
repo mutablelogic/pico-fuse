@@ -65,4 +65,15 @@ fuse_value_t *fuse_value_release(fuse_t *self, fuse_value_t *value);
  */
 const char *fuse_value_cstr(fuse_t *self, fuse_value_t *value, char *buffer, size_t size);
 
+/** @brief Return the count of elements in a list or map value
+ *
+ *  The function will return the number of elements in a list or map value. If the value is not a
+ *  list or map, the function will panic.
+ * 
+ *  @param self The fuse instance
+ *  @param value The value
+ *  @returns The number of elements in a list or map value
+ */
+uint32_t fuse_value_count(fuse_t *self, fuse_value_t *value);
+
 #endif /* FUSE_VALUE_H */
