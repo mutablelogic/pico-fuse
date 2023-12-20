@@ -69,4 +69,22 @@ void *fuse_alloc_ex(fuse_t *self, size_t size, uint16_t magic, const char *file,
  */
 void fuse_free(fuse_t *self, void *ptr);
 
+/** @brief Run the fuse application until an exit code is set
+ *
+ *  This method starts the run loop, which continues until the exit code is set.
+ *
+ *  @param self The fuse application
+ */
+void fuse_run(fuse_t *self);
+
+/** @brief Set the fuse exit code
+ *
+ *  This method should be called after the run loop has been started, in order to
+ *  set the exit code for the application.
+ *
+ *  @param self The fuse application
+ *  @param exit_code The exit code to set. Set the exit code to signal successful completion of the application
+ */
+void fuse_exit(fuse_t *self, int exit_code);
+
 #endif

@@ -6,6 +6,7 @@
 #ifndef FUSE_MAGIC_H
 #define FUSE_MAGIC_H
 
+// Define the magic numbers for the memory blocks
 #define FUSE_MAGIC_NULL 0x6570  ///< NULL value
 #define FUSE_MAGIC_APP 0x6571   ///< Application
 #define FUSE_MAGIC_BLOCK 0x6572 ///< Memory block
