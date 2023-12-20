@@ -1,6 +1,9 @@
 set(NAME "fuse_test")
 add_executable(${NAME} 
+    list.c
     main.c
+    null.c
+    scalar.c
 )
 add_test(NAME ${NAME} COMMAND ${NAME})
 

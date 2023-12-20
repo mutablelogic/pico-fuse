@@ -28,8 +28,18 @@ struct fuse_value
         // List and map element count
         uint32_t count;
     } data;
-    struct fuse_value *next; ///< The first value - or next value - in the list
-    struct fuse_value *prev; ///< The last value - or previous value - in the list
+
+    union
+    {
+        struct fuse_value *head;
+        struct fuse_value *prev;
+    } l;
+
+    union
+    {
+        struct fuse_value *tail;
+        struct fuse_value *next;
+    } r;
 };
 
 /* @brief Creates a new NULL value

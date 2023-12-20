@@ -59,10 +59,8 @@ fuse_value_t *fuse_value_new_list_ex(fuse_t *self, const char *file, int line)
         return NULL;
     }
 
-    // Initialize the list
-    ptr->next = 0;
-    ptr->prev = 0;
-    ptr->data.count = 0;
+    // Zero the value
+    memset(ptr, 0, sizeof(struct fuse_value));
 
     // Return success
     return ptr;
@@ -94,7 +92,7 @@ const char *fuse_value_cstr(fuse_t *self, fuse_value_t *value, char *buffer, siz
     case FUSE_MAGIC_NULL:
         return "null";
     case FUSE_MAGIC_LIST:
-        return "[]";
+        return "[ ]";
     case FUSE_MAGIC_U8:
         assert(buffer);
         assert(size);
