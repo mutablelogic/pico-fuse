@@ -18,6 +18,7 @@ typedef struct fuse_application fuse_t;
 #include "magic.h"
 #include "random.h"
 #include "sleep.h"
+#include "timer.h"
 #include "value.h"
 
 /** @brief Create a new fuse application
