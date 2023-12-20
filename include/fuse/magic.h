@@ -25,6 +25,10 @@
 #define FUSE_MAGIC_LIST 0x657F  ///< list[value]
 #define FUSE_MAGIC_MAP 0x6580   ///< map[value][value]
 
+// Define exit codes
+#define FUSE_EXIT_SUCCESS 1     ///< Successful completion
+#define FUSE_EXIT_MEMORYLEAKS 2 ///< Memory leaks detected in the application
+
 /** @brief Convert a magic number to a string
  *
  *  @param magic The magic number

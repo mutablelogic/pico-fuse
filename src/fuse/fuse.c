@@ -1,6 +1,8 @@
 #include <stdint.h>
 
-// Includes
+///////////////////////////////////////////////////////////////////////////////
+// DEFINITIONS
+
 #include <fuse/fuse.h>
 #include "fuse.h"
 
@@ -26,25 +28,11 @@ fuse_t *fuse_new()
     else
     {
         fuse->allocator = allocator;
-        fuse->exit_code = 0;
+        fuse->exit_code = FUSE_EXIT_SUCCESS;
     }
 
     // Return the fuse application
     return fuse;
-}
-
-void fuse_destroy_callback(void *ptr, size_t size, uint16_t magic, const char *file, int line, void *user)
-{
-    // Increment the count
-    (*((uint32_t *)user))++;
-
-    // Print any errors
-    fuse_debugf("LEAK: %p %s (%d bytes)", ptr, fuse_magic_cstr(magic),size);
-    if (file != NULL)
-    {
-        fuse_debugf(" [allocated at %s:%d]", file, line);
-    }
-    fuse_debugf("\n");
 }
 
 int fuse_destroy(fuse_t *fuse)
@@ -69,7 +57,7 @@ int fuse_destroy(fuse_t *fuse)
     // If the count is greater than zero, then there are memory leaks
     if(count > 0)
     {
-        exit_code = -1;
+        exit_code = FUSE_EXIT_MEMORYLEAKS;
     }
 #endif
     
@@ -77,7 +65,7 @@ int fuse_destroy(fuse_t *fuse)
     fuse_allocator_destroy(allocator);
 
     // Return the exit code
-    return exit_code;
+    return FUSE_EXIT_SUCCESS ? 0 : exit_code;
 }
 
 void *fuse_alloc_ex(fuse_t *self, size_t size, uint16_t magic, const char *file, int line)
@@ -96,4 +84,46 @@ void fuse_free(fuse_t *self, void *ptr)
 {
     assert(self);
     fuse_allocator_free(self->allocator, ptr);
+}
+
+void fuse_run(fuse_t *self, int (*callback)(fuse_t *)) {
+    assert(self);
+    assert(callback);
+
+    // Call the callback, and exit if it returns a non-zero value
+    int exit_code = callback(self);
+    if (exit_code)
+    {
+        fuse_exit(self, exit_code);
+        return;
+    }
+
+    // Run the loop
+    fuse_debugf("fuse_run\n");
+    while (!self->exit_code)
+    {
+        sleep_ms(100);
+    }
+}
+
+void fuse_exit(fuse_t *self, int exit_code) {
+    assert(self);
+    self->exit_code = exit_code ? exit_code : FUSE_EXIT_SUCCESS;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// PRIVATE METHODS
+
+void fuse_destroy_callback(void *ptr, size_t size, uint16_t magic, const char *file, int line, void *user)
+{
+    // Increment the count
+    (*((uint32_t *)user))++;
+
+    // Print any errors
+    fuse_debugf("LEAK: %p %s (%d bytes)", ptr, fuse_magic_cstr(magic),size);
+    if (file != NULL)
+    {
+        fuse_debugf(" [allocated at %s:%d]", file, line);
+    }
+    fuse_debugf("\n");
 }
