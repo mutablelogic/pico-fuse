@@ -1,5 +1,5 @@
 
-#include <alloc/fuse.h>
+#include <fuse/fuse.h>
 
 int TEST_001()
 {

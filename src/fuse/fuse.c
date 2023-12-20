@@ -1,77 +1,99 @@
-#include <stdlib.h>
-#include <fuse/fuse.h>
+#include <stdint.h>
 
-// Private includes
+// Includes
+#include <fuse/fuse.h>
 #include "fuse.h"
-#include "pool.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // PUBLIC METHODS
 
-fuse_t *fuse_new(fuse_flag_t flags)
+fuse_t *fuse_new()
 {
-    // Create a memory pool - use zero for the size to use the default size
-    fuse_pool_t *pool = fuse_pool_new(0, flags);
-    if (pool == NULL)
+    // Create an allocator
+    fuse_allocator_t *allocator = fuse_allocator_builtin_new();
+    if (allocator == NULL)
     {
         return NULL;
     }
 
-    // Allocate application instance in the memory pool
-    fuse_t *self = fuse_pool_alloc(pool, sizeof(fuse_t));
-    if (self == NULL)
+    // Allocate a fuse application
+    fuse_t *fuse = fuse_allocator_malloc(allocator, sizeof(fuse_t), (uint16_t)(FUSE_MAGIC_APP), NULL, 0);
+    if (fuse == NULL)
     {
-        fuse_pool_destroy(pool);
+        fuse_allocator_destroy(allocator);
         return NULL;
     }
+    else
+    {
+        fuse->allocator = allocator;
+        fuse->exit_code = 0;
+    }
 
-    // Set the instance properties
-    self->pool = pool;
-    self->flags = flags;
-    self->exit_code = 0;
+    // Return the fuse application
+    return fuse;
+}
 
-    // Return success
-    return self;
+void fuse_destroy_callback(void *ptr, size_t size, uint16_t magic, const char *file, int line, void *user)
+{
+    // Increment the count
+    (*((uint32_t *)user))++;
+
+    // Print any errors
+    fuse_debugf("LEAK: %p %s (%d bytes)", ptr, fuse_magic_cstr(magic),size);
+    if (file != NULL)
+    {
+        fuse_debugf(" [allocated at %s:%d]", file, line);
+    }
+    fuse_debugf("\n");
 }
 
 int fuse_destroy(fuse_t *fuse)
 {
     assert(fuse);
 
-    // Store the exit code
+    // Store the exit code and allocator object
     int exit_code = fuse->exit_code;
+    fuse_allocator_t *allocator = fuse->allocator;
 
     // Free the application
-    fuse_pool_t* pool = fuse->pool;
-    fuse_pool_free(fuse->pool, fuse);
+    fuse_allocator_free(allocator, fuse);
 
-    // Free the pool
-    fuse_pool_destroy(pool);
+    // Walk through any remaining memory blocks
+#ifdef DEBUG
+    void *ctx = NULL;
+    uint32_t count = 0;
+    while ((ctx = fuse_allocator_walk(allocator, ctx, fuse_destroy_callback, &count)) != NULL)
+    {
+        // Do nothing
+    }
+    // If the count is greater than zero, then there are memory leaks
+    if(count > 0)
+    {
+        exit_code = -1;
+    }
+#endif
+    
+    // Free the allocator
+    fuse_allocator_destroy(allocator);
 
     // Return the exit code
     return exit_code;
 }
 
-inline bool fuse_is(fuse_t *fuse, fuse_flag_t flag)
-{
-    // Always return false if the fuse argument is NULL
-    return fuse ? (fuse->flags & flag) == flag : false;
-}
-
-inline void *fuse_alloc_ex(fuse_t *self, size_t size, const char *file, int line)
+void *fuse_alloc_ex(fuse_t *self, size_t size, uint16_t magic, const char *file, int line)
 {
     assert(self);
-    void *ptr = fuse_pool_alloc_ex(self->pool, size, file, line);
-    if (ptr == NULL && fuse_is(self, FUSE_FLAG_DEBUG))
+    void *ptr = fuse_allocator_malloc(self->allocator, size, magic, file, line);
+    if (ptr == NULL)
     {
-        fuse_debugf(self, "memory allocation error allocating %lu bytes (%s:%d)\n", size, file, line);
+        // TODO: Report error in debugging
+        return NULL;
     }
     return ptr;
 }
 
-inline void fuse_free(fuse_t *self, void *ptr)
+void fuse_free(fuse_t *self, void *ptr)
 {
     assert(self);
-    assert(ptr);
-    fuse_pool_free(self->pool, ptr);
+    fuse_allocator_free(self->allocator, ptr);
 }

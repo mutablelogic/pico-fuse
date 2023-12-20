@@ -8,24 +8,29 @@
 #ifndef FUSE_H
 #define FUSE_H
 
+#include <stdbool.h>
+#include <stdint.h>
+#include <stddef.h>
+
 /** @brief The representation of a fuse application
  */
-typedef struct fuse_application fuse_t;
+typedef struct fuse_instance fuse_t;
 
-#include "alloc.h"
-#include "assert.h"
-#include "debug.h"
-#include "magic.h"
-#include "random.h"
-#include "sleep.h"
-#include "value.h"
+#include <fuse/debug.h>
+#include <fuse/flags.h>
+#include <fuse/list.h>
+#include <fuse/map.h>
+#include <fuse/pool.h>
+#include <fuse/random.h>
+#include <fuse/sleep.h>
+#include <fuse/value.h>
 
 /** @brief Create a new fuse application
  *
  *  @param flags The flags to use for the fuse application, to modify behaviour
  *  @returns A new fuse application, or NULL if memory could not be allocated
  */
-fuse_t *fuse_new();
+fuse_t *fuse_new(fuse_flag_t flags);
 
 /** @brief Deallocate a fuse application
  *
@@ -45,19 +50,18 @@ int fuse_destroy(fuse_t *fuse);
  *
  *  @param self The fuse application
  *  @param size Number of bytes to allocate
- *  @param magic The magic number to use for the memory block
  *  @param file The file from which the memory is allocated
  *  @param line The line in the file from which the memory is allocated
  *  @returns Pointer to the allocated memory block, or NULL if the memory could not be allocated
  */
-void *fuse_alloc_ex(fuse_t *self, size_t size, uint16_t magic, const char *file, int line);
+void *fuse_alloc_ex(fuse_t *self, size_t size, const char *file, int line);
 
 #ifdef DEBUG
-#define fuse_alloc(self, size, magic) \
-    (fuse_alloc_ex((self), (size), (magic), __FILE__, __LINE__))
+#define fuse_alloc(self, size) \
+    (fuse_alloc_ex((self), (size), __FILE__, __LINE__))
 #else
-#define fuse_alloc(self, size, magic) \
-    (fuse_alloc_ex((self), (size), (magic), 0, 0))
+#define fuse_alloc(self, size) \
+    (fuse_alloc_ex((self), (size), 0, 0))
 #endif
 
 /** @brief Free allocated memory

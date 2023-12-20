@@ -1,6 +1,9 @@
 
-#include <alloc/fuse.h>
+// Includes
+#include <fuse/fuse.h>
 
+///////////////////////////////////////////////////////////////////////////////
+// PUBLIC METHODS
 
 inline const char* fuse_magic_cstr(uint16_t magic) {
     switch(magic) {

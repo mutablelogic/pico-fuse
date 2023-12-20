@@ -43,8 +43,7 @@ if(${TARGET} STREQUAL "pico")
 endif()
 
 # Libraries
-add_subdirectory(src/alloc)
-#add_subdirectory(src/fuse)
+add_subdirectory(src/fuse)
 #if(${TARGET} STREQUAL "pico")
 #    add_subdirectory(src/picofuse)
 #endif()

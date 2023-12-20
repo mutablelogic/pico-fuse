@@ -1,7 +1,11 @@
 #include <stdint.h>
-#include <alloc/fuse.h>
+
+// Includes
+#include <fuse/fuse.h>
 #include "value.h"
 #include "fuse.h"
+
+#include <fuse/fuse.h>
 
 void fuse_value_append(fuse_t *self, fuse_value_t *value, fuse_value_t *element) {
     assert(self);

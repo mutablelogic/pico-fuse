@@ -6,7 +6,7 @@ add_test(NAME ${NAME} COMMAND ${NAME})
 set_tests_properties(${NAME} PROPERTIES WILL_FAIL TRUE)
 
 target_include_directories(${NAME} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/../../include)
-target_link_libraries(${NAME} alloc)
+target_link_libraries(${NAME} fuse)
 if(${TARGET} STREQUAL "pico")
     target_link_libraries(${NAME} picofuse)
     pico_enable_stdio_usb(${NAME} 1)

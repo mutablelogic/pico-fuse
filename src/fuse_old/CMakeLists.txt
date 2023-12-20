@@ -1,11 +1,13 @@
-set(NAME "alloc")
+set(NAME "fuse")
 add_library(${NAME} STATIC
-    alloc.c
-    alloc_builtin.c
     debug.c
+    epoll.c
     fuse.c
-    magic.c
+    list.c
+    map.c
     panic.c
+    pool.c
+    pool_std.c
     random_pico.c
     random_posix.c
     sleep_posix.c

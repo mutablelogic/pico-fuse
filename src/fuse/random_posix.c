@@ -1,8 +1,8 @@
 #include <limits.h>
 #include <time.h>
-#include <fuse/fuse.h>
 
-// Private includes
+// Includes
+#include <fuse/fuse.h>
 #include "random.h"
 
 ///////////////////////////////////////////////////////////////////////////////

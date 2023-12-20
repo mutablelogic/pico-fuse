@@ -1,23 +1,21 @@
-#include <stdlib.h>
 #include <stdio.h>
-
-
-// Includes
-#include <alloc/fuse.h>
+#include <stdarg.h>
+#include <stdlib.h>
+#include <fuse/fuse.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 // PUBLIC METHODS
 
-#ifdef TARGET_POSIX
-/*
- * Debug to stdout if the debug flag is set
- */
-void panic(const char* unused)
+inline void fuse_debugf(fuse_t *fuse, const char *format, ...)
 {
-    abort();
+    if (fuse==NULL || fuse_is(fuse, FUSE_FLAG_DEBUG))
+    {
+        va_list args;
+        va_start(args, format);
+        vprintf(format, args);
+        va_end(args);
+    }
 }
-
-#endif
 
 inline void fuse_panic(const char *expr, const char *file, int line)
 {

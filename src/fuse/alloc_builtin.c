@@ -3,7 +3,7 @@
 #include <string.h>
 
 // Includes
-#include <alloc/fuse.h>
+#include <fuse/fuse.h>
 #include "alloc.h"
 
 ///////////////////////////////////////////////////////////////////////////////

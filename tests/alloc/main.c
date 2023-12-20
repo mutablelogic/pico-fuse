@@ -1,5 +1,5 @@
 
-#include <alloc/fuse.h>
+#include <fuse/fuse.h>
 #include <stdio.h>
 
 void fuse_allocator_walk_callback(void *ptr, size_t size, uint16_t magic, const char *file, int line, void *data)
