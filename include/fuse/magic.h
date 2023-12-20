@@ -25,6 +25,9 @@
 #define FUSE_MAGIC_LIST 0x657F  ///< list[value]
 #define FUSE_MAGIC_MAP 0x6580   ///< map[value][value]
 
+// Define the magic numbers for the sources
+#define FUSE_MAGIC_TIMER 0x5601 ///< Timer source, which can fire at a regular interval
+
 // Define exit codes
 #define FUSE_EXIT_SUCCESS 1     ///< Successful completion
 #define FUSE_EXIT_MEMORYLEAKS 2 ///< Memory leaks detected in the application
