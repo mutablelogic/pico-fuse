@@ -8,6 +8,7 @@
 #define FUSE_TIMER_H
 
 #include "fuse.h"
+#include "value.h"
 #include <stdint.h>
 
 /** @brief Create a new timer

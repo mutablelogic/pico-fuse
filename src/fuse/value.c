@@ -86,13 +86,46 @@ const char *fuse_value_cstr(fuse_t *self, fuse_value_t *value, char *buffer, siz
 {
     assert(self);
     assert(value);
+    size_t sz = size;
 
     switch (fuse_allocator_magic(self->allocator, value))
     {
     case FUSE_MAGIC_NULL:
         return "null";
     case FUSE_MAGIC_LIST:
-        return "[ ]";
+        if (value->data.count == 0)
+        {
+            return "[ ]";
+        }
+        assert(buffer);
+        // Size must be at least one byte in order to append a null terminator. Of course,
+        // if the size is one, it's just going to return an empty string...
+        assert(size);
+        // Append a '['
+        sz = snprintf(buffer, size, "[ ");
+        if (sz >= size)
+        {
+            return buffer;
+        }
+        else
+        {
+            size -= sz;
+        }
+        // Append the elements
+        for (struct fuse_value *element = value->l.head; element != NULL; element = element->r.next)
+        {
+            fuse_debugf("element=%p\n",element);
+        }
+        // Append a ']'
+        sz = snprintf(buffer, size, "]");
+        if (sz >= size)
+        {
+            return buffer;
+        }
+        else
+        {
+            size -= sz;
+        }
     case FUSE_MAGIC_U8:
         assert(buffer);
         assert(size);
