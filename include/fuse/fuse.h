@@ -71,11 +71,11 @@ void fuse_free(fuse_t *self, void *ptr);
 
 /** @brief Run the fuse application until an exit code is set
  *
- *  This method starts the run loop, which continues until the exit code is set.
+ *  This method starts the event loop, which continues until the exit code is set.
  * 
  *  @param self The fuse application
  *  @param callback The callback function which is called to initialise the application. If
- *                  the callback returns a non-zero value, then the run loop is terminated and
+ *                  the callback returns a non-zero value, then the event loop is terminated and
  *                  the exit code is set to this value.
  */
 void fuse_run(fuse_t *self, int (*callback)(fuse_t *));

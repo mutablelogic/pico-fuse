@@ -106,7 +106,7 @@ void fuse_run(fuse_t *self, int (*callback)(fuse_t *)) {
     }
 }
 
-void fuse_exit(fuse_t *self, int exit_code) {
+inline void fuse_exit(fuse_t *self, int exit_code) {
     assert(self);
     self->exit_code = exit_code ? exit_code : FUSE_EXIT_SUCCESS;
 }
