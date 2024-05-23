@@ -5,6 +5,35 @@
 ///////////////////////////////////////////////////////////////////////////////
 // PUBLIC METHODS
 
+inline size_t fuse_sizeof(uint16_t magic) {
+    switch(magic) {
+        case (uint16_t)(FUSE_MAGIC_U8):
+            return sizeof(uint8_t);
+        case (uint16_t)(FUSE_MAGIC_U16):
+            return sizeof(uint16_t);
+        case (uint16_t)(FUSE_MAGIC_U32):
+            return sizeof(uint32_t);
+        case (uint16_t)(FUSE_MAGIC_U64):
+            return sizeof(uint64_t);
+        case (uint16_t)(FUSE_MAGIC_S8):
+            return sizeof(int8_t);
+        case (uint16_t)(FUSE_MAGIC_S16):
+            return sizeof(int16_t);
+        case (uint16_t)(FUSE_MAGIC_S32):
+            return sizeof(int32_t);
+        case (uint16_t)(FUSE_MAGIC_S64):
+            return sizeof(int64_t);
+        case (uint16_t)(FUSE_MAGIC_F32):
+            return sizeof(float);
+        case (uint16_t)(FUSE_MAGIC_F64):
+            return sizeof(double);
+        case (uint16_t)(FUSE_MAGIC_BOOL):
+            return sizeof(bool);
+        default:
+            return 0;
+    }
+}
+
 inline const char* fuse_magic_cstr(uint16_t magic) {
     switch(magic) {
         case (uint16_t)FUSE_MAGIC_NULL:
@@ -41,6 +70,8 @@ inline const char* fuse_magic_cstr(uint16_t magic) {
             return "LIST";
         case (uint16_t)(FUSE_MAGIC_MAP):
             return "MAP";
+        case (uint16_t)(FUSE_MAGIC_TENSOR):
+            return "TENSOR";
         default:
             return "???";
     }

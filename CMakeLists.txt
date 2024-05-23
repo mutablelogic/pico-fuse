@@ -44,6 +44,7 @@ endif()
 
 # Libraries
 add_subdirectory(src/fuse)
+add_subdirectory(src/ctensor)
 #if(${TARGET} STREQUAL "pico")
 #    add_subdirectory(src/picofuse)
 #endif()

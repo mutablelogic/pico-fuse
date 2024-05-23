@@ -16,3 +16,9 @@ add_library(${NAME} STATIC
 target_include_directories(${NAME} PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/../../include
 )
+
+if(${TARGET} STREQUAL "pico")
+    target_link_libraries(${NAME}
+        pico_stdlib
+    )
+endif()

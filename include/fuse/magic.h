@@ -24,6 +24,7 @@
 #define FUSE_MAGIC_STR 0x657E   ///< string
 #define FUSE_MAGIC_LIST 0x657F  ///< list[value]
 #define FUSE_MAGIC_MAP 0x6580   ///< map[value][value]
+#define FUSE_MAGIC_TENSOR 0x6581 ///< tensor
 
 // Define the magic numbers for the sources
 #define FUSE_MAGIC_TIMER 0x5601 ///< Timer source, which can fire at a regular interval
@@ -38,5 +39,12 @@
  *  @returns A zero-terminated string representation of the magic number
  */
 const char *fuse_magic_cstr(uint16_t magic);
+
+/** @brief Get the size of a primitive element based on magic number
+ *
+ *  @param magic The magic number
+ *  @returns The size in bytes, or zero if the named type is not a primitive
+ */
+size_t fuse_sizeof(uint16_t magic);
 
 #endif /* FUSE_MAGIC_H */
