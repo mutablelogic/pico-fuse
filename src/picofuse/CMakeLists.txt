@@ -4,6 +4,7 @@ add_library(${NAME} STATIC
     gpio.c
     led.c
     main.c
+    mqtt.c
     stdio.c
     wifi.c
 )
@@ -26,6 +27,7 @@ endif()
 if(PICO_CYW43_SUPPORTED)
     target_link_libraries(${NAME}
         pico_cyw43_arch_lwip_threadsafe_background
+        pico_lwip_mqtt
     )
     target_compile_definitions(${NAME} PRIVATE PICO_CYW43_SUPPORTED=1)
 endif()

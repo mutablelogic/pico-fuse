@@ -136,7 +136,7 @@ fuse_wifi_scan_context *fuse_wifi_scan()
         if (!wifi_scan_context->scanning)
         {
             cyw43_wifi_scan_options_t scan_options = {0};
-            int err = cyw43_wifi_scan(&cyw43_state, &scan_options, wifi_scan_context, fuse_wifi_scan_result);
+            int err = cyw43_wifi_scan(&cyw43_state, &scan_options, NULL, fuse_wifi_scan_result);
             if (err == 0)
             {
                 fuse_debugf("fuse_wifi_scan: scanning\n");
