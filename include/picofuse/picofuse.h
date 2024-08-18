@@ -6,6 +6,7 @@
 #ifndef PICOFUSE_H
 #define PICOFUSE_H
 
+#include <fuse/fuse.h>
 #include <picofuse/adc.h>
 #include <picofuse/gpio.h>
 #include <picofuse/led.h>

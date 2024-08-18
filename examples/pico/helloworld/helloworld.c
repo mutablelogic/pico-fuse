@@ -1,4 +1,3 @@
-#include <fuse/fuse.h>
 #include <picofuse/picofuse.h>
 
 int run(fuse_t* fuse) {

@@ -5,6 +5,7 @@
 #define PICOFUSE_GPIO_H
 
 #include <stdint.h>
+#include <stdbool.h>
 
 /** @brief Defines the function of a GPIO pin
  */
