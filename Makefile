@@ -18,6 +18,9 @@ all: config picotool test examples
 test: config
 	@make -C ${BUILD_DIR} all test
 
+examples: config
+	@make -C ${BUILD_DIR} all examples
+
 config: dependencies mkdir
 	@echo git submodule update pico-sdk
 	@${GIT} submodule update --init
@@ -73,10 +76,8 @@ mkdir:
 	@echo mkdir ${BUILD_DIR}
 	@install -d ${BUILD_DIR}
 
-clean:
+clean: submodule-clean
 	@echo clean
-	@cd lib/pico-sdk && ${GIT} submodule deinit --force --all
-	@cd lib/picotool && ${GIT} submodule deinit --force --all
 	@rm -fr $(BUILD_DIR)
 
 dependencies:

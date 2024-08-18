@@ -1,70 +1,40 @@
 # Versions
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.13)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 
 # PICO_BOARD
 if (DEFINED ENV{PICO_BOARD})
-    set(PICO_BOARD $ENV{PICO_BOARD})
+    set(PICO_BOARD "$ENV{PICO_BOARD}")
+    set(TARGET_OS "pico")
     message("Using PICO_BOARD from environment ('${PICO_BOARD}')")
 else()
-    if (NOT PICO_BOARD)
-        set(PICO_BOARD "pico")
-        message("Defaulting PICO target board to ${PICO_BOARD} since not specified")
-    else()
-        message("PICO target board is ${PICO_BOARD}")
-    endif()    
+    set(TARGET_OS ${CMAKE_HOST_SYSTEM_NAME})
+    string(TOLOWER ${TARGET_OS} TARGET_OS)
 endif()
-
-# TARGET set to linux, darwin or pico depending on PICO_BOARD
-if(PICO_BOARD STREQUAL "linux")
-    set(TARGET "linux")
-    add_compile_definitions(TARGET_LINUX)
-    add_compile_definitions(TARGET_POSIX)
-elseif(PICO_BOARD STREQUAL "darwin")
-    set(TARGET "darwin")
-    add_compile_definitions(TARGET_DARWIN)
-    add_compile_definitions(TARGET_POSIX)
-else()
-    set(TARGET "pico")
-    add_compile_definitions(TARGET_PICO)
-    include(lib/pico-sdk/pico_sdk_init.cmake)
-endif()
+message("Target ${TARGET_OS}")
 
 # Define project
-project(fuse CXX C ASM)
+project(picofuse CXX C ASM)
 
 # TODO!!!
 add_compile_definitions(DEBUG)
 
-# Pico libraries
-if(${TARGET} STREQUAL "pico")
-    pico_sdk_init()
-endif()
-
-# Libraries
+# picofuse libraries
 add_subdirectory(src/fuse)
-add_subdirectory(src/ctensor)
-#if(${TARGET} STREQUAL "pico")
-#    add_subdirectory(src/picofuse)
-#endif()
+if(TARGET_OS STREQUAL "pico")
+    pico_sdk_init()
+    add_subdirectory(src/picofuse)
+endif()
 
 # Tests
 include(CTest)
-
-# Tests - alloc
-add_subdirectory(tests/alloc)
-add_subdirectory(tests/fuse)
-add_subdirectory(tests/panic)
-add_subdirectory(tests/random)
-
-# Tests - picofuse
-#if(${TARGET} STREQUAL "pico")
-#    add_subdirectory(tests/blink)
-#    add_subdirectory(tests/temperature)
-#endif()
+#add_subdirectory(tests/alloc)
+#add_subdirectory(tests/fuse)
+#add_subdirectory(tests/panic)
+#add_subdirectory(tests/random)
 
 # Examples
-if(${TARGET} STREQUAL "pico")
+if(TARGET_OS STREQUAL "pico")
     add_subdirectory(examples/pico/helloworld)
 endif()
