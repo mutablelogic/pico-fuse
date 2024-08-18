@@ -25,6 +25,7 @@ inline void fuse_panic(const char *expr, const char *file, int line)
     } else {
         printf("PANIC: %s\n", expr);
     }
-    sleep_ms(1000);
-    abort();
+    while (true) {
+        sleep_ms(1000);
+    }
 }
