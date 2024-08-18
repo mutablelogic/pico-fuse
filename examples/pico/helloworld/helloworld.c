@@ -1,8 +1,11 @@
-#include <stdio.h>
-#include "pico/stdlib.h"
+#include <fuse/fuse.h>
+#include <picofuse/picofuse.h>
 
-int main() {
-    stdio_init_all();
-    printf("Hello, world!\n");
+int run(fuse_t* fuse) {
+    fuse_debugf("Hello, World!\n");
     return 0;
+}
+
+void main() {
+    fuse_main(run);
 }
