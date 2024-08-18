@@ -13,28 +13,19 @@ PICO_PLATFORM ?= rp2040
 PICO_BOARD ?= pico_w
 
 # Targets
-all: config picotool test examples
+all: examples
 
-test: config
+test:
 	@make -C ${BUILD_DIR} all test
 
-examples: config
+examples:
 	@make -C ${BUILD_DIR} all examples
 
-config: dependencies mkdir
-	@echo git submodule update pico-sdk
-	@${GIT} submodule update --init
-	@cd lib/pico-sdk && ${GIT} submodule update --init
-	@echo cmake config
-	@${CMAKE} -B ${BUILD_DIR} -DPICO_PLATFORM=${PICO_PLATFORM} -DPICO_BOARD=${PICO_BOARD}
-
-picotool: config
-	@echo git submodule update picotool
-	@cd lib/picotool && ${GIT} submodule update --init
+picotool: dependencies mkdir 
 	@echo make picotool
 	@PICO_SDK_PATH=../../../lib/pico-sdk ${CMAKE} -S lib/picotool -B ${BUILD_DIR}/lib/picotool
 	@make -C ${BUILD_DIR}/lib/picotool
-	@echo "\nRun:\n  install -s ${BUILD_DIR}/lib/picotool/picotool ${PREFIX}/bin"
+	@echo "\nRun:\n  install -s ${BUILD_DIR}/lib/picotool/picotool ${PREFIX}/bin\n"
 
 src: $(SRC_DIR)
 
@@ -50,18 +41,18 @@ $(EXAMPLES_DIR): dependencies mkdir
 	@echo make $(notdir $@)
 	@make -C ${BUILD_DIR}/$@
 
-# Update submodule to the latest version
+# Update submodule to the 2.0.0 version
 submodule-update: dependencies
 	@echo "Updating submodules"
-	@${GIT} submodule set-branch -b 2.0.0 lib/picotool
-	@${GIT} submodule set-branch -b 2.0.0 lib/pico-sdk
-	@${GIT} submodule sync
-	@${GIT} submodule foreach git pull origin master
+	@${GIT} pull --recurse-submodules	
+	@cd lib/pico-sdk && ${GIT} pull origin 2.0.0 && cd ../..
+	@cd lib/picotool && ${GIT} pull origin 2.0.0 && cd ../..
+	@${GIT} submodule sync --recursive
 
 # Submodule checkout
 submodule: dependencies
 	@echo "Checking out submodules"
-	@${GIT} submodule update --init --recursive
+	@${GIT} submodule update --init --recursive 
 
 # Submodule clean
 submodule-clean: dependencies

@@ -1,6 +1,6 @@
 [submodule "lib/pico-sdk"]
 	path = lib/pico-sdk
-	url = https://github.com/raspberrypi/pico-sdk
+	url = https://github.com/raspberrypi/pico-sdk.git
 	branch = 2.0.0
 
 [submodule "lib/picotool"]
