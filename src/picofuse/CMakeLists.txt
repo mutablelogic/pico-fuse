@@ -15,7 +15,7 @@ target_link_libraries(${NAME}
     fuse
 )
 
-if(${TARGET} STREQUAL "pico")
+if(${TARGET_OS} STREQUAL "pico")
     target_link_libraries(${NAME}
         pico_stdlib
         hardware_adc        

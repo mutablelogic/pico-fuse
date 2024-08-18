@@ -11,6 +11,6 @@
  *  @param flags The flags to pass to the fuse application
  *  @param main The main function to call, which should return 0 on success
  */
-int fuse_main(fuse_flag_t flags, int main(fuse_t *fuse));
+int fuse_main(int main(fuse_t *fuse));
 
 #endif

@@ -4,15 +4,15 @@
 ///////////////////////////////////////////////////////////////////////////////
 // PUBLIC METHODS
 
-int fuse_main(fuse_flag_t flags, int main(fuse_t *fuse))
+int fuse_main(int main(fuse_t *fuse))
 {
-#ifdef TARGET_PICO
+#if TARGET_OS == pico
     fuse_stdio_init();
 #endif
-    fuse_debugf(NULL, "picofuse_main: flags=%d\n", flags);
+    fuse_debugf(NULL, "picofuse_main\n");
 
     // Create a fuse application
-    fuse_t *fuse = fuse_new(flags);
+    fuse_t *fuse = fuse_new(0);
     assert(fuse);
 
     // Initialize the LED
@@ -32,7 +32,7 @@ int fuse_main(fuse_flag_t flags, int main(fuse_t *fuse))
     fuse_debugf(fuse, "picofuse_main: exit code %d\n", exit_code);
 
     // Endless loop on the pico
-#ifdef TARGET_PICO
+#if TARGET_OS == pico
     while (1)
     {
         sleep_ms(1000);

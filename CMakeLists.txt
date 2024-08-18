@@ -1,5 +1,5 @@
 # Versions
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.13...3.27)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 
@@ -8,6 +8,7 @@ if (DEFINED ENV{PICO_BOARD})
     set(PICO_BOARD "$ENV{PICO_BOARD}")
     set(TARGET_OS "pico")
     message("Using PICO_BOARD from environment ('${PICO_BOARD}')")
+    include(lib/pico-sdk/pico_sdk_init.cmake)
 else()
     set(TARGET_OS ${CMAKE_HOST_SYSTEM_NAME})
     string(TOLOWER ${TARGET_OS} TARGET_OS)
@@ -36,5 +37,5 @@ include(CTest)
 
 # Examples
 if(TARGET_OS STREQUAL "pico")
-    add_subdirectory(examples/pico/helloworld)
+    add_subdirectory(examples/pico)
 endif()
