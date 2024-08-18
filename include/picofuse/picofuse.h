@@ -12,5 +12,6 @@
 #include <picofuse/led.h>
 #include <picofuse/main.h>
 #include <picofuse/stdio.h>
+#include <picofuse/wifi.h>
 
 #endif

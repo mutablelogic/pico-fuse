@@ -5,6 +5,7 @@ add_library(${NAME} STATIC
     led.c
     main.c
     stdio.c
+    wifi.c
 )
 
 target_include_directories(${NAME} PRIVATE
