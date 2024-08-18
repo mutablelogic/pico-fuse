@@ -64,3 +64,7 @@ add_subdirectory(tests/random)
 #    add_subdirectory(tests/temperature)
 #endif()
 
+# Examples
+if(${TARGET} STREQUAL "pico")
+    add_subdirectory(examples/pico/helloworld)
+endif()
