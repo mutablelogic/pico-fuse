@@ -2,17 +2,19 @@
 
 int run(fuse_t *fuse)
 {
-    fuse_wifi_new(FUSE_WIFI_STATION, "de");
-    fuse_mqtt_new("192.168.86.12");
+    // Register the wifi module for DE country code and station mode
+    fuse_wifi_userdata_t params = {
+        .country_code = "DE",
+        .mode = FUSE_WIFI_STATION | FUSE_WIFI_SCAN};
+    fuse_context_t *wifi = fuse_register(fuse, &wifi, &params);
+    assert(wifi);
 
-    int i = 0;
-    while (true)
-    {
-        fuse_debugf("mqtt i=%d\n", i++);
-        sleep_ms(2000);
-    }
+    // Register MQTT module to connect to 192.168.86.12
+    fuse_mqtt_userdata_t params = {
+        .host = "192.168.86.12"};
+    fuse_context_t *mqtt = fuse_register(fuse, &mqtt, &params);
+    assert(mqtt);
 
-    fuse_mqtt_destroy();
-    fuse_wifi_destroy();
+    // Return success
     return 0;
 }

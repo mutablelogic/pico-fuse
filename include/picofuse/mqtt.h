@@ -4,14 +4,12 @@
 #ifndef PICOFUSE_MQTT_H
 #define PICOFUSE_MQTT_H
 
-#define MQTT_SERVER_PORT 1883
-
-/** @brief Initialize the mqtt module
+/** @brief User data for initializing the MQTT module
  */
-void fuse_mqtt_new(const char* host);
-
-/** @brief Release the mqtt module resources
- */
-void fuse_mqtt_destroy();
+typedef struct
+{
+    const char *host;   ///< (required) hostname of the MQTT broker
+    const int16_t port; ///< (optional) port number of the MQTT broker
+} fuse_mqtt_userdata_t;
 
 #endif

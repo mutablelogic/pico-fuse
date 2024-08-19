@@ -24,10 +24,10 @@
 #define FUSE_MAGIC_STR 0x657E   ///< string
 #define FUSE_MAGIC_LIST 0x657F  ///< list[value]
 #define FUSE_MAGIC_MAP 0x6580   ///< map[value][value]
-#define FUSE_MAGIC_TENSOR 0x6581 ///< tensor
 
 // Define the magic numbers for the sources
 #define FUSE_MAGIC_TIMER 0x5601 ///< Timer source, which can fire at a regular interval
+#define FUSE_MAGIC_WIFI 0x5602  ///< Wifi
 
 // Define exit codes
 #define FUSE_EXIT_SUCCESS 1     ///< Successful completion

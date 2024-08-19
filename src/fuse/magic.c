@@ -1,5 +1,3 @@
-
-// Includes
 #include <fuse/fuse.h>
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -70,8 +68,8 @@ inline const char* fuse_magic_cstr(uint16_t magic) {
             return "LIST";
         case (uint16_t)(FUSE_MAGIC_MAP):
             return "MAP";
-        case (uint16_t)(FUSE_MAGIC_TENSOR):
-            return "TENSOR";
+        case (uint16_t)(FUSE_MAGIC_WIFI):
+            return "WFI";
         default:
             return "???";
     }

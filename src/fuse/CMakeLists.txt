@@ -3,6 +3,7 @@ add_library(${NAME} STATIC
     alloc.c
     alloc_builtin.c
     debug.c
+    device.c
     fuse.c
     magic.c
     panic.c

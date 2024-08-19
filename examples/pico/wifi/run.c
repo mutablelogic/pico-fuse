@@ -2,16 +2,13 @@
 
 int run(fuse_t *fuse)
 {
-    fuse_wifi_new(FUSE_WIFI_STATION, "de");
+    // Register the wifi module for DE country code and station mode
+    fuse_wifi_userdata_t params = {
+        .country_code = "DE",
+        .mode = FUSE_WIFI_STATION | FUSE_WIFI_SCAN};
+    fuse_context_t *context = fuse_register(fuse, &wifi, &params);
 
-    int i = 0;
-    while (true)
-    {
-        fuse_debugf("Wifi i=%d\n", i++);
-        fuse_wifi_scan();
-        sleep_ms(1000);
-    }
+    fuse_debugf("context=%p\n", context);
 
-    fuse_wifi_destroy();
     return 0;
 }

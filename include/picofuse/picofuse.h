@@ -15,4 +15,7 @@
 #include <picofuse/stdio.h>
 #include <picofuse/wifi.h>
 
+extern fuse_device_t wifi; ///< WiFi device
+extern fuse_device_t mqtt; ///< MQTT device
+
 #endif

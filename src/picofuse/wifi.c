@@ -12,47 +12,70 @@
 ///////////////////////////////////////////////////////////////////////////////
 // TYPES
 
-struct wifi_scan_context
+struct wifi_context
 {
+    fuse_wifi_mode_t mode;
     absolute_time_t t;
     bool scanning;
 };
 
-void fuse_wifi_scan_destroy(fuse_wifi_scan_context *context);
+void *fuse_wifi_new(fuse_t *fuse, void *userdata);
+void fuse_wifi_destroy(fuse_t *fuse, void *context);
 
 ///////////////////////////////////////////////////////////////////////////////
 // GLOBALS
 
-struct wifi_scan_context *wifi_scan_context = NULL;
+fuse_device_t wifi = {
+    .name = "wifi",
+    .init = fuse_wifi_new,
+    .destroy = fuse_wifi_destroy,
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 // PUBLIC METHODS
 
-void fuse_wifi_new(const fuse_wifi_mode_t mode, const char *code)
+void *fuse_wifi_new(fuse_t *fuse, void *userdata)
 {
+    assert(fuse);
+    assert(userdata);
+
 #ifndef PICO_CYW43_SUPPORTED
     fuse_debugf("fuse_wifi_new: unsupported on this board\n");
-    return;
-#endif
-
+    return NULL;
+#else
     // Initialize the CYW43
+    fuse_wifi_userdata_t *params = (fuse_wifi_userdata_t *)userdata;
     uint32_t cc = CYW43_COUNTRY_WORLDWIDE;
-    if (code && strlen(code) == 2)
+    if (params->country_code != NULL && strlen(params->country_code) == 2)
     {
-        cc = CYW43_COUNTRY(toupper(code[0]), toupper(code[1]), 0);
+        cc = CYW43_COUNTRY(toupper(params->country_code[0]), toupper(params->country_code[1]), 0);
     }
-    int err = cyw43_arch_init_with_country(cc);
-    if (err != 0)
+
+    err_t err = cyw43_arch_init_with_country(cc);
+    if (err != ERR_OK)
     {
         fuse_debugf("fuse_wifi_new: cyw43_arch_init failed: code %d\n", err);
+        return NULL;
     }
     else
     {
         fuse_debugf("fuse_wifi_new: countrycode=%c%c\n", cc & 0xff, cc >> 8);
     }
 
-    // Set the mode
-    if (mode & FUSE_WIFI_STATION)
+    // Create the context
+    struct wifi_context *context = fuse_alloc(fuse, sizeof(struct wifi_context), FUSE_MAGIC_WIFI);
+    if (context == NULL)
+    {
+        return NULL;
+    }
+
+    // Initialize the context
+    context->mode = params->mode;
+    context->t = 0;
+    context->scanning = false;
+
+    // Enable the wifi mode
+    if (params->mode & FUSE_WIFI_STATION)
     {
         fuse_debugf("fuse_wifi_new: cyw43_arch_enable_sta_mode\n");
         cyw43_arch_enable_sta_mode();
@@ -73,41 +96,24 @@ void fuse_wifi_new(const fuse_wifi_mode_t mode, const char *code)
         cyw43_arch_disable_ap_mode();
     }
     */
+    return context;
+#endif
 }
 
-inline void fuse_wifi_destroy()
+void fuse_wifi_destroy(fuse_t *fuse, void *context)
 {
-    // Free the scan context
-    if (wifi_scan_context)
-    {
-        fuse_wifi_scan_destroy(wifi_scan_context);
-        wifi_scan_context = NULL;
-    }
+    assert(fuse);
+    assert(context);
 
+    // TODO: Wait until scanning is false
 #ifdef PICO_CYW43_SUPPORTED
     fuse_debugf("fuse_wifi_destroy\n");
     cyw43_arch_deinit();
 #endif
+    fuse_free(fuse, context);
 }
 
-fuse_wifi_scan_context *fuse_wifi_scan_new()
-{
-    fuse_wifi_scan_context *context = malloc(sizeof(struct wifi_scan_context));
-    assert(context);
-
-    context->t = 0;
-    context->scanning = false;
-
-    // Return success
-    return context;
-}
-
-void fuse_wifi_scan_destroy(fuse_wifi_scan_context *context)
-{
-    free(context);
-}
-
-#ifdef PICO_CYW43_SUPPORTED
+/*
 int fuse_wifi_scan_result(void *env, const cyw43_ev_scan_result_t *result)
 {
     if (result)
@@ -160,3 +166,4 @@ fuse_wifi_scan_context *fuse_wifi_scan()
     // Return the scan context
     return wifi_scan_context;
 }
+*/

@@ -1,11 +1,14 @@
 #include <picofuse/picofuse.h>
+
+#ifdef PICO_CYW43_SUPPORTED
 #include <lwip/apps/mqtt.h>
 #include <lwip/dns.h>
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 // TYPES
 
-struct wifi_mqtt_context
+struct mqtt_context
 {
     mqtt_client_t *client;
     ip_addr_t remote_addr;
@@ -13,39 +16,59 @@ struct wifi_mqtt_context
     struct mqtt_connect_client_info_t info;
 };
 
+void *mqtt_new(fuse_t *fuse, void *userdata);
+void mqtt_destroy(fuse_t *fuse, void *context);
+
 ///////////////////////////////////////////////////////////////////////////////
 // GLOBALS
 
-static struct wifi_mqtt_context *ctx;
+fuse_device_t mqtt = {
+    .name = "mqtt",
+    .init = mqtt_new,
+    .destroy = mqtt_destroy,
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 // PUBLIC METHODS
 
-struct wifi_mqtt_context *fuse_mqtt_context_new()
+void *mqtt_new(fuse_t *fuse, void *userdata)
 {
-    struct wifi_mqtt_context *context = malloc(sizeof(struct wifi_mqtt_context));
-    assert(context);
+    assert(fuse);
+    assert(userdata);
 
-    // Set the client
+#ifndef PICO_CYW43_SUPPORTED
+    fuse_debugf("mqtt_new: unsupported on this board\n");
+    return NULL;
+#else
+    // Create the context
+    struct mqtt_context *context = fuse_alloc(fuse, sizeof(struct mqtt_context), FUSE_MAGIC_MQTT);
+    if (context == NULL)
+    {
+        return NULL;
+    }
+
+    // Initialize the context
     context->client = mqtt_client_new();
-    assert(context->client);
-    context->port = MQTT_SERVER_PORT;
-    context->info.client_id = "mqtt";
-
+    if (context->client == NULL)
+    {
+        fuse_free(fuse, context);
+        return NULL;
+    }
     // Return success
     return context;
+#endif
 }
 
-void fuse_mqtt_context_destroy(struct wifi_mqtt_context *context)
+void mqtt_destroy(fuse_t *fuse, void *context)
 {
-    if (context != NULL)
-    {
-        mqtt_client_free(context->client);
-    }
-    free(context);
+    assert(fuse);
+    assert(context);
+
+    mqtt_client_free(((struct mqtt_context* )context)->client);
+    fuse_free(fuse, context);
 }
 
-
+/*
 void fuse_mqtt_connect_callback(mqtt_client_t *client, void *arg, mqtt_connection_status_t status) {
     if (status != 0) {
         fuse_debugf("fuse_mqtt_connect_callback: error code %d\n", status);
@@ -98,3 +121,4 @@ void fuse_mqtt_destroy()
         ctx = NULL;
     }
 }
+*/

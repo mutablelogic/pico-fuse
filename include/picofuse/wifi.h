@@ -4,30 +4,22 @@
 #ifndef PICOFUSE_WIFI_H
 #define PICOFUSE_WIFI_H
 
-/** @brief Wifi mode
+/** @brief WiFi flags
  */
 typedef enum
 {
     FUSE_WIFI_NONE = 0,        ///< No mode
     FUSE_WIFI_STATION = 1,     ///< Station mode
     FUSE_WIFI_ACCESSPOINT = 2, ///< Access point mode
+    FUSE_WIFI_SCAN = 4,        ///< Scan for wifi networks
 } fuse_wifi_mode_t;
 
-/** @brief WiFi scan context
+/** @brief User data for initializing the WiFi module
  */
-typedef struct wifi_scan_context fuse_wifi_scan_context;
-
-/** @brief Initialize the wifi module
- */
-void fuse_wifi_new(const fuse_wifi_mode_t mode, const char *code);
-
-/** @brief Release the wifi module resources
- */
-void fuse_wifi_destroy();
-
-
-/** @brief Perform a wifi scan
- */
-fuse_wifi_scan_context *fuse_wifi_scan();
+typedef struct
+{
+    const fuse_wifi_mode_t mode; ///< (required) flags for initialization
+    const char *country_code;    ///< (optional) two-letter country code for the WiFi region
+} fuse_wifi_userdata_t;
 
 #endif
