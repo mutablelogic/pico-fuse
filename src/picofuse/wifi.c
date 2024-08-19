@@ -25,7 +25,7 @@ void fuse_wifi_destroy(fuse_t *fuse, void *context);
 ///////////////////////////////////////////////////////////////////////////////
 // GLOBALS
 
-fuse_device_t wifi = {
+fuse_device_t fuse_wifi = {
     .name = "wifi",
     .init = fuse_wifi_new,
     .destroy = fuse_wifi_destroy,

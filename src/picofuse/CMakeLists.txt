@@ -5,6 +5,7 @@ add_library(${NAME} STATIC
     led.c
     main.c
     mqtt.c
+    serial.c
     stdio.c
     wifi.c
 )
@@ -19,8 +20,9 @@ target_link_libraries(${NAME}
 
 if(${TARGET_OS} STREQUAL "pico")
     target_link_libraries(${NAME}
-        pico_stdlib
         hardware_adc        
+        pico_stdlib
+        pico_unique_id
     )
 endif()
 

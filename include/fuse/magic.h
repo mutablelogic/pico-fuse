@@ -28,6 +28,7 @@
 // Define the magic numbers for the sources
 #define FUSE_MAGIC_TIMER 0x5601 ///< Timer source, which can fire at a regular interval
 #define FUSE_MAGIC_WIFI 0x5602  ///< Wifi
+#define FUSE_MAGIC_MQTT 0x5603  ///< MQTT
 
 // Define exit codes
 #define FUSE_EXIT_SUCCESS 1     ///< Successful completion

@@ -12,10 +12,11 @@
 #include <picofuse/led.h>
 #include <picofuse/main.h>
 #include <picofuse/mqtt.h>
+#include <picofuse/serial.h>
 #include <picofuse/stdio.h>
 #include <picofuse/wifi.h>
 
-extern fuse_device_t wifi; ///< WiFi device
-extern fuse_device_t mqtt; ///< MQTT device
+extern fuse_device_t fuse_wifi; ///< WiFi device
+extern fuse_device_t fuse_mqtt; ///< MQTT device
 
 #endif

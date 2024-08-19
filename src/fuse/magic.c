@@ -70,6 +70,8 @@ inline const char* fuse_magic_cstr(uint16_t magic) {
             return "MAP";
         case (uint16_t)(FUSE_MAGIC_WIFI):
             return "WFI";
+        case (uint16_t)(FUSE_MAGIC_MQTT):
+            return "MQT";
         default:
             return "???";
     }

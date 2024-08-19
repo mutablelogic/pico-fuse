@@ -22,7 +22,7 @@ void mqtt_destroy(fuse_t *fuse, void *context);
 ///////////////////////////////////////////////////////////////////////////////
 // GLOBALS
 
-fuse_device_t mqtt = {
+fuse_device_t fuse_mqtt = {
     .name = "mqtt",
     .init = mqtt_new,
     .destroy = mqtt_destroy,
