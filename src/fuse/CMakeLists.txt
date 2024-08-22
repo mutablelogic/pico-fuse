@@ -9,6 +9,7 @@ add_library(${NAME} STATIC
     magic.c
     map.c
     panic.c
+    printf.c
     random_pico.c
     random_posix.c
     sleep_posix.c

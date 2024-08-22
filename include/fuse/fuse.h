@@ -19,6 +19,7 @@ typedef struct fuse_application fuse_t;
 #include "list.h"
 #include "magic.h"
 #include "map.h"
+#include "printf.h"
 #include "random.h"
 #include "sleep.h"
 #include "timer.h"
