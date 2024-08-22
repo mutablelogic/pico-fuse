@@ -5,13 +5,13 @@ add_library(${NAME} STATIC
     debug.c
     device.c
     fuse.c
+    list.c
     magic.c
+    map.c
     panic.c
     random_pico.c
     random_posix.c
     sleep_posix.c
-    value.c
-    value_list.c
 )
 
 target_include_directories(${NAME} PRIVATE

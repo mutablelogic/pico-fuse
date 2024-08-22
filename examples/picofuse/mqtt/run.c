@@ -6,8 +6,7 @@ int run(fuse_t *fuse)
     // scanning for WiFi networks
     fuse_wifi_userdata_t wifi_params = {
         .country_code = "DE",
-        .mode = FUSE_WIFI_STATION | FUSE_WIFI_SCAN,
-        .ssid = "10967"};
+        .mode = FUSE_WIFI_STATION | FUSE_WIFI_SCAN};
     fuse_context_t *wifi = fuse_register(fuse, &fuse_wifi, &wifi_params);
     assert(wifi);
 

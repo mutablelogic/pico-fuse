@@ -2,7 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // PUBLIC METHODS
 
-#ifdef TARGET_POSIX
+#if (TARGET_OS == darwin || TARGET_OS == linux)
 
 #include <stdint.h>
 #include <time.h>

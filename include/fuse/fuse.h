@@ -16,7 +16,9 @@ typedef struct fuse_application fuse_t;
 #include "assert.h"
 #include "debug.h"
 #include "device.h"
+#include "list.h"
 #include "magic.h"
+#include "map.h"
 #include "random.h"
 #include "sleep.h"
 #include "timer.h"
@@ -46,20 +48,20 @@ int fuse_destroy(fuse_t *fuse);
  *  if the memory could not be allocated.
  *
  *  @param self The fuse application
- *  @param size Number of bytes to allocate
  *  @param magic The magic number to use for the memory block
+ *  @param user_data User data to pass to the initialisation function
  *  @param file The file from which the memory is allocated
  *  @param line The line in the file from which the memory is allocated
  *  @returns Pointer to the allocated memory block, or NULL if the memory could not be allocated
  */
-void *fuse_alloc_ex(fuse_t *self, size_t size, uint16_t magic, const char *file, int line);
+void *fuse_alloc_ex(fuse_t *self, const uint16_t magic, const void *user_data, const char *file, const int line);
 
 #ifdef DEBUG
-#define fuse_alloc(self, size, magic) \
-    (fuse_alloc_ex((self), (size), (magic), __FILE__, __LINE__))
+#define fuse_alloc(self, magic, user_data) \
+    (fuse_alloc_ex((self), (magic), (user_data), __FILE__, __LINE__))
 #else
 #define fuse_alloc(self, size, magic) \
-    (fuse_alloc_ex((self), (size), (magic), 0, 0))
+    (fuse_alloc_ex((self), (magic), (user_data), 0, 0))
 #endif
 
 /** @brief Free allocated memory
@@ -74,7 +76,7 @@ void fuse_free(fuse_t *self, void *ptr);
 /** @brief Run the fuse application until an exit code is set
  *
  *  This method starts the event loop, which continues until the exit code is set.
- * 
+ *
  *  @param self The fuse application
  *  @param callback The callback function which is called to initialise the application. If
  *                  the callback returns a non-zero value, then the event loop is terminated and
@@ -90,6 +92,6 @@ void fuse_run(fuse_t *self, int (*callback)(fuse_t *));
  *  @param self The fuse application
  *  @param exit_code The exit code to set. Set the exit code to signal successful completion of the application
  */
-void fuse_exit(fuse_t *self, int exit_code);
+void fuse_exit(fuse_t *self, const int exit_code);
 
 #endif
