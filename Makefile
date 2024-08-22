@@ -9,7 +9,6 @@ GIT := $(shell which git)
 CMAKE := $(shell which cmake)
 
 # Pico variables
-PICO_PLATFORM ?= rp2040
 PICO_BOARD ?= pico_w
 
 # Targets
@@ -23,7 +22,7 @@ examples: config
 
 config: dependencies mkdir
 	@echo cmake config
-	@${CMAKE} -B ${BUILD_DIR} -DPICO_PLATFORM=${PICO_PLATFORM} -DPICO_BOARD=${PICO_BOARD}
+	@${CMAKE} -B ${BUILD_DIR} -DPICO_BOARD=${PICO_BOARD}
 
 picotool: dependencies mkdir 
 	@echo make picotool

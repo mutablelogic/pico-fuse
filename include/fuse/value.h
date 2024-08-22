@@ -76,39 +76,4 @@ fuse_value_t *fuse_value_release(const fuse_t *self, fuse_value_t *value);
  */
 const char *fuse_value_cstr(const fuse_t *self, fuse_value_t *value, char *buffer, const size_t size);
 
-/** @brief Return the count of elements in a list or map value
- *
- *  The function will return the number of elements in a list or map value. If the value is not a
- *  list or map, the function will panic.
- *
- *  @param self The fuse instance
- *  @param value The value
- *  @returns The number of elements in a list or map value
- */
-uint32_t fuse_value_count(const fuse_t *self, fuse_value_t *value);
-
-/** @brief Append an element to the end of a list
- *
- *  The function will append a element to the end of a list. If adding the element would
- *  create a circular reference, the function will panic. If the value is not a list, the
- *  function will panic.
- *
- *  @param self The fuse instance
- *  @param list The value
- *  @param element The element to append
- */
-void fuse_value_append(const fuse_t *self, fuse_value_t *list, fuse_value_t *element);
-
-/** @brief Prepend an element to the beginning of a list
- *
- *  The function will prepend a element to the beginning of a list. If adding the element would
- *  create a circular reference, the function will panic. If the value is not a list, the
- *  function will panic.
- *
- *  @param self The fuse instance
- *  @param value The value
- *  @param element The element to prepend
- */
-void fuse_value_prepend(const fuse_t *self, fuse_value_t *list, fuse_value_t *element);
-
 #endif /* FUSE_VALUE_H */

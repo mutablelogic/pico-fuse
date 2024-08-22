@@ -25,19 +25,22 @@ inline void fuse_allocator_free(fuse_allocator_t *self, void *ptr)
     self->free(self, ptr);
 }
 
-inline uint16_t fuse_allocator_magic(fuse_allocator_t *self, void *ptr) {
+inline uint16_t fuse_allocator_magic(fuse_allocator_t *self, void *ptr)
+{
     assert(self);
     assert(ptr);
     return self->magic(self, ptr);
 }
 
-inline void fuse_allocator_retain(fuse_allocator_t *self, void *ptr) {
+inline void fuse_allocator_retain(fuse_allocator_t *self, void *ptr)
+{
     assert(self);
     assert(ptr);
     self->retain(self, ptr);
 }
 
-inline bool fuse_allocator_release(fuse_allocator_t *self, void *ptr) {
+inline bool fuse_allocator_release(fuse_allocator_t *self, void *ptr)
+{
     assert(self);
     assert(ptr);
     return self->release(self, ptr);
@@ -55,7 +58,7 @@ void *fuse_allocator_walk(fuse_allocator_t *self, void *ctx, fuse_allocator_walk
         // Call the callback
         if (block->used)
         {
-            callback(block->ptr, block->size,block->magic, block->file, block->line, user);
+            callback(block->ptr, block->size, block->magic, block->file, block->line, user);
         }
 
         // Move to the next block

@@ -12,6 +12,12 @@
 // DECLARATIONS
 
 void fuse_destroy_callback(void *ptr, size_t size, uint16_t magic, const char *file, int line, void *user);
+bool fuse_init_null(fuse_t *self, fuse_value_t *value, const void *user_data);
+bool fuse_init_number(fuse_t *self, fuse_value_t *value, const void *user_data);
+bool fuse_init_memcpy(fuse_t *self, fuse_value_t *value, const void *user_data);
+bool fuse_init_cstr(fuse_t *self, fuse_value_t *value, const void *user_data);
+bool fuse_init_list(fuse_t *self, fuse_value_t *value, const void *user_data);
+void fuse_destroy_list(fuse_t *self, fuse_value_t *value);
 
 ///////////////////////////////////////////////////////////////////////////////
 // PUBLIC METHODS
@@ -41,7 +47,7 @@ fuse_t *fuse_new()
     // Register primitive types
     fuse->desc[FUSE_MAGIC_NULL] = (struct fuse_value_desc){
         .size = 0,
-        .name = "NUL",
+        .name = "NULL",
     };
     fuse->desc[FUSE_MAGIC_APP] = (struct fuse_value_desc){
         .size = 0,
@@ -49,59 +55,74 @@ fuse_t *fuse_new()
     };
     fuse->desc[FUSE_MAGIC_BLOCK] = (struct fuse_value_desc){
         .size = 0,
-        .name = "DAT",
+        .name = "DATA",
+        .init = fuse_init_memcpy,
     };
     fuse->desc[FUSE_MAGIC_U8] = (struct fuse_value_desc){
         .size = sizeof(uint8_t),
         .name = "U8",
+        .init = fuse_init_number,
     };
     fuse->desc[FUSE_MAGIC_U16] = (struct fuse_value_desc){
         .size = sizeof(uint16_t),
         .name = "U16",
+        .init = fuse_init_number,
     };
     fuse->desc[FUSE_MAGIC_U32] = (struct fuse_value_desc){
         .size = sizeof(uint32_t),
         .name = "U32",
+        .init = fuse_init_number,
     };
     fuse->desc[FUSE_MAGIC_U64] = (struct fuse_value_desc){
         .size = sizeof(uint64_t),
         .name = "U64",
+        .init = fuse_init_number,
     };
     fuse->desc[FUSE_MAGIC_S8] = (struct fuse_value_desc){
         .size = sizeof(int8_t),
         .name = "S8",
+        .init = fuse_init_number,
     };
     fuse->desc[FUSE_MAGIC_S16] = (struct fuse_value_desc){
         .size = sizeof(int16_t),
         .name = "S16",
+        .init = fuse_init_number,
     };
     fuse->desc[FUSE_MAGIC_S32] = (struct fuse_value_desc){
         .size = sizeof(int32_t),
         .name = "S32",
+        .init = fuse_init_number,
     };
     fuse->desc[FUSE_MAGIC_S64] = (struct fuse_value_desc){
         .size = sizeof(int64_t),
         .name = "S64",
+        .init = fuse_init_number,
     };
     fuse->desc[FUSE_MAGIC_F32] = (struct fuse_value_desc){
         .size = sizeof(float),
         .name = "F32",
+        .init = fuse_init_memcpy,
     };
     fuse->desc[FUSE_MAGIC_F64] = (struct fuse_value_desc){
         .size = sizeof(double),
         .name = "F64",
+        .init = fuse_init_memcpy,
     };
     fuse->desc[FUSE_MAGIC_BOOL] = (struct fuse_value_desc){
         .size = sizeof(bool),
-        .name = "TF",
+        .name = "BOOL",
+        .init = fuse_init_number,
     };
     fuse->desc[FUSE_MAGIC_STR] = (struct fuse_value_desc){
-        .size = 0,
+        .size = sizeof(const char *),
         .name = "STR",
+        .init = fuse_init_cstr,
     };
     fuse->desc[FUSE_MAGIC_LIST] = (struct fuse_value_desc){
         .size = sizeof(fuse_list_t),
-        .name = "LST",
+        .name = "LIST",
+        .init = fuse_init_list,
+        .destroy = fuse_destroy_list,
     };
     fuse->desc[FUSE_MAGIC_MAP] = (struct fuse_value_desc){
         .size = sizeof(fuse_map_t),
@@ -149,7 +170,21 @@ void *fuse_alloc_ex(fuse_t *self, const uint16_t magic, const void *user_data, c
 {
     assert(self);
     assert(magic < FUSE_MAGIC_COUNT);
-    void *ptr = fuse_allocator_malloc(self->allocator, self->desc[magic].size, magic, file, line);
+
+    // Determine the size of the memory block
+    size_t size = self->desc[magic].size;
+    switch (magic)
+    {
+    case FUSE_MAGIC_BLOCK:
+        size = (size_t)user_data;
+        break;
+    default:
+        size = self->desc[magic].size;
+        break;
+    }
+
+    // Allocate the memory
+    void *ptr = fuse_allocator_malloc(self->allocator, size, magic, file, line);
     if (ptr == NULL)
     {
 #ifdef DEBUG
@@ -168,6 +203,14 @@ void *fuse_alloc_ex(fuse_t *self, const uint16_t magic, const void *user_data, c
     {
         if (!self->desc[magic].init((struct fuse_application *)self, ptr, user_data))
         {
+#ifdef DEBUG
+            fuse_debugf("fuse_alloc_ex: %s: initialise failed", self->desc[magic].name);
+            if (file != NULL)
+            {
+                fuse_debugf(" [allocated at %s:%d]", file, line);
+            }
+            fuse_debugf("\n");
+#endif
             fuse_allocator_free(self->allocator, ptr);
             return NULL;
         }
@@ -238,4 +281,97 @@ void fuse_destroy_callback(void *ptr, size_t size, uint16_t magic, const char *f
         fuse_debugf(" [allocated at %s:%d]", file, line);
     }
     fuse_debugf("\n");
+}
+
+/* @brief Initialise a number value
+ */
+bool fuse_init_number(fuse_t *self, fuse_value_t *value, const void *user_data)
+{
+    assert(self);
+    assert(value);
+
+    switch (fuse_allocator_magic(self->allocator, value))
+    {
+    case FUSE_MAGIC_U8:
+        *(uint8_t *)value = (uint8_t)user_data;
+        break;
+    case FUSE_MAGIC_U16:
+        *(uint16_t *)value = (uint16_t)user_data;
+        break;
+    case FUSE_MAGIC_U32:
+        *(uint32_t *)value = (uint32_t)user_data;
+        break;
+    case FUSE_MAGIC_U64:
+        *(uint64_t *)value = (uint64_t)user_data;
+        break;
+    case FUSE_MAGIC_S8:
+        *(int8_t *)value = (int8_t)user_data;
+        break;
+    case FUSE_MAGIC_S16:
+        *(int16_t *)value = (int16_t)user_data;
+        break;
+    case FUSE_MAGIC_S32:
+        *(int32_t *)value = (int32_t)user_data;
+        break;
+    case FUSE_MAGIC_S64:
+        *(int64_t *)value = (int64_t)user_data;
+        break;
+    case FUSE_MAGIC_BOOL:
+        *(bool *)value = (bool)user_data;
+        break;
+    default:
+        return false;
+    }
+
+    // Return success
+    return true;
+}
+
+/* @brief Initialise by copying memory
+ */
+bool fuse_init_memcpy(fuse_t *self, fuse_value_t *value, const void *user_data)
+{
+    assert(self);
+    assert(value);
+
+    uint16_t magic = fuse_allocator_magic(self->allocator, value);
+    assert(magic < FUSE_MAGIC_COUNT);
+    size_t size = self->desc[magic].size;
+
+    // Copy or zero the memory
+    if (user_data != NULL) {
+        memcpy(value, user_data, size);
+    } else {
+        memset(value, 0, size);
+    }
+
+    // Return success
+    return true;
+}
+
+/* @brief Initialise by setting the string pointer
+ */
+bool fuse_init_cstr(fuse_t *self, fuse_value_t *value, const void *user_data)
+{
+    assert(self);
+    assert(value);
+
+    // Set the string pointer
+    *(const char **)value = (const char *)user_data;
+
+    // Return success
+    return true;
+}
+
+/* @brief Initialise a list
+ */
+bool fuse_init_list(fuse_t *self, fuse_value_t *value, const void *user_data) {
+    fuse_debugf("fuse_init_list\n");
+
+    // Allocate a new list
+    return true;
+}
+
+void fuse_destroy_list(fuse_t *self, fuse_value_t *value) {
+    fuse_debugf("fuse_destroy_list\n");
 }
