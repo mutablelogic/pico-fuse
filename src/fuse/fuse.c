@@ -16,6 +16,8 @@ bool fuse_init_null(fuse_t *self, fuse_value_t *value, const void *user_data);
 bool fuse_init_number(fuse_t *self, fuse_value_t *value, const void *user_data);
 bool fuse_init_memcpy(fuse_t *self, fuse_value_t *value, const void *user_data);
 bool fuse_init_cstr(fuse_t *self, fuse_value_t *value, const void *user_data);
+size_t fuse_cstr_null(fuse_value_t *value, char *buffer, size_t size);
+size_t fuse_qstr_null(fuse_value_t *value, char *buffer, size_t size);
 
 ///////////////////////////////////////////////////////////////////////////////
 // PUBLIC METHODS
@@ -46,6 +48,8 @@ fuse_t *fuse_new()
     fuse->desc[FUSE_MAGIC_NULL] = (struct fuse_value_desc){
         .size = 0,
         .name = "NULL",
+        .cstr = fuse_cstr_null,
+        .qstr = fuse_qstr_null,
     };
     fuse->desc[FUSE_MAGIC_APP] = (struct fuse_value_desc){
         .size = 0,
@@ -363,4 +367,30 @@ bool fuse_init_cstr(fuse_t *self, fuse_value_t *value, const void *user_data)
 
     // Return success
     return true;
+}
+
+/* @brief Output a null as a cstr
+ */
+size_t fuse_cstr_null(fuse_value_t *value, char *buffer, size_t size)
+{
+    const char *str = "NULL";
+    size_t i = 0;
+    while (i < size && *str)
+    {
+        buffer[i++] = *str++;
+    }
+    return i;
+}
+
+/* @brief Output a null as a qstr
+ */
+size_t fuse_qstr_null(fuse_value_t *value, char *buffer, size_t size)
+{
+    const char *str = "null";
+    size_t i = 0;
+    while (i < size && *str)
+    {
+        buffer[i++] = *str++;
+    }
+    return i;
 }

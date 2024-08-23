@@ -11,13 +11,13 @@ int TEST_001(fuse_t *self)
     fuse_value_t *value = fuse_alloc(self, FUSE_MAGIC_NULL, NULL);
 
     // sprintf the value
-    assert(fuse_sprintf(buf, n, "%v", value) > 0);
-    fuse_debugf("  value=%s\n",buf);
+    assert(fuse_sprintf(self, buf, n, "%v", value) > 0);
+    fuse_debugf("  value=%s\n", buf);
     assert_cstr_eq("NULL", buf);
 
     // sprintf the value
-    assert(fuse_sprintf(buf, n, "%q", value) > 0);
-    fuse_debugf("  quoted=%s\n",buf);
+    assert(fuse_sprintf(self, buf, n, "%q", value) > 0);
+    fuse_debugf("  quoted=%s\n", buf);
     assert_cstr_eq("null", buf);
 
     // Free the value
