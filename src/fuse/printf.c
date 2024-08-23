@@ -7,21 +7,17 @@
 
 /* @brief Append a character into the output buffer
  */
-size_t outch(char *out, size_t n, size_t i, char c)
+static inline size_t outch(char *out, size_t n, size_t i, char c)
 {
     assert(out == NULL || i < n);
     if (out)
     {
         out[i] = c;
     }
-    else
-    {
-        putchar(c);
-    }
     return i + 1;
 }
 
-/* @brief Append a cstring value into the output buffer
+/* @brief Append a value into the output buffer
  */
 size_t outv(fuse_t *self, char *out, size_t n, size_t i, fuse_value_t *v)
 {
@@ -65,9 +61,9 @@ size_t outq(fuse_t *self, char *out, size_t n, size_t i, fuse_value_t *v)
     }
 }
 
-/* @brief Append a null-terminated string value into the output buffer
+/* @brief Append a null-terminated string
  */
-size_t outs(char *out, size_t n, size_t i, const char *v)
+size_t stoa(char *out, size_t n, size_t i, const char *v, fuse_printf_flags_t flags)
 {
     assert(out == NULL || i < n);
 
@@ -77,7 +73,12 @@ size_t outs(char *out, size_t n, size_t i, const char *v)
     }
     while (i < n && *v)
     {
-        out[i++] = *v++;
+        if (out)
+        {
+            out[i] = *v;
+        }
+        v++;
+        i++;
     }
     return i;
 }
@@ -97,28 +98,39 @@ size_t itoa(char *out, size_t n, size_t i, int64_t v, int base, fuse_printf_flag
     // negative value
     if (v < 0)
     {
-        out[i++] = '-';
+        if (out)
+        {
+            out[i] = '-';
+        }
         v = -v;
-        if (i >= n)
+        if (++i >= n)
         {
             return i;
         }
     }
 
+    // output the number, but in reverse order
     size_t len = 0;
     while (i < n && v > 0)
     {
-        out[i++] = (char)(v % base) + '0';
+        if (out)
+        {
+            out[i] = (char)(v % base) + '0';
+        }
         v /= base;
+        i++;
         len++;
     }
 
     // reverse the string
-    for (size_t j = 0; j < len / 2; j++)
+    if (out)
     {
-        char c = out[i - j - 1];
-        out[i - j - 1] = out[i - len + j];
-        out[i - len + j] = c;
+        for (size_t j = 0; j < len / 2; j++)
+        {
+            char c = out[i - j - 1];
+            out[i - j - 1] = out[i - len + j];
+            out[i - len + j] = c;
+        }
     }
 
     // return the new index
@@ -148,17 +160,24 @@ size_t utoa(char *out, size_t n, size_t i, uint64_t v, int base, fuse_printf_fla
     size_t len = 0;
     while (i < n && v > 0)
     {
-        out[i++] = udigit(v, base, flags & FUSE_PRINTF_FLAG_UPPER);
+        if (out)
+        {
+            out[i] = udigit(v, base, flags & FUSE_PRINTF_FLAG_UPPER);
+        }
         v /= base;
+        i++;
         len++;
     }
 
     // reverse the string
-    for (size_t j = 0; j < len / 2; j++)
+    if (out)
     {
-        char c = out[i - j - 1];
-        out[i - j - 1] = out[i - len + j];
-        out[i - len + j] = c;
+        for (size_t j = 0; j < len / 2; j++)
+        {
+            char c = out[i - j - 1];
+            out[i - j - 1] = out[i - len + j];
+            out[i - len + j] = c;
+        }
     }
 
     // return the new index
@@ -171,12 +190,7 @@ int fuse_vsprintf(fuse_t *self, char *out, size_t n, const char *format, va_list
 {
     assert(self);
     assert(format);
-
-    // where there is a buffer and n is zero-sized, return zero
-    if (out != NULL && n == 0)
-    {
-        return 0;
-    }
+    assert(out == NULL || n > 0);
 
     // Reduce n so it is the maximum number of characters that can be written,
     // not including the null terminator
@@ -211,7 +225,7 @@ int fuse_vsprintf(fuse_t *self, char *out, size_t n, const char *format, va_list
             format++;
             if (*format == '\0')
             {
-                i = outs(out, n, i, "%l");
+                i = stoa(out, n, i, "%l", 0);
                 continue;
             }
             break;
@@ -222,7 +236,7 @@ int fuse_vsprintf(fuse_t *self, char *out, size_t n, const char *format, va_list
         {
         case 's':
             // cstring
-            i = outs(out, n, i, va_arg(va, const char *));
+            i = stoa(out, n, i, va_arg(va, const char *), flags);
             format++;
             break;
         case 'd':
@@ -293,7 +307,6 @@ int fuse_vsprintf(fuse_t *self, char *out, size_t n, const char *format, va_list
 size_t fuse_sprintf(fuse_t *self, char *buffer, size_t size, const char *format, ...)
 {
     assert(self);
-    assert(buffer);
     assert(format);
 
     va_list va;
@@ -301,4 +314,30 @@ size_t fuse_sprintf(fuse_t *self, char *buffer, size_t size, const char *format,
     const int ret = fuse_vsprintf(self, buffer, size, format, va);
     va_end(va);
     return ret;
+}
+
+/* @brief Format a string to stdout, replacing formatting directives
+ */
+size_t fuse_printf(fuse_t *self, const char *format, ...)
+{
+    const int sz = 81;
+    static char buffer[sz];
+
+    assert(self);
+    assert(format);
+
+    // Try to print to the buffer first
+    va_list va;
+    va_start(va, format);
+    const int n = fuse_vsprintf(self, buffer, sz, format, va);
+    va_end(va);
+
+    if (n < sz)
+    {
+        // Print to stdout
+        puts(buffer);
+        return n;
+    }
+
+    return n;
 }

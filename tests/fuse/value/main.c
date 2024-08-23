@@ -13,7 +13,7 @@ int TEST_001(fuse_t *self)
     // sprintf the value
     assert(fuse_sprintf(self, buf, n, "%v", value) > 0);
     fuse_debugf("  value=%s\n", buf);
-    assert_cstr_eq("NULL", buf);
+    assert_cstr_eq("<NULL>", buf);
 
     // sprintf the json value
     assert(fuse_sprintf(self, buf, n, "%q", value) > 0);
@@ -32,7 +32,7 @@ int TEST_002(fuse_t *self)
     fuse_debugf("TRUE value\n");
 
     // Make and free a NULL value
-    fuse_value_t *value = fuse_alloc(self, FUSE_MAGIC_BOOL, (void* )true);
+    fuse_value_t *value = fuse_alloc(self, FUSE_MAGIC_BOOL, (void *)true);
 
     // sprintf the value
     assert(fuse_sprintf(self, buf, n, "%v", value) > 0);
@@ -51,7 +51,7 @@ int TEST_003(fuse_t *self)
     fuse_debugf("FALSE value\n");
 
     // Make and free a NULL value
-    fuse_value_t *value = fuse_alloc(self, FUSE_MAGIC_BOOL, (void* )false);
+    fuse_value_t *value = fuse_alloc(self, FUSE_MAGIC_BOOL, (void *)false);
 
     // sprintf the value
     assert(fuse_sprintf(self, buf, n, "%v", value) > 0);
@@ -80,11 +80,216 @@ int TEST_004(fuse_t *self)
 
         // sprintf the value
         assert(fuse_sprintf(self, buf, n, "%v", value) > 0);
-        fuse_debugf("  value=%s\n", buf);
     }
 
     // Free the value
     fuse_free(self, value);
+
+    // Return success
+    return 0;
+}
+
+int TEST_005(fuse_t *self)
+{
+    fuse_debugf("int16_t value\n");
+
+    // Make a S16 value
+    fuse_value_t *value = fuse_alloc(self, FUSE_MAGIC_S16, NULL);
+
+    // Iterate over all possible values
+    for (int16_t i = INT16_MIN; i < INT16_MAX; i++)
+    {
+        // Set the value
+        *(int16_t *)value = i;
+
+        // sprintf the value
+        assert(fuse_sprintf(self, buf, n, "%v", value) > 0);
+    }
+
+    // Free the value
+    fuse_free(self, value);
+
+    // Return success
+    return 0;
+}
+
+int TEST_006(fuse_t *self)
+{
+    fuse_debugf("int32_t value\n");
+
+    // Make a S32 value
+    fuse_value_t *value = fuse_alloc(self, FUSE_MAGIC_S32, NULL);
+
+    // Iterate over 1000 random values
+    for (int i = 0; i < 1000; i++)
+    {
+        // Set the value
+        uint32_t u32 = rand_u32();
+        *(int32_t *)value = (int32_t)((u32 >> 1) ^ (-(u32 & 1)));
+
+        // sprintf the value
+        assert(fuse_sprintf(self, buf, n, "%v", value) > 0);
+    }
+
+    // Free the value
+    fuse_free(self, value);
+
+    // Return success
+    return 0;
+}
+
+int TEST_007(fuse_t *self)
+{
+    fuse_debugf("int64_t value\n");
+
+    // Make a S32 value
+    fuse_value_t *value = fuse_alloc(self, FUSE_MAGIC_S64, NULL);
+
+    // Iterate over 1000 random values
+    for (int i = 0; i < 1000; i++)
+    {
+        // Set the value
+        uint64_t u64 = rand_u64();
+        *(int64_t *)value = (int64_t)((u64 >> 1) ^ (-(u64 & 1)));
+
+        // sprintf the value
+        assert(fuse_sprintf(self, buf, n, "%v", value) > 0);
+    }
+
+    // Free the value
+    fuse_free(self, value);
+
+    // Return success
+    return 0;
+}
+
+int TEST_008(fuse_t *self)
+{
+    fuse_debugf("uint8_t value\n");
+
+    // Make a U8 value
+    fuse_value_t *value = fuse_alloc(self, FUSE_MAGIC_U8, NULL);
+
+    // Iterate over almost all uint8_t values
+    for (uint8_t i = 0; i < UINT8_MAX; i++)
+    {
+        // Set the value
+        *(uint8_t *)value = i;
+
+        // sprintf the value
+        assert(fuse_sprintf(self, buf, n, "%v", value) > 0);
+    }
+
+    // Free the value
+    fuse_free(self, value);
+
+    // Return success
+    return 0;
+}
+
+int TEST_009(fuse_t *self)
+{
+    fuse_debugf("uint16_t value\n");
+
+    // Make a U16 value
+    fuse_value_t *value = fuse_alloc(self, FUSE_MAGIC_U16, NULL);
+
+    // Iterate over almost all uint8_t values
+    for (uint16_t i = 0; i < UINT16_MAX; i++)
+    {
+        // Set the value
+        *(uint16_t *)value = i;
+
+        // sprintf the value
+        assert(fuse_sprintf(self, buf, n, "%v", value) > 0);
+    }
+
+    // Free the value
+    fuse_free(self, value);
+
+    // Return success
+    return 0;
+}
+
+int TEST_010(fuse_t *self)
+{
+    fuse_debugf("uint32_t value\n");
+
+    // Make a U32 value
+    fuse_value_t *value = fuse_alloc(self, FUSE_MAGIC_U16, NULL);
+
+    // Iterate over almost all uint8_t values
+    for (int i = 0; i < 1000; i++)
+    {
+        // Set the value
+        *(uint32_t *)value = rand_u32();
+
+        // sprintf the value
+        assert(fuse_sprintf(self, buf, n, "%v", value) > 0);
+    }
+
+    // Free the value
+    fuse_free(self, value);
+
+    // Return success
+    return 0;
+}
+
+int TEST_011(fuse_t *self)
+{
+    fuse_debugf("uint64_t value\n");
+
+    // Make a U64 value
+    fuse_value_t *value = fuse_alloc(self, FUSE_MAGIC_U64, NULL);
+
+    // Iterate over almost all uint8_t values
+    for (int i = 0; i < 1000; i++)
+    {
+        // Set the value
+        *(uint64_t *)value = rand_u64();
+
+        // sprintf the value
+        assert(fuse_sprintf(self, buf, n, "%v", value) > 0);
+    }
+
+    // Free the value
+    fuse_free(self, value);
+
+    // Return success
+    return 0;
+}
+
+int TEST_012(fuse_t *self)
+{
+    fuse_debugf("cstr value\n");
+
+    // Make a CSTR value
+    fuse_value_t *value = fuse_alloc(self, FUSE_MAGIC_CSTR, "hello, world!");
+
+    assert(fuse_sprintf(self, buf, n, "%v", value) > 0);
+    assert_cstr_eq("hello, world!", buf);
+
+    // Free the value
+    fuse_free(self, value);
+
+    // Return success
+    return 0;
+}
+
+int TEST_013(fuse_t *self)
+{
+    fuse_debugf("cstr value\n");
+
+    // Make two CSTR values
+    fuse_value_t *value1 = fuse_alloc(self, FUSE_MAGIC_CSTR, "hello");
+    fuse_value_t *value2 = fuse_alloc(self, FUSE_MAGIC_CSTR, "world");
+
+    assert(fuse_sprintf(self, buf, n, "%v %v", value1, value2) > 0);
+    assert_cstr_eq("hello world", buf);
+
+    // Free the values
+    fuse_free(self, value1);
+    fuse_free(self, value2);
 
     // Return success
     return 0;
@@ -98,5 +303,13 @@ int main()
     assert(TEST_002(self) == 0);
     assert(TEST_003(self) == 0);
     assert(TEST_004(self) == 0);
+    assert(TEST_005(self) == 0);
+    assert(TEST_006(self) == 0);
+    assert(TEST_007(self) == 0);
+    assert(TEST_008(self) == 0);
+    assert(TEST_009(self) == 0);
+    assert(TEST_010(self) == 0);
+    assert(TEST_011(self) == 0);
+    assert(TEST_012(self) == 0);
     assert(fuse_destroy(self) == 0);
 }

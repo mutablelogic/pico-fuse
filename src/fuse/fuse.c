@@ -22,6 +22,7 @@ size_t fuse_cstr_null(fuse_t *self, fuse_value_t *value, char *buffer, size_t si
 size_t fuse_qstr_null(fuse_t *self, fuse_value_t *value, char *buffer, size_t size);
 size_t fuse_qstr_bool(fuse_t *self, fuse_value_t *value, char *buffer, size_t size);
 size_t fuse_qstr_number(fuse_t *self, fuse_value_t *value, char *buffer, size_t size);
+size_t fuse_cstr_cstr(fuse_t *self, fuse_value_t *value, char *buffer, size_t size);
 
 ///////////////////////////////////////////////////////////////////////////////
 // PUBLIC METHODS
@@ -141,6 +142,7 @@ fuse_t *fuse_new()
         .size = sizeof(const char *),
         .name = "CSTR",
         .init = fuse_init_cstr,
+        .cstr = fuse_cstr_cstr,
     };
     fuse->desc[FUSE_MAGIC_LIST] = (struct fuse_value_desc){
         .size = sizeof(struct fuse_list),
@@ -395,26 +397,22 @@ bool fuse_init_cstr(fuse_t *self, fuse_value_t *value, const void *user_data)
  */
 size_t fuse_cstr_null(fuse_t *self, fuse_value_t *value, char *buffer, size_t size)
 {
-    const char *str = "NULL";
-    size_t i = 0;
-    while (i < size && *str)
-    {
-        buffer[i++] = *str++;
-    }
-    return i;
+    return stoa(buffer, size, 0, NULL, 0);
 }
 
 /* @brief Output a null as a qstr
  */
 size_t fuse_qstr_null(fuse_t *self, fuse_value_t *value, char *buffer, size_t size)
 {
-    const char *str = "null";
-    size_t i = 0;
-    while (i < size && *str)
-    {
-        buffer[i++] = *str++;
-    }
-    return i;
+    return stoa(buffer, size, 0, "null", 0);
+}
+
+/* @brief Output a pointer to a null-terminated string as a cstr
+ */
+size_t fuse_cstr_cstr(fuse_t *self, fuse_value_t *value, char *buffer, size_t size)
+{
+    const char *v = *(const char **)value;
+    return stoa(buffer, size, 0, v, 0);
 }
 
 /* @brief Output a bool as a cstr
@@ -422,13 +420,14 @@ size_t fuse_qstr_null(fuse_t *self, fuse_value_t *value, char *buffer, size_t si
 size_t fuse_qstr_bool(fuse_t *self, fuse_value_t *value, char *buffer, size_t size)
 {
     bool v = *(bool *)value;
-    const char *str = v ? "true" : "false";
-    size_t i = 0;
-    while (i < size && *str)
+    if (v)
     {
-        buffer[i++] = *str++;
+        return stoa(buffer, size, 0, "true", 0);
     }
-    return i;
+    else
+    {
+        return stoa(buffer, size, 0, "false", 0);
+    }
 }
 
 /* @brief Output a uint8_t as a cstr
@@ -441,29 +440,21 @@ size_t fuse_qstr_number(fuse_t *self, fuse_value_t *value, char *buffer, size_t 
     switch (fuse_allocator_magic(self->allocator, value))
     {
     case FUSE_MAGIC_U8:
-        utoa(buffer, size, 0, *(uint8_t *)value, 10, 0);
-        break;
+        return utoa(buffer, size, 0, *(uint8_t *)value, 10, 0);
     case FUSE_MAGIC_U16:
-        utoa(buffer, size, 0, *(uint16_t *)value, 10, 0);
-        break;
+        return utoa(buffer, size, 0, *(uint16_t *)value, 10, 0);
     case FUSE_MAGIC_U32:
-        utoa(buffer, size, 0, *(uint32_t *)value, 10, 0);
-        break;
+        return utoa(buffer, size, 0, *(uint32_t *)value, 10, 0);
     case FUSE_MAGIC_U64:
-        utoa(buffer, size, 0, *(uint64_t *)value, 10, 0);
-        break;
+        return utoa(buffer, size, 0, *(uint64_t *)value, 10, 0);
     case FUSE_MAGIC_S8:
-        itoa(buffer, size, 0, *(int8_t *)value, 10, 0);
-        break;
+        return itoa(buffer, size, 0, *(int8_t *)value, 10, 0);
     case FUSE_MAGIC_S16:
-        itoa(buffer, size, 0, *(int16_t *)value, 10, 0);
-        break;
+        return itoa(buffer, size, 0, *(int16_t *)value, 10, 0);
     case FUSE_MAGIC_S32:
-        itoa(buffer, size, 0, *(int32_t *)value, 10, 0);
-        break;
+        return itoa(buffer, size, 0, *(int32_t *)value, 10, 0);
     case FUSE_MAGIC_S64:
-        itoa(buffer, size, 0, *(int64_t *)value, 10, 0);
-        break;
+        return itoa(buffer, size, 0, *(int64_t *)value, 10, 0);
     }
     return 0;
 }

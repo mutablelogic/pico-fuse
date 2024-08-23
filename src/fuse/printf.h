@@ -34,4 +34,15 @@ size_t itoa(char *out, size_t n, size_t i, int64_t v, int base, fuse_printf_flag
  */
 size_t utoa(char *out, size_t n, size_t i, uint64_t v, int base, fuse_printf_flags_t flags);
 
+/* @brief Append a null-terminated string
+ *
+ * @param out    The output buffer
+ * @param n      Size of the output buffer, not including the null terminator
+ * @param i      The current index in the output buffer
+ * @param v      The value to append
+ * @param flags  Flags to modify the output format
+ * @returns      The new index in the output buffer
+ */
+size_t stoa(char *out, size_t n, size_t i, const char *v, fuse_printf_flags_t flags);
+
 #endif

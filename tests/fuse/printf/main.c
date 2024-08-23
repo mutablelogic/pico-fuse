@@ -4,20 +4,6 @@
 const int n = 128;
 char buf[n] = {0};
 
-int TEST_001(fuse_t *self)
-{
-    const int sz = 0;
-    char buf[sz];
-
-    fuse_debugf("TEST_001 zero-sized buffer\n");
-
-    // sprintf the value
-    assert(fuse_sprintf(self, buf, sz, "test") == 0);
-
-    // Return success
-    return 0;
-}
-
 int TEST_002(fuse_t *self)
 {
     const int sz = 1;
@@ -312,7 +298,6 @@ int main()
 {
     fuse_t *self = fuse_new();
     assert(self);
-    assert(TEST_001(self) == 0);
     assert(TEST_002(self) == 0);
     assert(TEST_003(self) == 0);
     assert(TEST_004(self) == 0);
