@@ -1,7 +1,7 @@
-
-#include <fuse/fuse.h>
+#include <stdio.h>
 #include <stdarg.h>
 
+#include <fuse/fuse.h>
 #include "fuse.h"
 #include "printf.h"
 
@@ -9,10 +9,15 @@
  */
 size_t outch(char *out, size_t n, size_t i, char c)
 {
-    assert(out);
-    assert(i < n);
-
-    out[i] = c;
+    assert(out == NULL || i < n);
+    if (out)
+    {
+        out[i] = c;
+    }
+    else
+    {
+        putchar(c);
+    }
     return i + 1;
 }
 
@@ -21,39 +26,50 @@ size_t outch(char *out, size_t n, size_t i, char c)
 size_t outv(fuse_t *self, char *out, size_t n, size_t i, fuse_value_t *v)
 {
     assert(self);
-    assert(out);
-    assert(i < n);
+    assert(out == NULL || i < n);
     assert(v);
 
     int16_t magic = fuse_allocator_magic(self->allocator, v);
     assert(magic < FUSE_MAGIC_COUNT);
     assert(self->desc[magic].cstr);
-    size_t c = self->desc[magic].cstr(self, v, out + i, n - i);
-    return i + c;
+
+    if (out == NULL)
+    {
+        return self->desc[magic].cstr(self, v, NULL, 0) + i;
+    }
+    else
+    {
+        return self->desc[magic].cstr(self, v, out + i, n - i) + i;
+    }
 }
 
-/* @brief Append a json string value into the output buffer
+/* @brief Append a json (quoted) string value into the output buffer
  */
 size_t outq(fuse_t *self, char *out, size_t n, size_t i, fuse_value_t *v)
 {
     assert(self);
-    assert(out);
-    assert(i < n);
+    assert(out == NULL || i < n);
     assert(v);
 
     int16_t magic = fuse_allocator_magic(self->allocator, v);
     assert(magic < FUSE_MAGIC_COUNT);
     assert(self->desc[magic].qstr);
-    size_t c = self->desc[magic].qstr(self, v, out + i, n - i);
-    return i + c;
+
+    if (out == NULL)
+    {
+        return self->desc[magic].qstr(self, v, NULL, 0) + i;
+    }
+    else
+    {
+        return self->desc[magic].qstr(self, v, out + i, n - i) + i;
+    }
 }
 
 /* @brief Append a null-terminated string value into the output buffer
  */
 size_t outs(char *out, size_t n, size_t i, const char *v)
 {
-    assert(out);
-    assert(i < n);
+    assert(out == NULL || i < n);
 
     if (v == NULL)
     {
@@ -70,8 +86,7 @@ size_t outs(char *out, size_t n, size_t i, const char *v)
  */
 size_t itoa(char *out, size_t n, size_t i, int64_t v, int base, fuse_printf_flags_t flags)
 {
-    assert(out);
-    assert(i < n);
+    assert(out == NULL || i < n);
 
     // zero value
     if (v == 0)
@@ -122,8 +137,7 @@ static inline char udigit(uint64_t v, int base, bool upper)
  */
 size_t utoa(char *out, size_t n, size_t i, uint64_t v, int base, fuse_printf_flags_t flags)
 {
-    assert(out);
-    assert(i < n);
+    assert(out == NULL || i < n);
 
     // zero value
     if (v == 0)
@@ -151,17 +165,15 @@ size_t utoa(char *out, size_t n, size_t i, uint64_t v, int base, fuse_printf_fla
     return i;
 }
 
-/* @brief Format a string into the output buffer, replacing %v and %V with the value and type of the next argument
- *        respectively
+/* @brief Format a string into the output buffer or to stdout, replacing formatting directives
  */
 int fuse_vsprintf(fuse_t *self, char *out, size_t n, const char *format, va_list va)
 {
     assert(self);
-    assert(out);
     assert(format);
 
-    // where the buffer is zero-sized, return zero
-    if (n == 0)
+    // where there is a buffer and n is zero-sized, return zero
+    if (out != NULL && n == 0)
     {
         return 0;
     }
@@ -276,11 +288,14 @@ int fuse_vsprintf(fuse_t *self, char *out, size_t n, const char *format, va_list
     return i;
 }
 
-/* @brief Format a string into the output buffer, replacing %v and %V with the value and type of the next argument
- *        respectively
+/* @brief Format a string into the output buffer, replacing formatting directives
  */
 size_t fuse_sprintf(fuse_t *self, char *buffer, size_t size, const char *format, ...)
 {
+    assert(self);
+    assert(buffer);
+    assert(format);
+
     va_list va;
     va_start(va, format);
     const int ret = fuse_vsprintf(self, buffer, size, format, va);
