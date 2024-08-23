@@ -28,7 +28,7 @@ size_t outv(fuse_t *self, char *out, size_t n, size_t i, fuse_value_t *v)
     int16_t magic = fuse_allocator_magic(self->allocator, v);
     assert(magic < FUSE_MAGIC_COUNT);
     assert(self->desc[magic].cstr);
-    size_t c = self->desc[magic].cstr(v, out + i, n - i);
+    size_t c = self->desc[magic].cstr(self, v, out + i, n - i);
     return i + c;
 }
 
@@ -44,8 +44,111 @@ size_t outq(fuse_t *self, char *out, size_t n, size_t i, fuse_value_t *v)
     int16_t magic = fuse_allocator_magic(self->allocator, v);
     assert(magic < FUSE_MAGIC_COUNT);
     assert(self->desc[magic].qstr);
-    size_t c = self->desc[magic].qstr(v, out + i, n - i);
+    size_t c = self->desc[magic].qstr(self, v, out + i, n - i);
     return i + c;
+}
+
+/* @brief Append a null-terminated string value into the output buffer
+ */
+size_t outs(char *out, size_t n, size_t i, const char *v)
+{
+    assert(out);
+    assert(i < n);
+
+    if (v == NULL)
+    {
+        v = "<NULL>";
+    }
+    while (i < n && *v)
+    {
+        out[i++] = *v++;
+    }
+    return i;
+}
+
+/* @brief Append a signed integer
+ */
+size_t itoa(char *out, size_t n, size_t i, int64_t v, int base, fuse_printf_flags_t flags)
+{
+    assert(out);
+    assert(i < n);
+
+    // zero value
+    if (v == 0)
+    {
+        return outch(out, n, i, '0');
+    }
+
+    // negative value
+    if (v < 0)
+    {
+        out[i++] = '-';
+        v = -v;
+        if (i >= n)
+        {
+            return i;
+        }
+    }
+
+    size_t len = 0;
+    while (i < n && v > 0)
+    {
+        out[i++] = (char)(v % base) + '0';
+        v /= base;
+        len++;
+    }
+
+    // reverse the string
+    for (size_t j = 0; j < len / 2; j++)
+    {
+        char c = out[i - j - 1];
+        out[i - j - 1] = out[i - len + j];
+        out[i - len + j] = c;
+    }
+
+    // return the new index
+    return i;
+}
+
+/* @brief Return digit for a given value
+ */
+static inline char udigit(uint64_t v, int base, bool upper)
+{
+    char c = (char)(v % base);
+    return (c < 10) ? c + '0' : c - 10 + (upper ? 'A' : 'a');
+}
+
+/* @brief Append an unsigned integer
+ */
+size_t utoa(char *out, size_t n, size_t i, uint64_t v, int base, fuse_printf_flags_t flags)
+{
+    assert(out);
+    assert(i < n);
+
+    // zero value
+    if (v == 0)
+    {
+        return outch(out, n, i, '0');
+    }
+
+    size_t len = 0;
+    while (i < n && v > 0)
+    {
+        out[i++] = udigit(v, base, flags & FUSE_PRINTF_FLAG_UPPER);
+        v /= base;
+        len++;
+    }
+
+    // reverse the string
+    for (size_t j = 0; j < len / 2; j++)
+    {
+        char c = out[i - j - 1];
+        out[i - j - 1] = out[i - len + j];
+        out[i - len + j] = c;
+    }
+
+    // return the new index
+    return i;
 }
 
 /* @brief Format a string into the output buffer, replacing %v and %V with the value and type of the next argument
@@ -57,10 +160,20 @@ int fuse_vsprintf(fuse_t *self, char *out, size_t n, const char *format, va_list
     assert(out);
     assert(format);
 
-    int i = 0;
-    while (*format && i < (n - 1))
+    // where the buffer is zero-sized, return zero
+    if (n == 0)
     {
-        fuse_debugf("outv %c\n", *format);
+        return 0;
+    }
+
+    // Reduce n so it is the maximum number of characters that can be written,
+    // not including the null terminator
+    n--;
+
+    // iterate over the format string until it is exhausted or the buffer is full
+    int i = 0;
+    while (*format && i < n)
+    {
         if (*format != '%')
         {
             i = outch(out, n, i, *format);
@@ -77,9 +190,68 @@ int fuse_vsprintf(fuse_t *self, char *out, size_t n, const char *format, va_list
             }
         }
 
+        // evaluate flags
+        fuse_printf_flags_t flags = 0;
+        switch (*format)
+        {
+        case 'l':
+            flags |= FUSE_PRINTF_FLAG_LONG;
+            format++;
+            if (*format == '\0')
+            {
+                i = outs(out, n, i, "%l");
+                continue;
+            }
+            break;
+        }
+
         // evaluate specifier
         switch (*format)
         {
+        case 's':
+            // cstring
+            i = outs(out, n, i, va_arg(va, const char *));
+            format++;
+            break;
+        case 'd':
+            // signed integer
+            if (flags & FUSE_PRINTF_FLAG_LONG)
+            {
+                i = itoa(out, n, i, va_arg(va, int64_t), 10, flags);
+            }
+            else
+            {
+                i = itoa(out, n, i, va_arg(va, int32_t), 10, flags);
+            }
+            format++;
+            break;
+        case 'u':
+            // unsigned integer
+            if (flags & FUSE_PRINTF_FLAG_LONG)
+            {
+                i = utoa(out, n, i, va_arg(va, uint64_t), 10, flags);
+            }
+            else
+            {
+                i = utoa(out, n, i, va_arg(va, uint32_t), 10, flags);
+            }
+            format++;
+            break;
+        case 'X':
+            // upper case unsigned hexadecimal value
+            flags |= FUSE_PRINTF_FLAG_UPPER;
+        case 'x':
+            // unsigned hexadecimal value
+            if (flags & FUSE_PRINTF_FLAG_LONG)
+            {
+                i = utoa(out, n, i, va_arg(va, uint64_t), 16, flags);
+            }
+            else
+            {
+                i = utoa(out, n, i, va_arg(va, uint32_t), 16, flags);
+            }
+            format++;
+            break;
         case 'v':
             // value
             i = outv(self, out, n, i, va_arg(va, fuse_value_t *));
@@ -98,7 +270,7 @@ int fuse_vsprintf(fuse_t *self, char *out, size_t n, const char *format, va_list
     }
 
     // termination
-    outch(out, n, i, '\0');
+    outch(out, n + 1, i, '\0');
 
     // return number of characters written
     return i;

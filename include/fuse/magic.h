@@ -23,7 +23,7 @@
 #define FUSE_MAGIC_F32 0x0B   ///< float32_t
 #define FUSE_MAGIC_F64 0x0C   ///< float64_t
 #define FUSE_MAGIC_BOOL 0x0D  ///< bool
-#define FUSE_MAGIC_STR 0x0E   ///< string
+#define FUSE_MAGIC_CSTR 0x0E  ///< constant string with null terminator
 #define FUSE_MAGIC_LIST 0x0F  ///< list[value]
 #define FUSE_MAGIC_MAP 0x10   ///< map[value][value]
 

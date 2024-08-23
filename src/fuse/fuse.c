@@ -7,6 +7,7 @@
 #include "fuse.h"
 #include "list.h"
 #include "map.h"
+#include "printf.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // DECLARATIONS
@@ -16,8 +17,11 @@ bool fuse_init_null(fuse_t *self, fuse_value_t *value, const void *user_data);
 bool fuse_init_number(fuse_t *self, fuse_value_t *value, const void *user_data);
 bool fuse_init_memcpy(fuse_t *self, fuse_value_t *value, const void *user_data);
 bool fuse_init_cstr(fuse_t *self, fuse_value_t *value, const void *user_data);
-size_t fuse_cstr_null(fuse_value_t *value, char *buffer, size_t size);
-size_t fuse_qstr_null(fuse_value_t *value, char *buffer, size_t size);
+
+size_t fuse_cstr_null(fuse_t *self, fuse_value_t *value, char *buffer, size_t size);
+size_t fuse_qstr_null(fuse_t *self, fuse_value_t *value, char *buffer, size_t size);
+size_t fuse_qstr_bool(fuse_t *self, fuse_value_t *value, char *buffer, size_t size);
+size_t fuse_qstr_number(fuse_t *self, fuse_value_t *value, char *buffer, size_t size);
 
 ///////////////////////////////////////////////////////////////////////////////
 // PUBLIC METHODS
@@ -64,41 +68,57 @@ fuse_t *fuse_new()
         .size = sizeof(uint8_t),
         .name = "U8",
         .init = fuse_init_number,
+        .cstr = fuse_qstr_number,
+        .qstr = fuse_qstr_number,
     };
     fuse->desc[FUSE_MAGIC_U16] = (struct fuse_value_desc){
         .size = sizeof(uint16_t),
         .name = "U16",
         .init = fuse_init_number,
+        .cstr = fuse_qstr_number,
+        .qstr = fuse_qstr_number,
     };
     fuse->desc[FUSE_MAGIC_U32] = (struct fuse_value_desc){
         .size = sizeof(uint32_t),
         .name = "U32",
         .init = fuse_init_number,
+        .cstr = fuse_qstr_number,
+        .qstr = fuse_qstr_number,
     };
     fuse->desc[FUSE_MAGIC_U64] = (struct fuse_value_desc){
         .size = sizeof(uint64_t),
         .name = "U64",
         .init = fuse_init_number,
+        .cstr = fuse_qstr_number,
+        .qstr = fuse_qstr_number,
     };
     fuse->desc[FUSE_MAGIC_S8] = (struct fuse_value_desc){
         .size = sizeof(int8_t),
         .name = "S8",
         .init = fuse_init_number,
+        .cstr = fuse_qstr_number,
+        .qstr = fuse_qstr_number,
     };
     fuse->desc[FUSE_MAGIC_S16] = (struct fuse_value_desc){
         .size = sizeof(int16_t),
         .name = "S16",
         .init = fuse_init_number,
+        .cstr = fuse_qstr_number,
+        .qstr = fuse_qstr_number,
     };
     fuse->desc[FUSE_MAGIC_S32] = (struct fuse_value_desc){
         .size = sizeof(int32_t),
         .name = "S32",
         .init = fuse_init_number,
+        .cstr = fuse_qstr_number,
+        .qstr = fuse_qstr_number,
     };
     fuse->desc[FUSE_MAGIC_S64] = (struct fuse_value_desc){
         .size = sizeof(int64_t),
         .name = "S64",
         .init = fuse_init_number,
+        .cstr = fuse_qstr_number,
+        .qstr = fuse_qstr_number,
     };
     fuse->desc[FUSE_MAGIC_F32] = (struct fuse_value_desc){
         .size = sizeof(float),
@@ -114,10 +134,12 @@ fuse_t *fuse_new()
         .size = sizeof(bool),
         .name = "BOOL",
         .init = fuse_init_number,
+        .cstr = fuse_qstr_bool,
+        .qstr = fuse_qstr_bool,
     };
-    fuse->desc[FUSE_MAGIC_STR] = (struct fuse_value_desc){
+    fuse->desc[FUSE_MAGIC_CSTR] = (struct fuse_value_desc){
         .size = sizeof(const char *),
-        .name = "STR",
+        .name = "CSTR",
         .init = fuse_init_cstr,
     };
     fuse->desc[FUSE_MAGIC_LIST] = (struct fuse_value_desc){
@@ -371,7 +393,7 @@ bool fuse_init_cstr(fuse_t *self, fuse_value_t *value, const void *user_data)
 
 /* @brief Output a null as a cstr
  */
-size_t fuse_cstr_null(fuse_value_t *value, char *buffer, size_t size)
+size_t fuse_cstr_null(fuse_t *self, fuse_value_t *value, char *buffer, size_t size)
 {
     const char *str = "NULL";
     size_t i = 0;
@@ -384,7 +406,7 @@ size_t fuse_cstr_null(fuse_value_t *value, char *buffer, size_t size)
 
 /* @brief Output a null as a qstr
  */
-size_t fuse_qstr_null(fuse_value_t *value, char *buffer, size_t size)
+size_t fuse_qstr_null(fuse_t *self, fuse_value_t *value, char *buffer, size_t size)
 {
     const char *str = "null";
     size_t i = 0;
@@ -393,4 +415,55 @@ size_t fuse_qstr_null(fuse_value_t *value, char *buffer, size_t size)
         buffer[i++] = *str++;
     }
     return i;
+}
+
+/* @brief Output a bool as a cstr
+ */
+size_t fuse_qstr_bool(fuse_t *self, fuse_value_t *value, char *buffer, size_t size)
+{
+    bool v = *(bool *)value;
+    const char *str = v ? "true" : "false";
+    size_t i = 0;
+    while (i < size && *str)
+    {
+        buffer[i++] = *str++;
+    }
+    return i;
+}
+
+/* @brief Output a uint8_t as a cstr
+ */
+size_t fuse_qstr_number(fuse_t *self, fuse_value_t *value, char *buffer, size_t size)
+{
+    assert(value);
+    assert(buffer);
+
+    switch (fuse_allocator_magic(self->allocator, value))
+    {
+    case FUSE_MAGIC_U8:
+        utoa(buffer, size, 0, *(uint8_t *)value, 10, 0);
+        break;
+    case FUSE_MAGIC_U16:
+        utoa(buffer, size, 0, *(uint16_t *)value, 10, 0);
+        break;
+    case FUSE_MAGIC_U32:
+        utoa(buffer, size, 0, *(uint32_t *)value, 10, 0);
+        break;
+    case FUSE_MAGIC_U64:
+        utoa(buffer, size, 0, *(uint64_t *)value, 10, 0);
+        break;
+    case FUSE_MAGIC_S8:
+        itoa(buffer, size, 0, *(int8_t *)value, 10, 0);
+        break;
+    case FUSE_MAGIC_S16:
+        itoa(buffer, size, 0, *(int16_t *)value, 10, 0);
+        break;
+    case FUSE_MAGIC_S32:
+        itoa(buffer, size, 0, *(int32_t *)value, 10, 0);
+        break;
+    case FUSE_MAGIC_S64:
+        itoa(buffer, size, 0, *(int64_t *)value, 10, 0);
+        break;
+    }
+    return 0;
 }
