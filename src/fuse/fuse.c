@@ -23,6 +23,7 @@ size_t fuse_qstr_null(fuse_t *self, fuse_value_t *value, char *buffer, size_t si
 size_t fuse_qstr_bool(fuse_t *self, fuse_value_t *value, char *buffer, size_t size);
 size_t fuse_qstr_number(fuse_t *self, fuse_value_t *value, char *buffer, size_t size);
 size_t fuse_cstr_cstr(fuse_t *self, fuse_value_t *value, char *buffer, size_t size);
+size_t fuse_cstr_qstr(fuse_t *self, fuse_value_t *value, char *buffer, size_t size);
 
 ///////////////////////////////////////////////////////////////////////////////
 // PUBLIC METHODS
@@ -143,6 +144,7 @@ fuse_t *fuse_new()
         .name = "CSTR",
         .init = fuse_init_cstr,
         .cstr = fuse_cstr_cstr,
+        .qstr = fuse_cstr_qstr,
     };
     fuse->desc[FUSE_MAGIC_LIST] = (struct fuse_value_desc){
         .size = sizeof(struct fuse_list),
@@ -413,6 +415,14 @@ size_t fuse_cstr_cstr(fuse_t *self, fuse_value_t *value, char *buffer, size_t si
 {
     const char *v = *(const char **)value;
     return stoa(buffer, size, 0, v, 0);
+}
+
+/* @brief Output a pointer to a null-terminated string as a quoted cstr
+ */
+size_t fuse_cstr_qstr(fuse_t *self, fuse_value_t *value, char *buffer, size_t size)
+{
+    const char *v = *(const char **)value;
+    return qtoa(buffer, size, 0, v, 0);
 }
 
 /* @brief Output a bool as a cstr

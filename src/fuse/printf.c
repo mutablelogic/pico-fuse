@@ -7,7 +7,7 @@
 
 /* @brief Append a character into the output buffer
  */
-static inline size_t outch(char *out, size_t n, size_t i, char c)
+static inline size_t ctoa(char *out, size_t n, size_t i, char c)
 {
     assert(out == NULL || i < n);
     if (out)
@@ -83,6 +83,46 @@ size_t stoa(char *out, size_t n, size_t i, const char *v, fuse_printf_flags_t fl
     return i;
 }
 
+/* @brief Append a null-terminated string in quoted format
+ */
+size_t qtoa(char *out, size_t n, size_t i, const char *v, fuse_printf_flags_t flags)
+{
+    assert(out == NULL || i < n);
+
+    if (v == NULL)
+    {
+        return stoa(out, n, i, "null", flags);
+    }
+
+    // Output the prefix
+    if (i = ctoa(out, n, i, '"'), i >= n)
+        return i;
+
+    // Output the string
+    while (i < n && *v)
+    {
+        switch (*v)
+        {
+        case '"':
+            i = ctoa(out, n, i, '\\');
+            break;
+        case '\n':
+            i = ctoa(out, n, i, '\\');
+            break;
+        default:
+            i = ctoa(out, n, i, *v++);
+        }
+    }
+
+    // Output the suffix
+    if (i < n)
+    {
+        i = ctoa(out, n, i, '"');
+    }
+
+    return i;
+}
+
 /* @brief Append a signed integer
  */
 size_t itoa(char *out, size_t n, size_t i, int64_t v, int base, fuse_printf_flags_t flags)
@@ -92,7 +132,7 @@ size_t itoa(char *out, size_t n, size_t i, int64_t v, int base, fuse_printf_flag
     // zero value
     if (v == 0)
     {
-        return outch(out, n, i, '0');
+        return ctoa(out, n, i, '0');
     }
 
     // negative value
@@ -154,7 +194,7 @@ size_t utoa(char *out, size_t n, size_t i, uint64_t v, int base, fuse_printf_fla
     // zero value
     if (v == 0)
     {
-        return outch(out, n, i, '0');
+        return ctoa(out, n, i, '0');
     }
 
     size_t len = 0;
@@ -202,7 +242,7 @@ int fuse_vsprintf(fuse_t *self, char *out, size_t n, const char *format, va_list
     {
         if (*format != '%')
         {
-            i = outch(out, n, i, *format);
+            i = ctoa(out, n, i, *format);
             format++;
             continue;
         }
@@ -211,7 +251,7 @@ int fuse_vsprintf(fuse_t *self, char *out, size_t n, const char *format, va_list
             format++;
             if (*format == '\0')
             {
-                i = outch(out, n, i, '%');
+                i = ctoa(out, n, i, '%');
                 continue;
             }
         }
@@ -289,14 +329,14 @@ int fuse_vsprintf(fuse_t *self, char *out, size_t n, const char *format, va_list
             format++;
             break;
         default:
-            i = outch(out, n, i, *format);
+            i = ctoa(out, n, i, *format);
             format++;
             break;
         }
     }
 
     // termination
-    outch(out, n + 1, i, '\0');
+    ctoa(out, n + 1, i, '\0');
 
     // return number of characters written
     return i;
@@ -320,11 +360,12 @@ size_t fuse_sprintf(fuse_t *self, char *buffer, size_t size, const char *format,
  */
 size_t fuse_printf(fuse_t *self, const char *format, ...)
 {
-    const int sz = 81;
-    static char buffer[sz];
-
     assert(self);
     assert(format);
+
+    // We have a static buffer for printf less than 81 characters
+    static const int sz = 81;
+    static char buffer[sz] = {0};
 
     // Try to print to the buffer first
     va_list va;
@@ -332,11 +373,19 @@ size_t fuse_printf(fuse_t *self, const char *format, ...)
     const int n = fuse_vsprintf(self, buffer, sz, format, va);
     va_end(va);
 
-    if (n < sz)
+    if (n < (sz - 1))
     {
         // Print to stdout
         puts(buffer);
         return n;
+    }
+    else
+    {
+        // TODO: Allocate a buffer and print to it
+        assert("TODO");
+        // print to the buffer
+        // puts the buffer
+        // Free the allocated buffer
     }
 
     return n;

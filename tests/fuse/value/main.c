@@ -295,6 +295,40 @@ int TEST_013(fuse_t *self)
     return 0;
 }
 
+int TEST_014(fuse_t *self)
+{
+    fuse_debugf("qstr value\n");
+
+    // Make a CSTR value
+    fuse_value_t *value = fuse_alloc(self, FUSE_MAGIC_CSTR, "hello, world");
+
+    assert(fuse_sprintf(self, buf, n, "%q", value) > 0);
+    assert_cstr_eq("\"hello, world\"", buf);
+
+    // Free the values
+    fuse_free(self, value);
+
+    // Return success
+    return 0;
+}
+
+int TEST_015(fuse_t *self)
+{
+    fuse_debugf("qstr value with newline\n");
+
+    // Make a CSTR value
+    fuse_value_t *value = fuse_alloc(self, FUSE_MAGIC_CSTR, "hello, world\n");
+
+    assert(fuse_sprintf(self, buf, n, "%q", value) > 0);
+    assert_cstr_eq("\"hello, world\\n\"", buf);
+
+    // Free the values
+    fuse_free(self, value);
+
+    // Return success
+    return 0;
+}
+
 int main()
 {
     fuse_t *self = fuse_new();
@@ -311,5 +345,8 @@ int main()
     assert(TEST_010(self) == 0);
     assert(TEST_011(self) == 0);
     assert(TEST_012(self) == 0);
+    assert(TEST_013(self) == 0);
+    assert(TEST_014(self) == 0);
+    assert(TEST_015(self) == 0);
     assert(fuse_destroy(self) == 0);
 }
