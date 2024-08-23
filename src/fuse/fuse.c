@@ -16,8 +16,6 @@ bool fuse_init_null(fuse_t *self, fuse_value_t *value, const void *user_data);
 bool fuse_init_number(fuse_t *self, fuse_value_t *value, const void *user_data);
 bool fuse_init_memcpy(fuse_t *self, fuse_value_t *value, const void *user_data);
 bool fuse_init_cstr(fuse_t *self, fuse_value_t *value, const void *user_data);
-bool fuse_init_list(fuse_t *self, fuse_value_t *value, const void *user_data);
-void fuse_destroy_list(fuse_t *self, fuse_value_t *value);
 
 ///////////////////////////////////////////////////////////////////////////////
 // PUBLIC METHODS
@@ -119,7 +117,7 @@ fuse_t *fuse_new()
         .init = fuse_init_cstr,
     };
     fuse->desc[FUSE_MAGIC_LIST] = (struct fuse_value_desc){
-        .size = sizeof(fuse_list_t),
+        .size = sizeof(struct fuse_list),
         .name = "LIST",
         .init = fuse_init_list,
         .destroy = fuse_destroy_list,
@@ -152,6 +150,7 @@ int fuse_destroy(fuse_t *fuse)
     {
         // Do nothing
     }
+
     // If the count is greater than zero, then there are memory leaks
     if (count > 0)
     {
@@ -163,7 +162,7 @@ int fuse_destroy(fuse_t *fuse)
     fuse_allocator_destroy(allocator);
 
     // Return the exit code
-    return FUSE_EXIT_SUCCESS ? 0 : exit_code;
+    return exit_code == FUSE_EXIT_SUCCESS ? 0 : exit_code;
 }
 
 void *fuse_alloc_ex(fuse_t *self, const uint16_t magic, const void *user_data, const char *file, const int line)
@@ -275,7 +274,7 @@ void fuse_destroy_callback(void *ptr, size_t size, uint16_t magic, const char *f
     (*((uint32_t *)user))++;
 
     // Print any errors
-    fuse_debugf("LEAK: %p %s (%d bytes)", ptr, fuse_magic_cstr(magic), size);
+    fuse_debugf("LEAK: %p magic %04X (%d bytes)", ptr, magic, size);
     if (file != NULL)
     {
         fuse_debugf(" [allocated at %s:%d]", file, line);
@@ -339,9 +338,12 @@ bool fuse_init_memcpy(fuse_t *self, fuse_value_t *value, const void *user_data)
     size_t size = self->desc[magic].size;
 
     // Copy or zero the memory
-    if (user_data != NULL) {
+    if (user_data != NULL)
+    {
         memcpy(value, user_data, size);
-    } else {
+    }
+    else
+    {
         memset(value, 0, size);
     }
 
@@ -361,17 +363,4 @@ bool fuse_init_cstr(fuse_t *self, fuse_value_t *value, const void *user_data)
 
     // Return success
     return true;
-}
-
-/* @brief Initialise a list
- */
-bool fuse_init_list(fuse_t *self, fuse_value_t *value, const void *user_data) {
-    fuse_debugf("fuse_init_list\n");
-
-    // Allocate a new list
-    return true;
-}
-
-void fuse_destroy_list(fuse_t *self, fuse_value_t *value) {
-    fuse_debugf("fuse_destroy_list\n");
 }

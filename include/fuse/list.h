@@ -6,11 +6,7 @@
 #ifndef FUSE_LIST_H
 #define FUSE_LIST_H
 
-#include "fuse.h"
-
-/** @brief The abstract list structure
- */ 
-typedef struct fuse_list fuse_list_t;
+#include "value.h"
 
 /** @brief Append an element to the end of a list
  *
@@ -21,7 +17,7 @@ typedef struct fuse_list fuse_list_t;
  *  @param element The element to append
  *  @returns The appended element or NULL if the operation failed
  */
-fuse_value_t *fuse_list_append(fuse_t *self, fuse_list_t *list, fuse_value_t *value);
+fuse_value_t *fuse_list_append(fuse_t *self, fuse_value_t *list, fuse_value_t *element);
 
 /** @brief Append an element to the beginning of a list
  *
@@ -32,7 +28,7 @@ fuse_value_t *fuse_list_append(fuse_t *self, fuse_list_t *list, fuse_value_t *va
  *  @param element The element to add to the beginning of the list
  *  @returns The added element or NULL if the operation failed
  */
-fuse_value_t *fuse_list_push(fuse_t *self, fuse_list_t *list, fuse_value_t *value);
+fuse_value_t *fuse_list_push(fuse_t *self, fuse_value_t *list, fuse_value_t *element);
 
 /** @brief Remove an element from the end of the list
  *
@@ -42,7 +38,7 @@ fuse_value_t *fuse_list_push(fuse_t *self, fuse_list_t *list, fuse_value_t *valu
  *  @param list The list
  *  @returns The removed element or NULL if the operation failed (for example, if the list was empty)
  */
-fuse_value_t *fuse_list_pop(fuse_t *self, fuse_list_t *list);
+fuse_value_t *fuse_list_pop(fuse_t *self, fuse_value_t *list);
 
 /** @brief Return the number of elements in the list
  *
@@ -52,6 +48,6 @@ fuse_value_t *fuse_list_pop(fuse_t *self, fuse_list_t *list);
  *  @param list The list
  *  @returns The count of elements
  */
-size_t fuse_list_count(fuse_t *self, fuse_list_t *list);
+size_t fuse_list_count(fuse_t *self, fuse_value_t *list);
 
 #endif /* FUSE_LIST_H */

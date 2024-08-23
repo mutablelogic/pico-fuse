@@ -47,7 +47,7 @@ int run(fuse_t *fuse)
     fuse_debugf("value=%p\n", value);
 
     // Add a value
-    fuse_append(fuse, list, fuse_alloc(fuse, FUSE_MAGIC_U8, (void *)0xFF));
+    //fuse_append(fuse, list, fuse_alloc(fuse, FUSE_MAGIC_U8, (void *)0xFF));
 
     // Free the list
     fuse_free(fuse, list);

@@ -1,16 +1,13 @@
+#ifndef TARGET_PICO
+
 #include <limits.h>
 #include <time.h>
 
-// Includes
 #include <fuse/fuse.h>
 #include "random.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // PUBLIC METHODS
-
-#ifdef TARGET_POSIX
-#include <stdint.h>
-#include "random.h"
 
 // Seed
 static struct fuse_random_state seed = {0};

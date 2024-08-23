@@ -6,7 +6,6 @@ add_library(${NAME} STATIC
     device.c
     fuse.c
     list.c
-    magic.c
     map.c
     panic.c
     printf.c

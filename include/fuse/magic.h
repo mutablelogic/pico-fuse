@@ -40,11 +40,4 @@
 #define FUSE_EXIT_SUCCESS 1     ///< Successful completion
 #define FUSE_EXIT_MEMORYLEAKS 2 ///< Memory leaks detected in the application
 
-/** @brief Convert a magic number to a string
- *
- *  @param magic The magic number
- *  @returns A zero-terminated string representation of the magic number
- */
-const char *fuse_magic_cstr(uint16_t magic);
-
 #endif /* FUSE_MAGIC_H */

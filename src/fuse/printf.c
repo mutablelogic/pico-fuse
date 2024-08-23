@@ -68,11 +68,11 @@ int fuse_vsprintf(char *out, size_t n, const char *format, va_list va)
 /* @brief Format a string into the output buffer, replacing %v and %V with the value and type of the next argument
  *        respectively
  */
-int fuse_sprintf(char *out, size_t n, const char *format, ...)
+size_t fuse_sprintf(char *buffer, size_t size, const char *format, ...)
 {
     va_list va;
     va_start(va, format);
-    const int ret = fuse_vsprintf(out, n, format, va);
+    const int ret = fuse_vsprintf(buffer, size, format, va);
     va_end(va);
     return ret;
 }
