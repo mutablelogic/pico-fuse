@@ -4,10 +4,16 @@
 #ifndef FUSE_PRIVATE_PRINTF_H
 #define FUSE_PRIVATE_PRINTF_H
 
+/* @brief Flags to modify the output format
+ *
+ * The first 16 bits are reserved for the number of digits to print
+ * for hexadecimal values. The remaining bits are used for
+ * flags that modify the output format.
+ */
 typedef enum
 {
-    FUSE_PRINTF_FLAG_LONG = 1,  ///< Long unsigned or signed integer
-    FUSE_PRINTF_FLAG_UPPER = 2, ///< Uppercase hex digits
+    FUSE_PRINTF_FLAG_LONG = 0x0100,  ///< Long integer
+    FUSE_PRINTF_FLAG_UPPER = 0x0200, ///< Uppercase hex digits
 } fuse_printf_flags_t;
 
 /* @brief Append a signed integer value to a string

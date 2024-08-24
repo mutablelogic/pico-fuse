@@ -1,8 +1,12 @@
 #include <stdio.h>
 #include <stdarg.h>
 
+// Public headers
 #include <fuse/fuse.h>
+
+// Private headers
 #include "fuse.h"
+#include "defs.h"
 #include "printf.h"
 
 /* @brief Append a character into the output buffer
@@ -101,16 +105,40 @@ size_t qtoa(char *out, size_t n, size_t i, const char *v, fuse_printf_flags_t fl
     // Output the string
     while (i < n && *v)
     {
-        switch (*v)
+        switch (*v++)
         {
         case '"':
-            i = ctoa(out, n, i, '\\');
+            i = stoa(out, n, i, "\\\"", 0);
+            break;
+        case '\b':
+            i = stoa(out, n, i, "\\b", 0);
+            break;
+        case '\f':
+            i = stoa(out, n, i, "\\f", 0);
             break;
         case '\n':
-            i = ctoa(out, n, i, '\\');
+            i = stoa(out, n, i, "\\n", 0);
+            break;
+        case '\r':
+            i = stoa(out, n, i, "\\r", 0);
+            break;
+        case '\t':
+            i = stoa(out, n, i, "\\t", 0);
             break;
         default:
-            i = ctoa(out, n, i, *v++);
+        {
+            const char ch = *(v - 1);
+            if (ch <= 0x1F || ch == 0x7F)
+            {
+                i = stoa(out, n, i, "\\u", 0);
+                // "\u00XX"
+                i = itoa(out, n, i, ch, 16, FUSE_PRINTF_FLAG_UPPER | 4);
+            }
+            else
+            {
+                i = ctoa(out, n, i, ch);
+            }
+        }
         }
     }
 
@@ -177,6 +205,21 @@ size_t itoa(char *out, size_t n, size_t i, int64_t v, int base, fuse_printf_flag
     return i;
 }
 
+/* @brief Append a pointer value
+ */
+size_t ptoa(char *out, size_t n, size_t i, void *v)
+{
+    assert(out == NULL || i < n);
+    i = stoa(out, n, i, "0x", 0);
+    if (i < n)
+    {
+        i = utoa(out, n, i, (uintptr_t)v, 16, 0);
+    }
+
+    // return the new index
+    return i;
+}
+
 /* @brief Return digit for a given value
  */
 static inline char udigit(uint64_t v, int base, bool upper)
@@ -207,6 +250,21 @@ size_t utoa(char *out, size_t n, size_t i, uint64_t v, int base, fuse_printf_fla
         v /= base;
         i++;
         len++;
+    }
+
+    // Add additional zeros for hexadecimal values
+    size_t digits = flags & 0xFF;
+    if (base == 16 && digits > 0)
+    {
+        while (i < n && len < digits)
+        {
+            if (out)
+            {
+                out[i] = '0';
+            }
+            i++;
+            len++;
+        }
     }
 
     // reverse the string
@@ -328,6 +386,11 @@ int fuse_vsprintf(fuse_t *self, char *out, size_t n, const char *format, va_list
             i = outq(self, out, n, i, va_arg(va, fuse_value_t *));
             format++;
             break;
+        case 'p':
+            // pointer
+            i = ptoa(out, n, i, va_arg(va, void *));
+            format++;
+            break;
         default:
             i = ctoa(out, n, i, *format);
             format++;
@@ -363,8 +426,8 @@ size_t fuse_printf(fuse_t *self, const char *format, ...)
     assert(self);
     assert(format);
 
-    // We have a static buffer for printf less than 81 characters
-    static const int sz = 81;
+    // We have a static buffer for printf
+    static const int sz = FUSE_PRINTF_BUFFER_SIZE + 1;
     static char buffer[sz] = {0};
 
     // Try to print to the buffer first

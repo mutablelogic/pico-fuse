@@ -314,13 +314,47 @@ int TEST_014(fuse_t *self)
 
 int TEST_015(fuse_t *self)
 {
-    fuse_debugf("qstr value with newline\n");
+    fuse_debugf("qstr value with control characters\n");
 
     // Make a CSTR value
-    fuse_value_t *value = fuse_alloc(self, FUSE_MAGIC_CSTR, "hello, world\n");
+    fuse_value_t *value = fuse_alloc(self, FUSE_MAGIC_CSTR, " \b \f \n \r \t \\ ");
 
     assert(fuse_sprintf(self, buf, n, "%q", value) > 0);
-    assert_cstr_eq("\"hello, world\\n\"", buf);
+    assert_cstr_eq("\" \\b \\f \\n \\r \\t \\ \"", buf);
+
+    // Free the values
+    fuse_free(self, value);
+
+    // Return success
+    return 0;
+}
+
+int TEST_016(fuse_t *self)
+{
+    fuse_debugf("qstr value with quotes\n");
+
+    // Make a CSTR value
+    fuse_value_t *value = fuse_alloc(self, FUSE_MAGIC_CSTR, "\"hello, world\n\"");
+
+    assert(fuse_sprintf(self, buf, n, "%q", value) > 0);
+    assert_cstr_eq("\"\\\"hello, world\\n\\\"\"", buf);
+
+    // Free the values
+    fuse_free(self, value);
+
+    // Return success
+    return 0;
+}
+
+int TEST_017(fuse_t *self)
+{
+    fuse_debugf("qstr value with hex characters\n");
+
+    // Make a CSTR value
+    fuse_value_t *value = fuse_alloc(self, FUSE_MAGIC_CSTR, "\x01\x02");
+
+    assert(fuse_sprintf(self, buf, n, "%q", value) > 0);
+    assert_cstr_eq("\"\\\"hello, world\\n\\\"\"", buf);
 
     // Free the values
     fuse_free(self, value);
@@ -348,5 +382,6 @@ int main()
     assert(TEST_013(self) == 0);
     assert(TEST_014(self) == 0);
     assert(TEST_015(self) == 0);
+    assert(TEST_016(self) == 0);
     assert(fuse_destroy(self) == 0);
 }

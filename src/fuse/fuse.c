@@ -322,28 +322,28 @@ bool fuse_init_number(fuse_t *self, fuse_value_t *value, const void *user_data)
     switch (fuse_allocator_magic(self->allocator, value))
     {
     case FUSE_MAGIC_U8:
-        *(uint8_t *)value = (uint8_t)user_data;
+        *(uint8_t *)value = (uint8_t)(uintptr_t)user_data;
         break;
     case FUSE_MAGIC_U16:
-        *(uint16_t *)value = (uint16_t)user_data;
+        *(uint16_t *)value = (uint16_t)(uintptr_t)user_data;
         break;
     case FUSE_MAGIC_U32:
-        *(uint32_t *)value = (uint32_t)user_data;
+        *(uint32_t *)value = (uint32_t)(uintptr_t)user_data;
         break;
     case FUSE_MAGIC_U64:
-        *(uint64_t *)value = (uint64_t)user_data;
+        *(uint64_t *)value = (uint64_t)(uintptr_t)user_data;
         break;
     case FUSE_MAGIC_S8:
-        *(int8_t *)value = (int8_t)user_data;
+        *(int8_t *)value = (int8_t)(intptr_t)user_data;
         break;
     case FUSE_MAGIC_S16:
-        *(int16_t *)value = (int16_t)user_data;
+        *(int16_t *)value = (int16_t)(intptr_t)user_data;
         break;
     case FUSE_MAGIC_S32:
-        *(int32_t *)value = (int32_t)user_data;
+        *(int32_t *)value = (int32_t)(intptr_t)user_data;
         break;
     case FUSE_MAGIC_S64:
-        *(int64_t *)value = (int64_t)user_data;
+        *(int64_t *)value = (int64_t)(intptr_t)user_data;
         break;
     case FUSE_MAGIC_BOOL:
         *(bool *)value = (bool)user_data;

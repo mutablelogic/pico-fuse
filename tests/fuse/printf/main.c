@@ -294,6 +294,27 @@ int TEST_017(fuse_t *self)
     return 0;
 }
 
+int TEST_018(fuse_t *self)
+{
+    const int sz = 24;
+    char inbuf[sz];
+    char outbuf[sz];
+
+    fuse_debugf("TEST_018 ptr\n");
+
+    for (uintptr_t p = 0; p < 1000; p++)
+    {
+        assert(fuse_sprintf(self, inbuf, sz, "%p", (void*)p) != 0);
+        assert(snprintf(outbuf, sz, "%p", (void*)p) != 0);
+        fuse_debugf("  inbuf: %s\n", inbuf);
+        fuse_debugf("  outbuf: %s\n", outbuf);
+        assert_cstr_eq(outbuf, inbuf);
+    }
+
+    // Return success
+    return 0;
+}
+
 int main()
 {
     fuse_t *self = fuse_new();
@@ -314,9 +335,6 @@ int main()
     assert(TEST_015(self) == 0);
     assert(TEST_016(self) == 0);
     assert(TEST_017(self) == 0);
-
-    // TODO: Failing tests
-    // mostly int64_t
-
+    assert(TEST_018(self) == 0);
     assert(fuse_destroy(self) == 0);
 }
