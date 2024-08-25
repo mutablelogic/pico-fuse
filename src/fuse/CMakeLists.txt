@@ -2,6 +2,7 @@ set(NAME "fuse")
 add_library(${NAME} STATIC
     alloc.c
     alloc_builtin.c
+    base64.c
     debug.c
     device.c
     fuse.c
@@ -16,8 +17,6 @@ add_library(${NAME} STATIC
     strtoa.c
     vtoa.c
 )
-
-target_compile_definitions(${NAME} PRIVATE _POSIX_C_SOURCE=199309L)
 
 target_include_directories(${NAME} PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/../../include
