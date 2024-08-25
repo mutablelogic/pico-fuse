@@ -65,7 +65,11 @@ void *fuse_allocator_walk(fuse_allocator_t *self, void *ctx, fuse_allocator_walk
         // Call the callback
         if (block->used)
         {
+#ifdef DEBUG
             callback(block->ptr, block->size, block->magic, block->file, block->line, user);
+#else
+            callback(block->ptr, block->size, block->magic, NULL, 0, user);
+#endif
         }
 
         // Move to the next block

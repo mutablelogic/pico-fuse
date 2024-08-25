@@ -6,7 +6,7 @@ int TEST_001(fuse_t *self)
     fuse_debugf("TEST_001 ftoa float\n");
 
     const int sz = 20;
-    char buf[sz] = {0};
+    char buf[sz];
     for (size_t i = 0; i < 100; i++)
     {
         float v = (float)i / 10.0;

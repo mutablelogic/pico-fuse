@@ -65,15 +65,4 @@ fuse_value_t *fuse_value_retain(const fuse_t *self, fuse_value_t *value);
  */
 fuse_value_t *fuse_value_release(const fuse_t *self, fuse_value_t *value);
 
-/** @brief Convert a value to a zero-terminated string
- *
- *  @param self The fuse instance
- *  @param value The value
- *  @param buffer The buffer to write the string to
- *  @param size The size of the buffer
- *  @returns A zero-terminated string representation of the magic number, or NULL if the value could
- *          not be converted
- */
-const char *fuse_value_cstr(const fuse_t *self, fuse_value_t *value, char *buffer, const size_t size);
-
 #endif /* FUSE_VALUE_H */

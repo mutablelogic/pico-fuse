@@ -159,6 +159,8 @@ fuse_t *fuse_new()
         .name = "LIST",
         .init = fuse_init_list,
         .destroy = fuse_destroy_list,
+        .cstr = fuse_qstr_list,
+        .qstr = fuse_qstr_list,
     };
     fuse->desc[FUSE_MAGIC_MAP] = (struct fuse_value_desc){
         .size = sizeof(fuse_map_t),

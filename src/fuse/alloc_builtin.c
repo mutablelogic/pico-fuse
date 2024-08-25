@@ -31,6 +31,8 @@ fuse_allocator_t *fuse_allocator_builtin_new()
     allocator->size = fuse_allocator_builtin_size;
     allocator->retain = fuse_allocator_builtin_retain;
     allocator->release = fuse_allocator_builtin_release;
+    allocator->headptr = fuse_allocator_builtin_headptr;
+    allocator->tailptr = fuse_allocator_builtin_tailptr;
 
     // Return the allocator
     return allocator;
@@ -56,8 +58,10 @@ void *fuse_allocator_builtin_malloc(struct fuse_allocator *ctx, size_t size, uin
     block->used = true;
     block->size = size;
     block->magic = magic;
+#ifdef DEBUG
     block->file = file;
     block->line = line;
+#endif
 
     // Link into the list
     if (ctx->head == NULL)
@@ -183,4 +187,28 @@ bool fuse_allocator_builtin_release(struct fuse_allocator *ctx, void *ptr)
         return true;
     }
     return false;
+}
+
+void** fuse_allocator_builtin_headptr(void *ptr) {
+    assert(ptr);
+
+    // Get the header
+    struct fuse_allocator_header *block = ptr - sizeof(struct fuse_allocator_header);
+    assert(block->ptr == ptr);
+    assert(block->used);
+
+    // Return the head pointer
+    return &block->head;
+}
+
+void** fuse_allocator_builtin_tailptr(void *ptr) {
+    assert(ptr);
+
+    // Get the header
+    struct fuse_allocator_header *block = ptr - sizeof(struct fuse_allocator_header);
+    assert(block->ptr == ptr);
+    assert(block->used);
+
+    // Return the tail pointer
+    return &block->tail;
 }

@@ -1,22 +1,147 @@
 
-// Includes
+// Public Includes
 #include <fuse/fuse.h>
+
+// Private Includes
+#include "fuse.h"
+#include "alloc.h"
 #include "list.h"
+#include "printf.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 // LIFECYCLE
 
 /* @brief Initialise a list
  */
-bool fuse_init_list(fuse_t *self, fuse_value_t *value, const void *user_data) {
+bool fuse_init_list(fuse_t *self, fuse_value_t *list, const void *user_data)
+{
+    assert(self);
+    assert(list);
+
     fuse_debugf("fuse_init_list\n");
 
-    // Allocate a new list
+    // Set the count to 0
+    ((struct fuse_list *)list)->count = 0;
+
+    // Return success
     return true;
 }
 
 /* @brief Destroy the list
  */
-void fuse_destroy_list(fuse_t *self, fuse_value_t *value) {
+void fuse_destroy_list(fuse_t *self, fuse_value_t *list)
+{
     fuse_debugf("fuse_destroy_list\n");
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// PRIVATE METHODS
+
+static inline fuse_value_t *fuse_get_head(fuse_t *self, fuse_value_t *list)
+{
+    assert(self);
+    assert(list);
+
+    // Return the head
+    fuse_value_t **ptr = (fuse_value_t **)self->allocator->headptr(list);
+    assert(ptr);
+    return *ptr;
+}
+
+static inline void fuse_set_head(fuse_t *self, fuse_value_t *list, fuse_value_t *elem)
+{
+    assert(self);
+    assert(list);
+
+    // Set the head
+    fuse_value_t **ptr = (fuse_value_t **)self->allocator->headptr(list);
+    assert(ptr);
+    *ptr = elem;
+}
+
+static inline fuse_value_t *fuse_get_tail(fuse_t *self, fuse_value_t *list)
+{
+    assert(self);
+    assert(list);
+
+    // Return the tail
+    fuse_value_t **ptr = (fuse_value_t **)self->allocator->tailptr(list);
+    assert(ptr);
+    return *ptr;
+}
+
+static inline void fuse_set_tail(fuse_t *self, fuse_value_t *list, fuse_value_t *elem)
+{
+    assert(self);
+    assert(list);
+
+    // Set the tail
+    fuse_value_t **ptr = (fuse_value_t **)self->allocator->tailptr(list);
+    assert(ptr);
+    *ptr = elem;
+}
+
+size_t fuse_qstr_list(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *list) {
+    assert(self);
+    assert(buf == NULL || sz > 0);
+    assert(list);
+
+    // Add prefix
+    i = chtoa_internal(buf, sz, i, '[');
+
+    // TODO: Add list elements
+
+    // Add suffix
+    i = chtoa_internal(buf, sz, i, ']');
+
+    // Return the index
+    return i;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+// PUBLIC METHODS
+
+/* @brief Append an element to a list and return it
+ */
+fuse_value_t *fuse_list_append(fuse_t *self, fuse_value_t *list, fuse_value_t *elem)
+{
+    assert(self);
+    assert(list);
+    assert(elem);
+    assert(fuse_get_head(self, elem) == NULL);
+    assert(fuse_get_tail(self, elem) == NULL);
+
+    // Link into the list
+    fuse_value_t *head = fuse_get_head(self, list);
+    fuse_value_t *tail = fuse_get_tail(self, list);
+    if (head == NULL)
+    {
+        fuse_set_head(self, list, elem);
+    }
+    if (tail != NULL)
+    {
+        fuse_set_tail(self, tail, elem);
+    }
+    fuse_set_tail(self, elem, tail);
+    fuse_set_tail(self, list, elem);
+
+    // TODO: Retain the element
+
+    // Increment the list count
+    ((struct fuse_list *)list)->count++;
+
+    // Return the element
+    return elem;
+}
+
+/** @brief Return the number of elements in the list or map
+ */
+inline size_t fuse_count(fuse_t *self, fuse_value_t *value)
+{
+    assert(self);
+    assert(value);
+    assert(self->allocator->magic(self->allocator, value) == FUSE_MAGIC_LIST);
+
+    return ((struct fuse_list *)value)->count;
 }

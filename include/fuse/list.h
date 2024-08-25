@@ -40,14 +40,14 @@ fuse_value_t *fuse_list_push(fuse_t *self, fuse_value_t *list, fuse_value_t *ele
  */
 fuse_value_t *fuse_list_pop(fuse_t *self, fuse_value_t *list);
 
-/** @brief Return the number of elements in the list
+/** @brief Return the number of elements in the list or map
  *
- *  The function will return the number of elements in the list
+ *  The function will return the number of elements in the list or map
  *
  *  @param self The fuse instance
- *  @param list The list
+ *  @param value The list or map
  *  @returns The count of elements
  */
-size_t fuse_list_count(fuse_t *self, fuse_value_t *list);
+size_t fuse_count(fuse_t *self, fuse_value_t *value);
 
 #endif /* FUSE_LIST_H */
