@@ -13,7 +13,11 @@
 size_t ptoa(char *buf, size_t sz, size_t i, void *v)
 {
     assert(buf == NULL || sz > 0);
+
+    // Output the prefix
     i = cstrtoa_internal(buf, sz, i, "0x");
+
+    // Output the value in hexadecimal, padded to the size of a pointer
     i = utoa_internal(buf, sz, i, (uintptr_t)v, FUSE_PRINTF_FLAG_HEX | (sizeof(void *) << 3));
 
     // return the new index
@@ -136,6 +140,11 @@ int fuse_vsprintf(fuse_t *self, char *buf, size_t sz, const char *format, va_lis
             i = ptoa(buf, sz, i, va_arg(va, void *));
             format++;
             break;
+        case '%':
+            // quote a %
+            i = chtoa_internal(buf, sz, i, '%');
+            format++;
+            break;
         default:
             assert(*format == 0);
         }
@@ -177,7 +186,7 @@ size_t fuse_printf(fuse_t *self, const char *format, ...)
     static const int sz = FUSE_PRINTF_BUFFER_SIZE + 1;
     static char buffer[sz] = {0};
 
-    // Try to print to the buffer first
+    // Try to print into the buffer first
     va_list va;
     va_start(va, format);
     const int n = fuse_vsprintf(self, buffer, sz, format, va);
@@ -185,13 +194,12 @@ size_t fuse_printf(fuse_t *self, const char *format, ...)
 
     if (n < (sz - 1))
     {
+        // Happy path - write the string to stdout
         puts(buffer);
     }
     else
     {
-        fuse_debugf("fuse_printf: buffer too small, allocating %ld bytes\n", n + 1);
-
-        // Allocate the memory
+        // Unhappy path - allocate data, format and write the string to stdout
         char *tmp = fuse_alloc(self, FUSE_MAGIC_DATA, (void *)(uintptr_t)(n + 1));
         if (tmp == NULL)
         {
@@ -210,5 +218,6 @@ size_t fuse_printf(fuse_t *self, const char *format, ...)
         fuse_free(self, tmp);
     }
 
+    // return the number of characters written
     return n;
 }
