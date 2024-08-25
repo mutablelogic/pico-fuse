@@ -25,6 +25,7 @@ size_t fuse_qstr_number(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value
 size_t fuse_cstr_cstr(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v);
 size_t fuse_qstr_cstr(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v);
 size_t fuse_cstr_data(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v);
+size_t fuse_qstr_data(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v);
 
 ///////////////////////////////////////////////////////////////////////////////
 // PUBLIC METHODS
@@ -67,6 +68,7 @@ fuse_t *fuse_new()
         .name = "DATA",
         .init = fuse_init_memcpy,
         .cstr = fuse_cstr_data,
+        .qstr = fuse_qstr_data,
     };
     fuse->desc[FUSE_MAGIC_U8] = (struct fuse_value_desc){
         .size = sizeof(uint8_t),
@@ -128,11 +130,15 @@ fuse_t *fuse_new()
         .size = sizeof(float),
         .name = "F32",
         .init = fuse_init_memcpy,
+        .cstr = fuse_qstr_number,
+        .qstr = fuse_qstr_number,
     };
     fuse->desc[FUSE_MAGIC_F64] = (struct fuse_value_desc){
         .size = sizeof(double),
         .name = "F64",
         .init = fuse_init_memcpy,
+        .cstr = fuse_qstr_number,
+        .qstr = fuse_qstr_number,
     };
     fuse->desc[FUSE_MAGIC_BOOL] = (struct fuse_value_desc){
         .size = sizeof(bool),
@@ -455,6 +461,10 @@ size_t fuse_qstr_number(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value
         return itoa_internal(buf, sz, i, *(int32_t *)v, 0);
     case FUSE_MAGIC_S64:
         return itoa_internal(buf, sz, i, *(int64_t *)v, 0);
+    case FUSE_MAGIC_F32:
+        return ftoa_internal(buf, sz, i, *(float *)v, 0);
+    case FUSE_MAGIC_F64:
+        return ftoa_internal(buf, sz, i, *(double *)v, 0);    
     default:
         assert(false);
     }
@@ -509,4 +519,16 @@ size_t fuse_cstr_data(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t
 
     // Return the new index
     return i;
+}
+
+
+/* @brief Output a data block as base64
+ */
+size_t fuse_qstr_data(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v)
+{
+    assert(self);
+    assert(v);
+    assert(fuse_allocator_magic(self->allocator, v) == FUSE_MAGIC_DATA);
+
+    return b64toa_internal(buf, sz, i, v, fuse_allocator_size(self->allocator, v));
 }

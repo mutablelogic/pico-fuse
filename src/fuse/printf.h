@@ -105,4 +105,15 @@ size_t cstrtoa_internal(char *buf, size_t sz, size_t i, const char *str);
  */
 size_t vtoa_internal(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v, bool quoted);
 
+/* @brief Append a value to a buffer as a base64 string
+ *
+ * @param buf    Output buffer
+ * @param sz     Size of the buffer, including the null terminator
+ * @param i      Current index in the buffer
+ * @param v      Value to append
+ * @param len    The number of bytes
+ * @returns      The new index in the output buffer
+ */
+size_t b64toa_internal(char *buf, size_t sz, size_t i, void *v, size_t len);
+
 #endif
