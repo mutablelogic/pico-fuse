@@ -188,8 +188,8 @@ size_t fuse_printf(fuse_t *self, const char *format, ...)
     assert(format);
 
     // We have a static buffer for printf
-    static const int sz = FUSE_PRINTF_BUFFER_SIZE + 1;
-    static char buffer[sz] = {0};
+    static const int sz = FUSE_PRINTF_BUFFER_SIZE;
+    static char buffer[FUSE_PRINTF_BUFFER_SIZE];
 
     // Try to print into the buffer first
     va_list va;

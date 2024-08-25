@@ -2,7 +2,7 @@
 #include <stdio.h>
 
 const int n = 128;
-char buf[n] = {0};
+char buf[128];
 
 int TEST_002(fuse_t *self)
 {

@@ -4,7 +4,7 @@
 int TEST_001(fuse_t *self)
 {
     const int sz = 128;
-    char buf[sz] = {0};
+    char buf[128];
 
     // Test quoted values
     fuse_debugf("TEST_001 strtoa\n");

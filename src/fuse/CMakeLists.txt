@@ -2,6 +2,7 @@ set(NAME "fuse")
 add_library(${NAME} STATIC
     alloc.c
     alloc_builtin.c
+    base64.c
     debug.c
     device.c
     ftoa.c

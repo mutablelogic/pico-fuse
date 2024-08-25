@@ -78,6 +78,16 @@ size_t utoa_binary(char *buf, size_t sz, uint64_t v, uint8_t bits);
  */
 size_t utoa_hex(char *buf, size_t sz, uint64_t v, uint8_t bits, bool upper);
 
+/* @brief Convert a value to a  base64 string
+ * 
+ * @param buf    The output buffer, or NULL to calculate the length only
+ * @param sz     Size of the output buffer in bytes, including the null terminator
+ * @param v      The value
+ * @param len    The length of the value in bytes
+ * @returns      The number of bytes that the value would require
+ */
+size_t b64toa(char *buf, size_t sz, void *v, size_t len);
+
 /* @brief Format a string into the output buffer, replacing formatting directives
  *
  * @param self       The fuse application

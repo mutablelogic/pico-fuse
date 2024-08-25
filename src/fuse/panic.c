@@ -1,9 +1,10 @@
-#include <stdlib.h>
 #include <stdbool.h>
 #include <stdio.h>
 
 // Public headers
 #include <fuse/fuse.h>
+
+void abort(void);
 
 ///////////////////////////////////////////////////////////////////////////////
 // PUBLIC METHODS
