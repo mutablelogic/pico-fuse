@@ -1,6 +1,7 @@
 # Versions
 cmake_minimum_required(VERSION 3.13)
 set(CMAKE_C_STANDARD 11)
+set(CMAKE_CXX_STANDARD 21)
 
 # PICO_BOARD
 if (DEFINED ENV{PICO_BOARD})
@@ -18,8 +19,6 @@ message("Target ${TARGET_OS}")
 project(picofuse CXX C ASM)
 
 # TODO!!!
-# Allow use of POSIX extensions
-add_compile_definitions(_POSIX_C_SOURCE=200809L)
 add_compile_definitions(DEBUG)
 
 # picofuse libraries

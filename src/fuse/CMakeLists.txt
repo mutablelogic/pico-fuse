@@ -17,6 +17,7 @@ add_library(${NAME} STATIC
     vtoa.c
 )
 
+target_compile_definitions(${NAME} PRIVATE _POSIX_C_SOURCE=199309L)
 
 target_include_directories(${NAME} PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/../../include
