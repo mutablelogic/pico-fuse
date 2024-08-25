@@ -57,6 +57,14 @@ void fuse_allocator_free(fuse_allocator_t *self, void *ptr);
  */
 uint16_t fuse_allocator_magic(fuse_allocator_t *self, void *ptr);
 
+/** @brief Retrieve the size for a memory block
+ *
+ *  @param self The allocator object
+ *  @param ptr A pointer to the memory block
+ *  @returns The size in bytes for the memory block
+ */
+size_t fuse_allocator_size(fuse_allocator_t *self, void *ptr);
+
 /** @brief Retain a memory block by incrementing the reference counter
  *
  * @param self The allocator object

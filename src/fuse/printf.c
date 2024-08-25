@@ -6,277 +6,15 @@
 
 // Private headers
 #include "fuse.h"
-#include "defs.h"
 #include "printf.h"
-
-/* @brief Append a character into the output buffer
- */
-static inline size_t ctoa(char *out, size_t n, size_t i, char c)
-{
-    assert(out == NULL || i < n);
-    if (out)
-    {
-        out[i] = c;
-    }
-    return i + 1;
-}
-
-/* @brief Append a value into the output buffer
- */
-size_t outv(fuse_t *self, char *out, size_t n, size_t i, fuse_value_t *v)
-{
-    assert(self);
-    assert(out == NULL || i < n);
-    assert(v);
-
-    int16_t magic = fuse_allocator_magic(self->allocator, v);
-    assert(magic < FUSE_MAGIC_COUNT);
-    assert(self->desc[magic].cstr);
-
-    if (out == NULL)
-    {
-        return self->desc[magic].cstr(self, v, NULL, 0) + i;
-    }
-    else
-    {
-        return self->desc[magic].cstr(self, v, out + i, n - i) + i;
-    }
-}
-
-/* @brief Append a json (quoted) string value into the output buffer
- */
-size_t outq(fuse_t *self, char *out, size_t n, size_t i, fuse_value_t *v)
-{
-    assert(self);
-    assert(out == NULL || i < n);
-    assert(v);
-
-    int16_t magic = fuse_allocator_magic(self->allocator, v);
-    assert(magic < FUSE_MAGIC_COUNT);
-    assert(self->desc[magic].qstr);
-
-    if (out == NULL)
-    {
-        return self->desc[magic].qstr(self, v, NULL, 0) + i;
-    }
-    else
-    {
-        return self->desc[magic].qstr(self, v, out + i, n - i) + i;
-    }
-}
-
-/* @brief Append a null-terminated string
- */
-size_t stoa(char *out, size_t n, size_t i, const char *v, fuse_printf_flags_t flags)
-{
-    assert(out == NULL || i < n);
-
-    if (v == NULL)
-    {
-        v = "<NULL>";
-    }
-    while (i < n && *v)
-    {
-        if (out)
-        {
-            out[i] = *v;
-        }
-        v++;
-        i++;
-    }
-    return i;
-}
-
-/* @brief Append a null-terminated string in quoted format
- */
-size_t qtoa(char *out, size_t n, size_t i, const char *v, fuse_printf_flags_t flags)
-{
-    assert(out == NULL || i < n);
-
-    if (v == NULL)
-    {
-        return stoa(out, n, i, "null", flags);
-    }
-
-    // Output the prefix
-    if (i = ctoa(out, n, i, '"'), i >= n)
-        return i;
-
-    // Output the string
-    while (i < n && *v)
-    {
-        switch (*v++)
-        {
-        case '"':
-            i = stoa(out, n, i, "\\\"", 0);
-            break;
-        case '\b':
-            i = stoa(out, n, i, "\\b", 0);
-            break;
-        case '\f':
-            i = stoa(out, n, i, "\\f", 0);
-            break;
-        case '\n':
-            i = stoa(out, n, i, "\\n", 0);
-            break;
-        case '\r':
-            i = stoa(out, n, i, "\\r", 0);
-            break;
-        case '\t':
-            i = stoa(out, n, i, "\\t", 0);
-            break;
-        default:
-        {
-            const char ch = *(v - 1);
-            if (ch <= 0x1F || ch == 0x7F)
-            {
-                i = stoa(out, n, i, "\\u", 0);
-                // "\u00XX"
-                i = itoa(out, n, i, ch, 16, FUSE_PRINTF_FLAG_UPPER | 4);
-            }
-            else
-            {
-                i = ctoa(out, n, i, ch);
-            }
-        }
-        }
-    }
-
-    // Output the suffix
-    if (i < n)
-    {
-        i = ctoa(out, n, i, '"');
-    }
-
-    return i;
-}
-
-/* @brief Append a signed integer
- */
-size_t itoa(char *out, size_t n, size_t i, int64_t v, int base, fuse_printf_flags_t flags)
-{
-    assert(out == NULL || i < n);
-
-    // zero value
-    if (v == 0)
-    {
-        return ctoa(out, n, i, '0');
-    }
-
-    // negative value
-    if (v < 0)
-    {
-        if (out)
-        {
-            out[i] = '-';
-        }
-        v = -v;
-        if (++i >= n)
-        {
-            return i;
-        }
-    }
-
-    // output the number, but in reverse order
-    size_t len = 0;
-    while (i < n && v > 0)
-    {
-        if (out)
-        {
-            out[i] = (char)(v % base) + '0';
-        }
-        v /= base;
-        i++;
-        len++;
-    }
-
-    // reverse the string
-    if (out)
-    {
-        for (size_t j = 0; j < len / 2; j++)
-        {
-            char c = out[i - j - 1];
-            out[i - j - 1] = out[i - len + j];
-            out[i - len + j] = c;
-        }
-    }
-
-    // return the new index
-    return i;
-}
 
 /* @brief Append a pointer value
  */
-size_t ptoa(char *out, size_t n, size_t i, void *v)
+size_t ptoa(char *buf, size_t sz, size_t i, void *v)
 {
-    assert(out == NULL || i < n);
-    i = stoa(out, n, i, "0x", 0);
-    if (i < n)
-    {
-        i = utoa(out, n, i, (uintptr_t)v, 16, 0);
-    }
-
-    // return the new index
-    return i;
-}
-
-/* @brief Return digit for a given value
- */
-static inline char udigit(uint64_t v, int base, bool upper)
-{
-    char c = (char)(v % base);
-    return (c < 10) ? c + '0' : c - 10 + (upper ? 'A' : 'a');
-}
-
-/* @brief Append an unsigned integer
- */
-size_t utoa(char *out, size_t n, size_t i, uint64_t v, int base, fuse_printf_flags_t flags)
-{
-    assert(out == NULL || i < n);
-
-    // zero value
-    if (v == 0)
-    {
-        return ctoa(out, n, i, '0');
-    }
-
-    size_t len = 0;
-    while (i < n && v > 0)
-    {
-        if (out)
-        {
-            out[i] = udigit(v, base, flags & FUSE_PRINTF_FLAG_UPPER);
-        }
-        v /= base;
-        i++;
-        len++;
-    }
-
-    // Add additional zeros for hexadecimal values
-    size_t digits = flags & 0xFF;
-    if (base == 16 && digits > 0)
-    {
-        while (i < n && len < digits)
-        {
-            if (out)
-            {
-                out[i] = '0';
-            }
-            i++;
-            len++;
-        }
-    }
-
-    // reverse the string
-    if (out)
-    {
-        for (size_t j = 0; j < len / 2; j++)
-        {
-            char c = out[i - j - 1];
-            out[i - j - 1] = out[i - len + j];
-            out[i - len + j] = c;
-        }
-    }
+    assert(buf == NULL || sz > 0);
+    i = cstrtoa_internal(buf, sz, i, "0x");
+    i = utoa_internal(buf, sz, i, (uintptr_t)v, FUSE_PRINTF_FLAG_HEX | (sizeof(void *) << 3));
 
     // return the new index
     return i;
@@ -284,23 +22,19 @@ size_t utoa(char *out, size_t n, size_t i, uint64_t v, int base, fuse_printf_fla
 
 /* @brief Format a string into the output buffer or to stdout, replacing formatting directives
  */
-int fuse_vsprintf(fuse_t *self, char *out, size_t n, const char *format, va_list va)
+int fuse_vsprintf(fuse_t *self, char *buf, size_t sz, const char *format, va_list va)
 {
     assert(self);
     assert(format);
-    assert(out == NULL || n > 0);
+    assert(buf == NULL || sz > 0);
 
-    // Reduce n so it is the maximum number of characters that can be written,
-    // not including the null terminator
-    n--;
-
-    // iterate over the format string until it is exhausted or the buffer is full
-    int i = 0;
-    while (*format && i < n)
+    // iterate over the format string
+    size_t i = 0;
+    while (*format)
     {
         if (*format != '%')
         {
-            i = ctoa(out, n, i, *format);
+            i = chtoa_internal(buf, sz, i, *format);
             format++;
             continue;
         }
@@ -309,7 +43,7 @@ int fuse_vsprintf(fuse_t *self, char *out, size_t n, const char *format, va_list
             format++;
             if (*format == '\0')
             {
-                i = ctoa(out, n, i, '%');
+                i = chtoa_internal(buf, sz, i, '%');
                 continue;
             }
         }
@@ -320,10 +54,9 @@ int fuse_vsprintf(fuse_t *self, char *out, size_t n, const char *format, va_list
         {
         case 'l':
             flags |= FUSE_PRINTF_FLAG_LONG;
-            format++;
-            if (*format == '\0')
+            if (*++format == '\0')
             {
-                i = stoa(out, n, i, "%l", 0);
+                i = cstrtoa_internal(buf, sz, i, "%l");
                 continue;
             }
             break;
@@ -334,18 +67,18 @@ int fuse_vsprintf(fuse_t *self, char *out, size_t n, const char *format, va_list
         {
         case 's':
             // cstring
-            i = stoa(out, n, i, va_arg(va, const char *), flags);
+            i = cstrtoa_internal(buf, sz, i, va_arg(va, const char *));
             format++;
             break;
         case 'd':
             // signed integer
             if (flags & FUSE_PRINTF_FLAG_LONG)
             {
-                i = itoa(out, n, i, va_arg(va, int64_t), 10, flags);
+                i = itoa_internal(buf, sz, i, va_arg(va, int64_t), flags);
             }
             else
             {
-                i = itoa(out, n, i, va_arg(va, int32_t), 10, flags);
+                i = itoa_internal(buf, sz, i, va_arg(va, int32_t), flags);
             }
             format++;
             break;
@@ -353,11 +86,11 @@ int fuse_vsprintf(fuse_t *self, char *out, size_t n, const char *format, va_list
             // unsigned integer
             if (flags & FUSE_PRINTF_FLAG_LONG)
             {
-                i = utoa(out, n, i, va_arg(va, uint64_t), 10, flags);
+                i = utoa_internal(buf, sz, i, va_arg(va, uint64_t), flags);
             }
             else
             {
-                i = utoa(out, n, i, va_arg(va, uint32_t), 10, flags);
+                i = utoa_internal(buf, sz, i, va_arg(va, uint32_t), flags);
             }
             format++;
             break;
@@ -368,38 +101,52 @@ int fuse_vsprintf(fuse_t *self, char *out, size_t n, const char *format, va_list
             // unsigned hexadecimal value
             if (flags & FUSE_PRINTF_FLAG_LONG)
             {
-                i = utoa(out, n, i, va_arg(va, uint64_t), 16, flags);
+                i = utoa_internal(buf, sz, i, va_arg(va, uint64_t), flags | FUSE_PRINTF_FLAG_HEX);
             }
             else
             {
-                i = utoa(out, n, i, va_arg(va, uint32_t), 16, flags);
+                i = utoa_internal(buf, sz, i, va_arg(va, uint32_t), flags | FUSE_PRINTF_FLAG_HEX);
+            }
+            format++;
+            break;
+        case 'b':
+            // unsigned binary value
+            if (flags & FUSE_PRINTF_FLAG_LONG)
+            {
+                i = utoa_internal(buf, sz, i, va_arg(va, uint64_t), flags | FUSE_PRINTF_FLAG_BIN);
+            }
+            else
+            {
+                i = utoa_internal(buf, sz, i, va_arg(va, uint32_t), flags | FUSE_PRINTF_FLAG_BIN);
             }
             format++;
             break;
         case 'v':
             // value
-            i = outv(self, out, n, i, va_arg(va, fuse_value_t *));
+            i = vtoa_internal(self, buf, sz, i, va_arg(va, fuse_value_t *), false);
             format++;
             break;
         case 'q':
-            // quoted (in JSON format)
-            i = outq(self, out, n, i, va_arg(va, fuse_value_t *));
+            // quoted value
+            i = vtoa_internal(self, buf, sz, i, va_arg(va, fuse_value_t *), true);
             format++;
             break;
         case 'p':
             // pointer
-            i = ptoa(out, n, i, va_arg(va, void *));
+            i = ptoa(buf, sz, i, va_arg(va, void *));
             format++;
             break;
         default:
-            i = ctoa(out, n, i, *format);
-            format++;
-            break;
+            assert(*format == 0);
         }
     }
 
-    // termination
-    ctoa(out, n + 1, i, '\0');
+    // Terminate the string
+    if (buf)
+    {
+        size_t k = MIN(i, sz - 1);
+        buf[k] = '\0';
+    }
 
     // return number of characters written
     return i;
@@ -438,17 +185,29 @@ size_t fuse_printf(fuse_t *self, const char *format, ...)
 
     if (n < (sz - 1))
     {
-        // Print to stdout
         puts(buffer);
-        return n;
     }
     else
     {
-        // TODO: Allocate a buffer and print to it
-        assert("TODO");
-        // print to the buffer
-        // puts the buffer
-        // Free the allocated buffer
+        fuse_debugf("fuse_printf: buffer too small, allocating %ld bytes\n", n + 1);
+
+        // Allocate the memory
+        char *tmp = fuse_alloc(self, FUSE_MAGIC_DATA, (void *)(uintptr_t)(n + 1));
+        if (tmp == NULL)
+        {
+            return 0;
+        }
+
+        // Do it again...
+        va_start(va, format);
+        fuse_vsprintf(self, tmp, n + 1, format, va);
+        va_end(va);
+
+        // Write the string to stdout
+        puts(tmp);
+
+        // Free the memory
+        fuse_free(self, tmp);
     }
 
     return n;

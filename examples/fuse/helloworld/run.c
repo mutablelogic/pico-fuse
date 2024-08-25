@@ -7,8 +7,8 @@ int run(fuse_t *fuse)
     fuse_debugf("value=%p\n", value);
     fuse_free(fuse, value);
 
-    // Make and free a BLOCK value
-    value = fuse_alloc(fuse, FUSE_MAGIC_BLOCK, NULL);
+    // Make and free a DATA value
+    value = fuse_alloc(fuse, FUSE_MAGIC_DATA, NULL);
     fuse_debugf("value=%p\n", value);
     fuse_free(fuse, value);
 

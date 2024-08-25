@@ -2,7 +2,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-#include "defs.h"
+// Public headers
 #include <fuse/fuse.h>
 
 ///////////////////////////////////////////////////////////////////////////////

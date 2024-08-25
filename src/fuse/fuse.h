@@ -22,8 +22,8 @@ struct fuse_value_desc
     const char *name;
     bool (*init)(struct fuse_application *self, fuse_value_t *value, const void *user_data);
     void (*destroy)(struct fuse_application *self, fuse_value_t *value);
-    size_t (*cstr)(struct fuse_application *self, fuse_value_t *value, char *buffer, size_t size);
-    size_t (*qstr)(struct fuse_application *self, fuse_value_t *value, char *buffer, size_t size);
+    size_t (*cstr)(struct fuse_application *self, char *buf, size_t sz, size_t i, fuse_value_t *v);
+    size_t (*qstr)(struct fuse_application *self, char *buf, size_t sz, size_t i, fuse_value_t *v);
 };
 
 /* @brief Represents an instance of a fuse application

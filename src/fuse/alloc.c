@@ -32,6 +32,13 @@ inline uint16_t fuse_allocator_magic(fuse_allocator_t *self, void *ptr)
     return self->magic(self, ptr);
 }
 
+inline size_t fuse_allocator_size(fuse_allocator_t *self, void *ptr)
+{
+    assert(self);
+    assert(ptr);
+    return self->size(self, ptr);
+}
+
 inline void fuse_allocator_retain(fuse_allocator_t *self, void *ptr)
 {
     assert(self);

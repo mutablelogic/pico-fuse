@@ -26,6 +26,7 @@ fuse_allocator_t *fuse_allocator_builtin_new()
     allocator->free = fuse_allocator_builtin_free;
     allocator->destroy = fuse_allocator_builtin_destroy;
     allocator->magic = fuse_allocator_builtin_magic;
+    allocator->size = fuse_allocator_builtin_size;
     allocator->retain = fuse_allocator_builtin_retain;
     allocator->release = fuse_allocator_builtin_release;
 
@@ -131,6 +132,20 @@ uint16_t fuse_allocator_builtin_magic(struct fuse_allocator *ctx, void *ptr)
 
     // Return the magic number
     return block->magic;
+}
+
+size_t fuse_allocator_builtin_size(struct fuse_allocator *ctx, void *ptr)
+{
+    assert(ctx);
+    assert(ptr);
+
+    // Get the header
+    struct fuse_allocator_header *block = ptr - sizeof(struct fuse_allocator_header);
+    assert(block->ptr == ptr);
+    assert(block->used);
+
+    // Return the size
+    return block->size;
 }
 
 void fuse_allocator_builtin_retain(struct fuse_allocator *ctx, void *ptr)

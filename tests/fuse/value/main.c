@@ -354,7 +354,8 @@ int TEST_017(fuse_t *self)
     fuse_value_t *value = fuse_alloc(self, FUSE_MAGIC_CSTR, "\x01\x02");
 
     assert(fuse_sprintf(self, buf, n, "%q", value) > 0);
-    assert_cstr_eq("\"\\\"hello, world\\n\\\"\"", buf);
+    fuse_debugf("  value=%s\n", buf);
+    assert_cstr_eq("\"\\u0001\\u0002\"", buf);
 
     // Free the values
     fuse_free(self, value);
@@ -383,5 +384,6 @@ int main()
     assert(TEST_014(self) == 0);
     assert(TEST_015(self) == 0);
     assert(TEST_016(self) == 0);
+    assert(TEST_017(self) == 0);
     assert(fuse_destroy(self) == 0);
 }

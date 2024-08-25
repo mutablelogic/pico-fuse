@@ -11,7 +11,7 @@
 // Define the magic numbers for the values
 #define FUSE_MAGIC_NULL 0x00  ///< NULL value
 #define FUSE_MAGIC_APP 0x01   ///< Application
-#define FUSE_MAGIC_BLOCK 0x02 ///< Memory block
+#define FUSE_MAGIC_DATA 0x02 ///< Memory block
 #define FUSE_MAGIC_U8 0x03    ///< uint8_t
 #define FUSE_MAGIC_U16 0x04   ///< uint16_t
 #define FUSE_MAGIC_U32 0x05   ///< uint32_t

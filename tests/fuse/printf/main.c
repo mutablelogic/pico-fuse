@@ -304,11 +304,31 @@ int TEST_018(fuse_t *self)
 
     for (uintptr_t p = 0; p < 1000; p++)
     {
-        assert(fuse_sprintf(self, inbuf, sz, "%p", (void*)p) != 0);
-        assert(snprintf(outbuf, sz, "%p", (void*)p) != 0);
+        assert(fuse_sprintf(self, inbuf, sz, "%p", (void *)p) != 0);
+        assert(snprintf(outbuf, sz, "%p", (void *)p) != 0);
         fuse_debugf("  inbuf: %s\n", inbuf);
         fuse_debugf("  outbuf: %s\n", outbuf);
         assert_cstr_eq(outbuf, inbuf);
+    }
+
+    // Return success
+    return 0;
+}
+
+int TEST_019(fuse_t *self)
+{
+    fuse_debugf("TEST_019 stdout\n");
+
+    for (size_t p = 0; p < 1000; p++)
+    {
+        fuse_value_t *value = fuse_alloc(self, FUSE_MAGIC_DATA, (void *)p);
+        for (size_t i = 0; i < p; i++)
+        {
+            ((char*)value)[i] = (uint8_t)i;
+        }
+
+        assert(fuse_printf(self, "%lu => %v", p, value) != 0);
+        fuse_free(self, value);
     }
 
     // Return success
@@ -336,5 +356,6 @@ int main()
     assert(TEST_016(self) == 0);
     assert(TEST_017(self) == 0);
     assert(TEST_018(self) == 0);
+    assert(TEST_019(self) == 0);
     assert(fuse_destroy(self) == 0);
 }

@@ -18,12 +18,13 @@ bool fuse_init_number(fuse_t *self, fuse_value_t *value, const void *user_data);
 bool fuse_init_memcpy(fuse_t *self, fuse_value_t *value, const void *user_data);
 bool fuse_init_cstr(fuse_t *self, fuse_value_t *value, const void *user_data);
 
-size_t fuse_cstr_null(fuse_t *self, fuse_value_t *value, char *buffer, size_t size);
-size_t fuse_qstr_null(fuse_t *self, fuse_value_t *value, char *buffer, size_t size);
-size_t fuse_qstr_bool(fuse_t *self, fuse_value_t *value, char *buffer, size_t size);
-size_t fuse_qstr_number(fuse_t *self, fuse_value_t *value, char *buffer, size_t size);
-size_t fuse_cstr_cstr(fuse_t *self, fuse_value_t *value, char *buffer, size_t size);
-size_t fuse_cstr_qstr(fuse_t *self, fuse_value_t *value, char *buffer, size_t size);
+size_t fuse_cstr_null(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v);
+size_t fuse_qstr_null(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v);
+size_t fuse_qstr_bool(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v);
+size_t fuse_qstr_number(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v);
+size_t fuse_cstr_cstr(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v);
+size_t fuse_qstr_cstr(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v);
+size_t fuse_cstr_data(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v);
 
 ///////////////////////////////////////////////////////////////////////////////
 // PUBLIC METHODS
@@ -61,10 +62,11 @@ fuse_t *fuse_new()
         .size = 0,
         .name = "APP",
     };
-    fuse->desc[FUSE_MAGIC_BLOCK] = (struct fuse_value_desc){
+    fuse->desc[FUSE_MAGIC_DATA] = (struct fuse_value_desc){
         .size = 0,
         .name = "DATA",
         .init = fuse_init_memcpy,
+        .cstr = fuse_cstr_data,
     };
     fuse->desc[FUSE_MAGIC_U8] = (struct fuse_value_desc){
         .size = sizeof(uint8_t),
@@ -144,7 +146,7 @@ fuse_t *fuse_new()
         .name = "CSTR",
         .init = fuse_init_cstr,
         .cstr = fuse_cstr_cstr,
-        .qstr = fuse_cstr_qstr,
+        .qstr = fuse_qstr_cstr,
     };
     fuse->desc[FUSE_MAGIC_LIST] = (struct fuse_value_desc){
         .size = sizeof(struct fuse_list),
@@ -204,7 +206,7 @@ void *fuse_alloc_ex(fuse_t *self, const uint16_t magic, const void *user_data, c
     size_t size = self->desc[magic].size;
     switch (magic)
     {
-    case FUSE_MAGIC_BLOCK:
+    case FUSE_MAGIC_DATA:
         size = (size_t)user_data;
         break;
     default:
@@ -397,74 +399,114 @@ bool fuse_init_cstr(fuse_t *self, fuse_value_t *value, const void *user_data)
 
 /* @brief Output a null as a cstr
  */
-size_t fuse_cstr_null(fuse_t *self, fuse_value_t *value, char *buffer, size_t size)
+size_t fuse_cstr_null(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v)
 {
-    return stoa(buffer, size, 0, NULL, 0);
+    return cstrtoa_internal(buf, sz, i, NULL);
 }
 
 /* @brief Output a null as a qstr
  */
-size_t fuse_qstr_null(fuse_t *self, fuse_value_t *value, char *buffer, size_t size)
+size_t fuse_qstr_null(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v)
 {
-    return stoa(buffer, size, 0, "null", 0);
-}
-
-/* @brief Output a pointer to a null-terminated string as a cstr
- */
-size_t fuse_cstr_cstr(fuse_t *self, fuse_value_t *value, char *buffer, size_t size)
-{
-    const char *v = *(const char **)value;
-    return stoa(buffer, size, 0, v, 0);
-}
-
-/* @brief Output a pointer to a null-terminated string as a quoted cstr
- */
-size_t fuse_cstr_qstr(fuse_t *self, fuse_value_t *value, char *buffer, size_t size)
-{
-    const char *v = *(const char **)value;
-    return qtoa(buffer, size, 0, v, 0);
+    return cstrtoa_internal(buf, sz, i, FUSE_PRINTF_NULL_JSON);
 }
 
 /* @brief Output a bool as a cstr
  */
-size_t fuse_qstr_bool(fuse_t *self, fuse_value_t *value, char *buffer, size_t size)
+size_t fuse_qstr_bool(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v)
 {
-    bool v = *(bool *)value;
-    if (v)
+    assert(self);
+    assert(v);
+    assert(fuse_allocator_magic(self->allocator, v) == FUSE_MAGIC_BOOL);
+
+    bool b = *(bool *)v;
+    if (b)
     {
-        return stoa(buffer, size, 0, "true", 0);
+        return cstrtoa_internal(buf, sz, i, FUSE_PRINTF_TRUE);
     }
     else
     {
-        return stoa(buffer, size, 0, "false", 0);
+        return cstrtoa_internal(buf, sz, i, FUSE_PRINTF_FALSE);
     }
 }
 
-/* @brief Output a uint8_t as a cstr
+/* @brief Output an integer as a cstr
  */
-size_t fuse_qstr_number(fuse_t *self, fuse_value_t *value, char *buffer, size_t size)
+size_t fuse_qstr_number(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v)
 {
-    assert(value);
-    assert(buffer);
+    assert(self);
+    assert(v);
 
-    switch (fuse_allocator_magic(self->allocator, value))
+    switch (fuse_allocator_magic(self->allocator, v))
     {
     case FUSE_MAGIC_U8:
-        return utoa(buffer, size, 0, *(uint8_t *)value, 10, 0);
+        return utoa_internal(buf, sz, i, *(uint8_t *)v, 0);
     case FUSE_MAGIC_U16:
-        return utoa(buffer, size, 0, *(uint16_t *)value, 10, 0);
+        return utoa_internal(buf, sz, i, *(uint16_t *)v, 0);
     case FUSE_MAGIC_U32:
-        return utoa(buffer, size, 0, *(uint32_t *)value, 10, 0);
+        return utoa_internal(buf, sz, i, *(uint32_t *)v, 0);
     case FUSE_MAGIC_U64:
-        return utoa(buffer, size, 0, *(uint64_t *)value, 10, 0);
+        return utoa_internal(buf, sz, i, *(uint64_t *)v, 0);
     case FUSE_MAGIC_S8:
-        return itoa(buffer, size, 0, *(int8_t *)value, 10, 0);
+        return itoa_internal(buf, sz, i, *(int8_t *)v, 0);
     case FUSE_MAGIC_S16:
-        return itoa(buffer, size, 0, *(int16_t *)value, 10, 0);
+        return itoa_internal(buf, sz, i, *(int16_t *)v, 0);
     case FUSE_MAGIC_S32:
-        return itoa(buffer, size, 0, *(int32_t *)value, 10, 0);
+        return itoa_internal(buf, sz, i, *(int32_t *)v, 0);
     case FUSE_MAGIC_S64:
-        return itoa(buffer, size, 0, *(int64_t *)value, 10, 0);
+        return itoa_internal(buf, sz, i, *(int64_t *)v, 0);
+    default:
+        assert(false);
     }
     return 0;
+}
+
+/* @brief Output a pointer to a null-terminated string as a cstr
+ */
+size_t fuse_cstr_cstr(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v)
+{
+    assert(self);
+    assert(v);
+    assert(fuse_allocator_magic(self->allocator, v) == FUSE_MAGIC_CSTR);
+
+    const char *vp = *(const char **)v;
+    return cstrtoa_internal(buf, sz, i, vp);
+}
+
+/* @brief Output a pointer to a null-terminated string as a quoted cstr
+ */
+size_t fuse_qstr_cstr(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v)
+{
+    assert(self);
+    assert(v);
+    assert(fuse_allocator_magic(self->allocator, v) == FUSE_MAGIC_CSTR);
+
+    const char *vp = *(const char **)v;
+    return strtoa_internal(buf, sz, i, vp);
+}
+
+/* @brief Output a data block as hex
+ */
+size_t fuse_cstr_data(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v)
+{
+    assert(self);
+    assert(v);
+    assert(fuse_allocator_magic(self->allocator, v) == FUSE_MAGIC_DATA);
+
+    // If data size is zero, then return empty string
+    size_t datasz = fuse_allocator_size(self->allocator, v);
+    if (datasz == 0)
+    {
+        return i;
+    }
+
+    // Write hex data
+    size_t j = 0;
+    while (j < datasz)
+    {
+        i = utoa_internal(buf, sz, i, ((uint8_t *)v)[j++], FUSE_PRINTF_FLAG_HEX | FUSE_PRINTF_FLAG_UPPER | 2);
+    }
+
+    // Return the new index
+    return i;
 }

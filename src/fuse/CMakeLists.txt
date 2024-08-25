@@ -5,6 +5,7 @@ add_library(${NAME} STATIC
     debug.c
     device.c
     fuse.c
+    itoa.c
     list.c
     map.c
     panic.c
@@ -12,6 +13,8 @@ add_library(${NAME} STATIC
     random_pico.c
     random_posix.c
     sleep_posix.c
+    strtoa.c
+    vtoa.c
 )
 
 target_include_directories(${NAME} PRIVATE
