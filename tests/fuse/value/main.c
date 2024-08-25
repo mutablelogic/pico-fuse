@@ -1,7 +1,7 @@
 #include <fuse/fuse.h>
 
 const int n = 128;
-char buf[n] = {0};
+char buf[128];
 
 int TEST_001(fuse_t *self)
 {

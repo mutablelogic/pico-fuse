@@ -1,9 +1,8 @@
 
 #ifndef TARGET_PICO
 
-#define _BSD_SOURCE
 #include <stdint.h>
-#include <unistd.h>
+#include <time.h>
 #include <errno.h>
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -14,15 +13,18 @@
  *
  * @param ms The number of milliseconds to pause
  */
-inline void sleep_ms(uint32_t ms)
+void sleep_ms(uint32_t ms)
 {
-    if (ms == 0)
-    {
-        return;
-    }
+    struct timespec ts;
+    int result = 0;
 
-    // usleep takes microseconds as input
-    usleep(ms * 1000);
+    // Convert milliseconds to seconds and nanoseconds
+    ts.tv_sec = ms / 1000;
+    ts.tv_nsec = (ms % 1000) * 1000000;
+
+    do {
+        result = nanosleep(&ts, &ts);
+    } while (result && errno == EINTR);  // Repeat if interrupted by a signal
 }
 
 #endif

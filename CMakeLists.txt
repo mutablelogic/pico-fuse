@@ -1,7 +1,6 @@
 # Versions
 cmake_minimum_required(VERSION 3.13)
 set(CMAKE_C_STANDARD 11)
-set(CMAKE_CXX_STANDARD 21)
 
 # PICO_BOARD
 if (DEFINED ENV{PICO_BOARD})
@@ -31,9 +30,6 @@ endif()
 # Tests
 include(CTest)
 add_subdirectory(tests/fuse)
-#add_subdirectory(tests/fuse)
-#add_subdirectory(tests/panic)
-#add_subdirectory(tests/random)
 
 # Examples
 add_subdirectory(examples/fuse)
