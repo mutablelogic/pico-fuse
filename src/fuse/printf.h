@@ -6,11 +6,14 @@
 
 /* @brief Flags for printf functions
  */
-#define FUSE_PRINTF_NULL "(null)"    ///< How a NULL value is printed
-#define FUSE_PRINTF_NULL_JSON "null" ///< How a NULL value is printed for JSON
-#define FUSE_PRINTF_TRUE "true"      ///< How a true value is printed
-#define FUSE_PRINTF_FALSE "false"    ///< How a false value is printed
-#define FUSE_PRINTF_BUFFER_SIZE 80   ///< Default buffer size for printf functions
+#define FUSE_PRINTF_NULL "(null)"         ///< How a NULL value is printed
+#define FUSE_PRINTF_NULL_JSON "null"      ///< How a NULL value is printed for JSON
+#define FUSE_PRINTF_TRUE "true"           ///< How a true value is printed
+#define FUSE_PRINTF_FALSE "false"         ///< How a false value is printed
+#define FUSE_PRINTF_NAN "NaN"             ///< How a NaN float value is printed
+#define FUSE_PRINTF_MINUS_INF "-Infinity" ///< How -ve infinity float value is printed
+#define FUSE_PRINTF_PLUS_INF "Infinity"   ///< How +ve infinity float value is printed
+#define FUSE_PRINTF_BUFFER_SIZE 80        ///< Default buffer size for printf functions
 
 /* @brief Return the minimum of two values
  */
@@ -82,6 +85,17 @@ size_t itoa_internal(char *buf, size_t sz, size_t i, int64_t v, fuse_printf_flag
  * @returns      The new index in the output buffer
  */
 size_t utoa_internal(char *buf, size_t sz, size_t i, uint64_t v, fuse_printf_flags_t flags);
+
+/* @brief Append a float value to a string
+ *
+ * @param buf    Output buffer
+ * @param sz     Size of the buffer, including the null terminator
+ * @param i      Current index in the buffer
+ * @param v      Value to append
+ * @param flags  Flags to modify the output format
+ * @returns      The new index in the output buffer
+ */
+size_t ftoa_internal(char *buf, size_t sz, size_t i, double v, fuse_printf_flags_t flags);
 
 /* @brief Append a null-terminated string
  *

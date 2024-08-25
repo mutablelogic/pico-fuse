@@ -140,6 +140,11 @@ int fuse_vsprintf(fuse_t *self, char *buf, size_t sz, const char *format, va_lis
             i = ptoa(buf, sz, i, va_arg(va, void *));
             format++;
             break;
+        case 'f':
+            // float or double
+            i = ftoa_internal(buf, sz, i, va_arg(va, double), 0);
+            format++;
+            break;
         case '%':
             // quote a %
             i = chtoa_internal(buf, sz, i, '%');

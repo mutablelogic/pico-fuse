@@ -4,6 +4,7 @@ add_library(${NAME} STATIC
     alloc_builtin.c
     debug.c
     device.c
+    ftoa.c
     fuse.c
     itoa.c
     list.c

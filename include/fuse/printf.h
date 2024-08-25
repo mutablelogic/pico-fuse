@@ -17,6 +17,15 @@
  */
 size_t strtoa(char *buf, size_t sz, const char *v);
 
+/* @brief Return an double float value as a string
+ *
+ * @param buf    The output buffer, or NULL to calculate the length only
+ * @param sz     Size of the output buffer in bytes, including the null terminator
+ * @param v      The value
+ * @returns      The number of bytes that the value would require
+ */
+size_t ftoa(char *buf, size_t sz, double v);
+
 /* @brief Convert a value to a string
  *
  * Returns a value as a string, optionally quoted for JSON output
@@ -90,6 +99,7 @@ size_t utoa_hex(char *buf, size_t sz, uint64_t v, uint8_t bits, bool upper);
  * - %x:  Hexadecimal unsigned integer (lowercase)
  * - %X:  Hexadecimal unsigned integer (uppercase)
  * - %p:  Pointer value
+ * - %f:  Floating point value (float or double)
  * - %v:  fuse_value_t*
  * - %q:  Quoted fuse_value_t* (in JSON format)
  * - %%:  Literal '%'
@@ -112,6 +122,7 @@ size_t fuse_sprintf(fuse_t *self, char *buffer, size_t size, const char *format,
  * - %x:  Hexadecimal unsigned integer (lowercase)
  * - %X:  Hexadecimal unsigned integer (uppercase)
  * - %p:  Pointer value
+ * - %f:  Floating point value (float or double)
  * - %v:  fuse_value_t*
  * - %q:  Quoted fuse_value_t* (in JSON format)
  * - %%:  Literal '%'
