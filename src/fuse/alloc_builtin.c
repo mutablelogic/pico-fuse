@@ -1,10 +1,12 @@
-#include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
 
 // Includes
 #include <fuse/fuse.h>
 #include "alloc.h"
+
+void free(void *ptr);
+void *malloc(size_t size);
 
 ///////////////////////////////////////////////////////////////////////////////
 // PUBLIC METHODS

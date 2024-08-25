@@ -1,12 +1,12 @@
 
-///////////////////////////////////////////////////////////////////////////////
-// PUBLIC METHODS
-
-#if (TARGET_OS == darwin || TARGET_OS == linux)
+#ifndef TARGET_PICO
 
 #include <stdint.h>
 #include <time.h>
 #include <errno.h>
+
+///////////////////////////////////////////////////////////////////////////////
+// PUBLIC METHODS
 
 /*
  * Pause for a certain number of milliseconds
