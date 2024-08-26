@@ -40,6 +40,18 @@ fuse_value_t *fuse_list_push(fuse_t *self, fuse_value_t *list, fuse_value_t *ele
  */
 fuse_value_t *fuse_list_pop(fuse_t *self, fuse_value_t *list);
 
+/** @brief Return the next element in a list
+ *
+ *  Return the next element in a list. If the element is NULL, the first element is returned.
+ *  If the element is the last element, NULL is returned.
+ *
+ *  @param self The fuse instance
+ *  @param list The list
+ *  @param elem The current element, or NULL to get the first element
+ *  @returns The next element or NULL if the list is empty or the current element is the last element
+ */
+fuse_value_t *fuse_list_next(fuse_t *self, fuse_value_t *list, fuse_value_t *elem);
+
 /** @brief Return the number of elements in the list or map
  *
  *  The function will return the number of elements in the list or map

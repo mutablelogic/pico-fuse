@@ -17,6 +17,7 @@ bool fuse_init_list(fuse_t *self, fuse_value_t *list, const void *user_data)
 {
     assert(self);
     assert(list);
+    assert(self->allocator->magic(self->allocator, list) == FUSE_MAGIC_LIST);
 
     fuse_debugf("fuse_init_list\n");
 
@@ -31,7 +32,13 @@ bool fuse_init_list(fuse_t *self, fuse_value_t *list, const void *user_data)
  */
 void fuse_destroy_list(fuse_t *self, fuse_value_t *list)
 {
+    assert(self);
+    assert(list);
+    assert(self->allocator->magic(self->allocator, list) == FUSE_MAGIC_LIST);
+
     fuse_debugf("fuse_destroy_list\n");
+
+    // TODO: Release all elements from the list
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -81,7 +88,8 @@ static inline void fuse_set_tail(fuse_t *self, fuse_value_t *list, fuse_value_t 
     *ptr = elem;
 }
 
-size_t fuse_qstr_list(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *list) {
+size_t fuse_qstr_list(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *list)
+{
     assert(self);
     assert(buf == NULL || sz > 0);
     assert(list);
@@ -89,7 +97,21 @@ size_t fuse_qstr_list(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t
     // Add prefix
     i = chtoa_internal(buf, sz, i, '[');
 
-    // TODO: Add list elements
+    fuse_value_t *elem = fuse_list_next(self, list, NULL);
+    while (elem != NULL)
+    {
+        // Append quoted string
+        i = vtoa_internal(self, buf, sz, i, elem, true);
+
+        // Get the next element
+        elem = fuse_list_next(self, list, elem);
+
+        // Add separator
+        if (elem != NULL)
+        {
+            i = chtoa_internal(buf, sz, i, ',');
+        }
+    }
 
     // Add suffix
     i = chtoa_internal(buf, sz, i, ']');
@@ -98,11 +120,10 @@ size_t fuse_qstr_list(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t
     return i;
 }
 
-
 ////////////////////////////////////////////////////////////////////////////////
 // PUBLIC METHODS
 
-/* @brief Append an element to a list and return it
+/* @brief Append an element to the end of a list and return it
  */
 fuse_value_t *fuse_list_append(fuse_t *self, fuse_value_t *list, fuse_value_t *elem)
 {
@@ -111,6 +132,8 @@ fuse_value_t *fuse_list_append(fuse_t *self, fuse_value_t *list, fuse_value_t *e
     assert(elem);
     assert(fuse_get_head(self, elem) == NULL);
     assert(fuse_get_tail(self, elem) == NULL);
+    assert(self->allocator->magic(self->allocator, list) == FUSE_MAGIC_LIST);
+    assert(elem != list);
 
     // Link into the list
     fuse_value_t *head = fuse_get_head(self, list);
@@ -123,8 +146,9 @@ fuse_value_t *fuse_list_append(fuse_t *self, fuse_value_t *list, fuse_value_t *e
     {
         fuse_set_tail(self, tail, elem);
     }
-    fuse_set_tail(self, elem, tail);
     fuse_set_tail(self, list, elem);
+    fuse_set_head(self, elem, tail);
+    fuse_set_tail(self, elem, NULL);
 
     // TODO: Retain the element
 
@@ -144,4 +168,15 @@ inline size_t fuse_count(fuse_t *self, fuse_value_t *value)
     assert(self->allocator->magic(self->allocator, value) == FUSE_MAGIC_LIST);
 
     return ((struct fuse_list *)value)->count;
+}
+
+/** @brief Return the next list element
+ */
+inline fuse_value_t *fuse_list_next(fuse_t *self, fuse_value_t *list, fuse_value_t *elem)
+{
+    assert(self);
+    assert(list);
+    assert(self->allocator->magic(self->allocator, list) == FUSE_MAGIC_LIST);
+
+    return (elem == NULL) ? fuse_get_head(self, list) : fuse_get_tail(self, elem);
 }
