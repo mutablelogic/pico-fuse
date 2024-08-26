@@ -45,6 +45,8 @@ struct fuse_allocator
 };
 
 /** @brief Retrieve the head pointer for a memory block
+ * 
+ * The head pointer is the pointer to the previous value in a linked list.
  *
  * @param self The allocator object
  * @param ptr A pointer to the memory block
@@ -53,6 +55,8 @@ struct fuse_allocator
 void **fuse_allocator_headptr(fuse_allocator_t *self, void *ptr);
 
 /** @brief Retrieve the tail pointer for a memory block
+ * 
+ * The tail pointer is the pointer to the next value in a linked list.
  *
  * @param self The allocator object
  * @param ptr A pointer to the memory block
