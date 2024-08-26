@@ -19,8 +19,6 @@ bool fuse_init_list(fuse_t *self, fuse_value_t *list, const void *user_data)
     assert(list);
     assert(self->allocator->magic(self->allocator, list) == FUSE_MAGIC_LIST);
 
-    fuse_debugf("fuse_init_list\n");
-
     // Set the count to 0
     ((struct fuse_list *)list)->count = 0;
 
@@ -36,9 +34,18 @@ void fuse_destroy_list(fuse_t *self, fuse_value_t *list)
     assert(list);
     assert(self->allocator->magic(self->allocator, list) == FUSE_MAGIC_LIST);
 
-    fuse_debugf("fuse_destroy_list\n");
+    fuse_value_t *elem = fuse_list_next(self, list, NULL);
+    while (elem != NULL)
+    {
+        // Get the next element
+        fuse_value_t *tmp = fuse_list_next(self, list, elem);
 
-    // TODO: Release all elements from the list
+        // Release the value
+        fuse_value_release(self, elem);
+
+        // Move to the next element
+        elem = tmp;
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -135,6 +142,13 @@ fuse_value_t *fuse_list_append(fuse_t *self, fuse_value_t *list, fuse_value_t *e
     assert(self->allocator->magic(self->allocator, list) == FUSE_MAGIC_LIST);
     assert(elem != list);
 
+    // Retain the element, return NULL if the retain failed
+    elem = fuse_value_retain(self, elem);
+    if (elem == NULL)
+    {
+        return NULL;
+    }
+
     // Link into the list
     fuse_value_t *head = fuse_get_head(self, list);
     fuse_value_t *tail = fuse_get_tail(self, list);
@@ -149,8 +163,6 @@ fuse_value_t *fuse_list_append(fuse_t *self, fuse_value_t *list, fuse_value_t *e
     fuse_set_tail(self, list, elem);
     fuse_set_head(self, elem, tail);
     fuse_set_tail(self, elem, NULL);
-
-    // TODO: Retain the element
 
     // Increment the list count
     ((struct fuse_list *)list)->count++;
