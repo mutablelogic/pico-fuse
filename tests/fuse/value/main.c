@@ -364,6 +364,32 @@ int TEST_017(fuse_t *self)
     return 0;
 }
 
+int TEST_018(fuse_t *self)
+{
+    fuse_debugf("data value\n");
+
+    // Make a DATA value
+    const char *data = "\x01\x02";
+    fuse_value_t *value = fuse_alloc(self, FUSE_MAGIC_DATA, strlen(data) + 1);
+    memcpy(value, data, strlen(data) + 1);
+
+    // cstr
+    assert(fuse_sprintf(self, buf, n, "%v", value) > 0);
+    fuse_debugf("  value=%s\n", buf);
+    assert_cstr_eq("010200", buf);
+
+    // qstr
+    assert(fuse_sprintf(self, buf, n, "%q", value) > 0);
+    fuse_debugf("  value=%s\n", buf);
+    assert_cstr_eq("010200", buf);
+
+    // Free the values
+    fuse_free(self, value);
+
+    // Return success
+    return 0;
+}
+
 int main()
 {
     fuse_t *self = fuse_new();
@@ -385,5 +411,6 @@ int main()
     assert(TEST_015(self) == 0);
     assert(TEST_016(self) == 0);
     assert(TEST_017(self) == 0);
+    assert(TEST_018(self) == 0);
     assert(fuse_destroy(self) == 0);
 }
