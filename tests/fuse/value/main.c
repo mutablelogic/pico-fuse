@@ -381,7 +381,7 @@ int TEST_018(fuse_t *self)
     // qstr
     assert(fuse_sprintf(self, buf, n, "%q", value) > 0);
     fuse_debugf("  value=%s\n", buf);
-    assert_cstr_eq("010200", buf);
+    assert_cstr_eq("AQIA", buf);
 
     // Free the values
     fuse_free(self, value);
