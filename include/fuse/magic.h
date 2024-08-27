@@ -9,23 +9,24 @@
 #include <stdint.h>
 
 // Define the magic numbers for the values
-#define FUSE_MAGIC_NULL 0x00  ///< NULL value
-#define FUSE_MAGIC_APP 0x01   ///< Application
-#define FUSE_MAGIC_DATA 0x02 ///< Memory block
-#define FUSE_MAGIC_U8 0x03    ///< uint8_t
-#define FUSE_MAGIC_U16 0x04   ///< uint16_t
-#define FUSE_MAGIC_U32 0x05   ///< uint32_t
-#define FUSE_MAGIC_U64 0x06   ///< uint64_t
-#define FUSE_MAGIC_S8 0x07    ///< int8_t
-#define FUSE_MAGIC_S16 0x08   ///< int16_t
-#define FUSE_MAGIC_S32 0x09   ///< int32_t
-#define FUSE_MAGIC_S64 0x0A   ///< int64_t
-#define FUSE_MAGIC_F32 0x0B   ///< float32_t
-#define FUSE_MAGIC_F64 0x0C   ///< float64_t
-#define FUSE_MAGIC_BOOL 0x0D  ///< bool
-#define FUSE_MAGIC_CSTR 0x0E  ///< constant string with null terminator
-#define FUSE_MAGIC_LIST 0x0F  ///< list[value]
-#define FUSE_MAGIC_MAP 0x10   ///< map[value][value]
+#define FUSE_MAGIC_NULL 0x00 ///< NULL value
+#define FUSE_MAGIC_APP 0x01  ///< Application
+#define FUSE_MAGIC_POOL 0x02 ///< Autorelease pool
+#define FUSE_MAGIC_DATA 0x03 ///< Memory block
+#define FUSE_MAGIC_U8 0x04   ///< uint8_t
+#define FUSE_MAGIC_U16 0x05  ///< uint16_t
+#define FUSE_MAGIC_U32 0x06  ///< uint32_t
+#define FUSE_MAGIC_U64 0x07  ///< uint64_t
+#define FUSE_MAGIC_S8 0x08   ///< int8_t
+#define FUSE_MAGIC_S16 0x09  ///< int16_t
+#define FUSE_MAGIC_S32 0x0A  ///< int32_t
+#define FUSE_MAGIC_S64 0x0B  ///< int64_t
+#define FUSE_MAGIC_F32 0x0C  ///< float32_t
+#define FUSE_MAGIC_F64 0x0D  ///< float64_t
+#define FUSE_MAGIC_BOOL 0x0E ///< bool
+#define FUSE_MAGIC_CSTR 0x0F ///< constant string with null terminator
+#define FUSE_MAGIC_LIST 0x10 ///< list[value]
+#define FUSE_MAGIC_MAP 0x11  ///< map[value][value]
 
 // Define the magic numbers for devices
 #define FUSE_MAGIC_TIMER 0x20 ///< Timer source, which can fire at a regular interval

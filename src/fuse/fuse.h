@@ -11,6 +11,9 @@
 // Forward declaration
 struct fuse_application;
 
+// Set initial capacity of autorelease pool
+#define FUSE_AUTORELEASE_CAP 16
+
 ///////////////////////////////////////////////////////////////////////////////
 // TYPES
 
@@ -32,6 +35,7 @@ struct fuse_application
 {
     fuse_allocator_t *allocator;                   ///< The allocator for the application
     struct fuse_value_desc desc[FUSE_MAGIC_COUNT]; ///< Value descriptors
+    struct fuse_autorelease *pool;                 ///< The autorelease pool
     int exit_code;                                 ///< Exit code of the application
 };
 

@@ -8,6 +8,7 @@
 #include "list.h"
 #include "map.h"
 #include "printf.h"
+#include "autorelease.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // DECLARATIONS
@@ -52,6 +53,15 @@ fuse_t *fuse_new()
         fuse->exit_code = FUSE_EXIT_SUCCESS;
     }
 
+    // Create an autorelease pool
+    fuse->pool = fuse_autorelease_new(fuse, FUSE_AUTORELEASE_CAP);
+    if (fuse->pool == NULL)
+    {
+        fuse_allocator_free(allocator, fuse);
+        fuse_allocator_destroy(allocator);
+        return NULL;
+    }
+
     // Register primitive types
     fuse->desc[FUSE_MAGIC_NULL] = (struct fuse_value_desc){
         .size = 0,
@@ -62,6 +72,10 @@ fuse_t *fuse_new()
     fuse->desc[FUSE_MAGIC_APP] = (struct fuse_value_desc){
         .size = 0,
         .name = "APP",
+    };
+    fuse->desc[FUSE_MAGIC_POOL] = (struct fuse_value_desc){
+        .size = 0,
+        .name = "POOL",
     };
     fuse->desc[FUSE_MAGIC_DATA] = (struct fuse_value_desc){
         .size = 0,
@@ -174,6 +188,10 @@ fuse_t *fuse_new()
 int fuse_destroy(fuse_t *fuse)
 {
     assert(fuse);
+    assert(fuse->pool);
+
+    // Drain the autorelease pool and free resources
+    fuse_autorelease_destroy(fuse, fuse->pool);
 
     // Store the exit code and allocator object
     int exit_code = fuse->exit_code;
