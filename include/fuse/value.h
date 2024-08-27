@@ -45,14 +45,13 @@ fuse_value_t *fuse_value_new_ex(const fuse_t *self, const uint16_t magic, const 
 
 /** @brief Retain the value and return it.
  *
- * This method increments the reference count of the value, so that when released, the
- * value is not destroyed, but the reference is decremented.
+ * This method increments the reference count of the value, to take ownership of the value.
  *
  * @param self The fuse instance
  * @param value The value to retain
- * @return The retained value
+ * @return The retained value, or NULL if the value could not be retained
  */
-fuse_value_t *fuse_value_retain(const fuse_t *self, fuse_value_t *value);
+fuse_value_t *fuse_value_retain(fuse_t *self, fuse_value_t *value);
 
 /** @brief Release a value and destroy it if the reference count reaches 0
  *
@@ -61,8 +60,7 @@ fuse_value_t *fuse_value_retain(const fuse_t *self, fuse_value_t *value);
  *
  * @param self The fuse instance
  * @param ptr The value to release
- * @return The released value. Returns NULL if the memory is freed
  */
-fuse_value_t *fuse_value_release(const fuse_t *self, fuse_value_t *value);
+void fuse_value_release(fuse_t *self, fuse_value_t *value);
 
 #endif /* FUSE_VALUE_H */
