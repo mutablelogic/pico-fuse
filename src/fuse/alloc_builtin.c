@@ -55,7 +55,6 @@ void *fuse_allocator_builtin_malloc(struct fuse_allocator *ctx, size_t size, uin
     // Zero all data structures
     memset(block, 0, sizeof(struct fuse_allocator_header));
     block->ptr = (void *)block + sizeof(struct fuse_allocator_header);
-    block->used = true;
     block->size = size;
     block->magic = magic;
 #ifdef DEBUG
@@ -87,7 +86,6 @@ void fuse_allocator_builtin_free(struct fuse_allocator *ctx, void *ptr)
     // Get the header
     struct fuse_allocator_header *block = ptr - sizeof(struct fuse_allocator_header);
     assert(block->ptr == ptr);
-    assert(block->used);
 
     // Unlink from the list
     if (block->prev != NULL)
@@ -134,7 +132,6 @@ uint16_t fuse_allocator_builtin_magic(struct fuse_allocator *ctx, void *ptr)
     // Get the header
     struct fuse_allocator_header *block = ptr - sizeof(struct fuse_allocator_header);
     assert(block->ptr == ptr);
-    assert(block->used);
 
     // Return the magic number
     return block->magic;
@@ -148,7 +145,6 @@ size_t fuse_allocator_builtin_size(struct fuse_allocator *ctx, void *ptr)
     // Get the header
     struct fuse_allocator_header *block = ptr - sizeof(struct fuse_allocator_header);
     assert(block->ptr == ptr);
-    assert(block->used);
 
     // Return the size
     return block->size;
@@ -162,7 +158,6 @@ void fuse_allocator_builtin_retain(struct fuse_allocator *ctx, void *ptr)
     // Get the header
     struct fuse_allocator_header *block = ptr - sizeof(struct fuse_allocator_header);
     assert(block->ptr == ptr);
-    assert(block->used);
     assert(block->ref < UINT16_MAX);
 
     // Increment the reference count
@@ -177,7 +172,6 @@ bool fuse_allocator_builtin_release(struct fuse_allocator *ctx, void *ptr)
     // Get the header
     struct fuse_allocator_header *block = ptr - sizeof(struct fuse_allocator_header);
     assert(block->ptr == ptr);
-    assert(block->used);
     assert(block->ref > 0);
 
     // Decrement the reference count
@@ -195,7 +189,6 @@ void** fuse_allocator_builtin_headptr(void *ptr) {
     // Get the header
     struct fuse_allocator_header *block = ptr - sizeof(struct fuse_allocator_header);
     assert(block->ptr == ptr);
-    assert(block->used);
 
     // Return the head pointer
     return &block->head;
@@ -207,7 +200,6 @@ void** fuse_allocator_builtin_tailptr(void *ptr) {
     // Get the header
     struct fuse_allocator_header *block = ptr - sizeof(struct fuse_allocator_header);
     assert(block->ptr == ptr);
-    assert(block->used);
 
     // Return the tail pointer
     return &block->tail;

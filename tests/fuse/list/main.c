@@ -8,18 +8,15 @@ int TEST_001(fuse_t *self)
     fuse_debugf("TEST_001: zero-sized list value\n");
 
     // Make an empty list
-    fuse_value_t *value = fuse_alloc(self, FUSE_MAGIC_LIST, NULL);
+    fuse_value_t *list = fuse_new_list(self);
 
     // check count
-    assert(fuse_count(self, value) == 0);
+    assert(fuse_count(self, list) == 0);
 
     // sprintf the value
-    assert(fuse_sprintf(self, buf, n, "%v", value) > 0);
+    assert(fuse_sprintf(self, buf, n, "%v", list) > 0);
     fuse_debugf("  value=%s\n", buf);
     assert_cstr_eq("[]", buf);
-
-    // Free the list
-    fuse_free(self, value);
 
     // Return success
     return 0;
@@ -30,30 +27,25 @@ int TEST_002(fuse_t *self)
     fuse_debugf("TEST_002: list value with 10 nulls\n");
 
     // Make an empty list
-    // TODO: Use fuse_new_list which autoreleases the value
-    fuse_value_t *value = fuse_alloc(self, FUSE_MAGIC_LIST, NULL);
+    fuse_value_t *list = fuse_new_list(self);
 
     // check count
-    assert(fuse_count(self, value) == 0);
+    assert(fuse_count(self, list) == 0);
 
     // append 10 NULL values
     for (size_t i = 0; i < 10; i++)
     {
-        // TODO: Use fuse_new_null which autoreleases the value
-        fuse_value_t *v = fuse_alloc(self, FUSE_MAGIC_NULL, NULL);
-        assert(fuse_list_append(self, value, v) == v);
+        // Append a new NULL value
+        assert(fuse_list_append(self, list, fuse_new_null(self)));
     }
 
     // check count
-    assert(fuse_count(self, value) == 10);
+    assert(fuse_count(self, list) == 10);
 
     // sprintf the value
-    assert(fuse_sprintf(self, buf, n, "%v", value) > 0);
+    assert(fuse_sprintf(self, buf, n, "%v", list) > 0);
     fuse_debugf("  value=%s\n", buf);
     assert_cstr_eq("[null,null,null,null,null,null,null,null,null,null]", buf);
-
-    // Free the list (which also frees the values)
-    fuse_free(self, value);
 
     // Return success
     return 0;

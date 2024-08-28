@@ -15,7 +15,6 @@ struct fuse_allocator_header
     size_t size;                        ///< The size of the memory block, in bytes
     uint16_t magic;                     ///< A magic number
     uint16_t ref;                       ///< The reference count of the memory block
-    bool used;                          ///< Whether the memory block is used
     struct fuse_allocator_header *prev; ///< The previous memory block header, or NULL if this is the first memory block header
     struct fuse_allocator_header *next; ///< The next memory block header, or NULL if this is the last memory block header
     void *head;                         ///< The previous value in a linked list

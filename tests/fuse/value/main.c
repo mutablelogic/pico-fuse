@@ -370,7 +370,7 @@ int TEST_018(fuse_t *self)
 
     // Make a DATA value
     const char *data = "\x01\x02";
-    fuse_value_t *value = fuse_alloc(self, FUSE_MAGIC_DATA, strlen(data) + 1);
+    fuse_value_t *value = fuse_alloc(self, FUSE_MAGIC_DATA, (void* )(strlen(data) + 1));
     memcpy(value, data, strlen(data) + 1);
 
     // cstr

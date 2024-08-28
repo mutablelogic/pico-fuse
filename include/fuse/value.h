@@ -25,14 +25,26 @@ typedef struct fuse_value_desc fuse_value_desc_t;
 void fuse_register_value_desc(const fuse_t *self, const fuse_value_desc_t *desc);
 
 #ifdef DEBUG
-#define fuse_value_new(self, magic, user_data) \
-    (fuse_value_new_ex((self), (magic), (user_data), __FILE__, __LINE__))
+#define fuse_new_null(self) \
+    (fuse_new_value_ex((self), (FUSE_MAGIC_NULL), (0), __FILE__, __LINE__))
+#define fuse_new_data(self, sz) \
+    (fuse_new_value_ex((self), (FUSE_MAGIC_DATA), (void *)(sz), __FILE__, __LINE__))
+#define fuse_new_list(self) \
+    (fuse_new_value_ex((self), (FUSE_MAGIC_LIST), (0), __FILE__, __LINE__))
 #else
-#define fuse_value_new(self, magic, user_data) \
-    (fuse_value_new_ex((self), (magic), (user_data), 0, 0))
+#define fuse_new_null(self) \
+    (fuse_new_value_ex((self), (FUSE_MAGIC_NULL), (0), 0, 0))
+#define fuse_new_data(self, sz) \
+    (fuse_new_value_ex((self), (FUSE_MAGIC_DATA), (void *)(sz), 0, 0))
+#define fuse_new_list(self) \
+    (fuse_new_value_ex((self), (FUSE_MAGIC_LIST), (0), 0, 0))
 #endif
 
-/** @brief Create a new zero-based value
+/** @brief Create a new autoreleased value
+ *
+ *  This method creates a new value. The value is initialized with user_data, the behavior of which is
+ *  determined by the magic number. The value is set to be automatically released, so to take ownership
+ *  of the value, you must retain it with fuse_value_retain.
  *
  * @param self The fuse instance
  * @param magic The magic number of the value
@@ -41,7 +53,7 @@ void fuse_register_value_desc(const fuse_t *self, const fuse_value_desc_t *desc)
  * @param line The line number of the caller
  * @return The new value or NULL if the value could not be created
  */
-fuse_value_t *fuse_value_new_ex(const fuse_t *self, const uint16_t magic, const void *user_data, const char *file, const int line);
+fuse_value_t *fuse_new_value_ex(fuse_t *self, const uint16_t magic, const void *user_data, const char *file, const int line);
 
 /** @brief Retain the value and return it.
  *
@@ -51,7 +63,7 @@ fuse_value_t *fuse_value_new_ex(const fuse_t *self, const uint16_t magic, const 
  * @param value The value to retain
  * @return The retained value, or NULL if the value could not be retained
  */
-fuse_value_t *fuse_value_retain(fuse_t *self, fuse_value_t *value);
+fuse_value_t *fuse_retain(fuse_t *self, fuse_value_t *value);
 
 /** @brief Release a value and destroy it if the reference count reaches 0
  *
@@ -61,6 +73,16 @@ fuse_value_t *fuse_value_retain(fuse_t *self, fuse_value_t *value);
  * @param self The fuse instance
  * @param ptr The value to release
  */
-void fuse_value_release(fuse_t *self, fuse_value_t *value);
+void fuse_release(fuse_t *self, fuse_value_t *value);
+
+/** @brief Drain the memory allocation pool
+ *
+ * This method empties auto-releaaed values (with a zero retain count).
+ *
+ * @param self The fuse instance
+ * @param sz The maximum number of values to release, or 0 for all
+ * @return The number of values that were released
+ */
+size_t fuse_drain(fuse_t *self, size_t cap);
 
 #endif /* FUSE_VALUE_H */

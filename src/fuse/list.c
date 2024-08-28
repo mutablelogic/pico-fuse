@@ -41,7 +41,7 @@ void fuse_destroy_list(fuse_t *self, fuse_value_t *list)
         fuse_value_t *tmp = fuse_list_next(self, list, elem);
 
         // Release the value
-        fuse_value_release(self, elem);
+        fuse_release(self, elem);
 
         // Move to the next element
         elem = tmp;
@@ -143,7 +143,7 @@ fuse_value_t *fuse_list_append(fuse_t *self, fuse_value_t *list, fuse_value_t *e
     assert(elem != list);
 
     // Retain the element, return NULL if the retain failed
-    elem = fuse_value_retain(self, elem);
+    elem = fuse_retain(self, elem);
     if (elem == NULL)
     {
         return NULL;

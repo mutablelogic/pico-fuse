@@ -3,7 +3,11 @@
 ///////////////////////////////////////////////////////////////////////////////
 // DEFINITIONS
 
+// Public
 #include <fuse/fuse.h>
+
+// Private
+#include "alloc.h"
 #include "fuse.h"
 #include "list.h"
 #include "map.h"
@@ -13,7 +17,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // DECLARATIONS
 
-void fuse_destroy_callback(void *ptr, size_t size, uint16_t magic, const char *file, int line, void *user);
+void fuse_destroy_callback(fuse_allocator_header_t *hdr, void *user);
 bool fuse_init_null(fuse_t *self, fuse_value_t *value, const void *user_data);
 bool fuse_init_number(fuse_t *self, fuse_value_t *value, const void *user_data);
 bool fuse_init_memcpy(fuse_t *self, fuse_value_t *value, const void *user_data);
@@ -326,17 +330,19 @@ inline void fuse_exit(fuse_t *self, int exit_code)
 ///////////////////////////////////////////////////////////////////////////////
 // PRIVATE METHODS
 
-void fuse_destroy_callback(void *ptr, size_t size, uint16_t magic, const char *file, int line, void *user)
+void fuse_destroy_callback(fuse_allocator_header_t *hdr, void *user)
 {
     // Increment the count
     (*((uint32_t *)user))++;
 
     // Print any errors
-    fuse_debugf("LEAK: %p magic %04X (%d bytes)", ptr, magic, size);
-    if (file != NULL)
+    fuse_debugf("LEAK: %p magic %04X (%d bytes)", hdr->ptr, hdr->magic, hdr->size);
+#ifdef DEBUG
+    if (hdr->file != NULL)
     {
-        fuse_debugf(" [allocated at %s:%d]", file, line);
+        fuse_debugf(" [allocated at %s:%d]", hdr->file, hdr->line);
     }
+#endif
     fuse_debugf("\n");
 }
 
@@ -484,7 +490,7 @@ size_t fuse_qstr_number(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value
     case FUSE_MAGIC_F32:
         return ftoa_internal(buf, sz, i, *(float *)v, 0);
     case FUSE_MAGIC_F64:
-        return ftoa_internal(buf, sz, i, *(double *)v, 0);    
+        return ftoa_internal(buf, sz, i, *(double *)v, 0);
     default:
         assert(false);
     }
@@ -540,7 +546,6 @@ size_t fuse_cstr_data(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t
     // Return the new index
     return i;
 }
-
 
 /* @brief Output a data block as base64
  */

@@ -15,6 +15,10 @@
  */
 typedef struct fuse_allocator fuse_allocator_t;
 
+/** @brief Opaque type for an allocator header
+ */
+typedef struct fuse_allocator_header fuse_allocator_header_t;
+
 /** @brief Callback function for walking the memory pool
  *
  *  @param ptr A pointer to the memory block
@@ -23,7 +27,7 @@ typedef struct fuse_allocator fuse_allocator_t;
  *  @param file The file where the allocation was made
  *  @param line The line of the file where the allocation was made
  */
-typedef void (*fuse_allocator_walk_callback_t)(void *ptr, size_t size, uint16_t magic, const char *file, int line, void *user);
+typedef void (*fuse_allocator_walk_callback_t)(fuse_allocator_header_t *hdr, void *user);
 
 /** @brief Create a new allocator using the bulit-in malloc and free functions
  *
