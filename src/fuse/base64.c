@@ -38,7 +38,7 @@ size_t b64toa_internal(char *buf, size_t sz, size_t i, void *v, size_t len)
     return i;
 }
 
-/* @brief Convert a value to a  base64 string
+/* @brief Convert a value to a base64 string
  */
 size_t b64toa(char *buf, size_t sz, void *v, size_t len)
 {
