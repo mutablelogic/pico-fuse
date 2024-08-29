@@ -5,6 +5,7 @@
 #define FUSE_PRINTF_H
 
 #include <stddef.h>
+#include <stdbool.h>
 
 /* @brief Return a quoted string
  *

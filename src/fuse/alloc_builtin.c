@@ -5,23 +5,35 @@
 #include <fuse/fuse.h>
 #include "alloc.h"
 
+///////////////////////////////////////////////////////////////////////////////
+// FORWARD DECLARATIONS
+
 void free(void *ptr);
 void *malloc(size_t size);
+void *fuse_allocator_builtin_malloc(struct fuse_allocator *ctx, size_t size, uint16_t magic, const char *file, int line);
+void fuse_allocator_builtin_free(struct fuse_allocator *ctx, void *ptr);
+void fuse_allocator_builtin_destroy(struct fuse_allocator *ctx);
+uint16_t fuse_allocator_builtin_magic(struct fuse_allocator *ctx, void *ptr);
+size_t fuse_allocator_builtin_size(struct fuse_allocator *ctx, void *ptr);
+void fuse_allocator_builtin_retain(struct fuse_allocator *ctx, void *ptr);
+bool fuse_allocator_builtin_release(struct fuse_allocator *ctx, void *ptr);
+void **fuse_allocator_builtin_headptr(void *ptr);
+void **fuse_allocator_builtin_tailptr(void *ptr);
 
 ///////////////////////////////////////////////////////////////////////////////
-// PUBLIC METHODS
+// LIFECYCLE
 
-fuse_allocator_t *fuse_allocator_builtin_new()
+struct fuse_allocator *fuse_allocator_builtin_new()
 {
     // Allocate memory for the allocator
-    fuse_allocator_t *allocator = malloc(sizeof(fuse_allocator_t));
+    struct fuse_allocator *allocator = malloc(sizeof(struct fuse_allocator));
     if (allocator == NULL)
     {
         return NULL;
     }
 
     // Zero all data structures
-    memset(allocator, 0, sizeof(fuse_allocator_t));
+    memset(allocator, 0, sizeof(struct fuse_allocator));
 
     // Set the allocator properties
     allocator->malloc = fuse_allocator_builtin_malloc;
@@ -161,6 +173,7 @@ void fuse_allocator_builtin_retain(struct fuse_allocator *ctx, void *ptr)
     assert(block->ref < UINT16_MAX);
 
     // Increment the reference count
+    // TODO: Do this atomically
     block->ref++;
 }
 
@@ -175,15 +188,12 @@ bool fuse_allocator_builtin_release(struct fuse_allocator *ctx, void *ptr)
     assert(block->ref > 0);
 
     // Decrement the reference count
-    if (--block->ref == 0)
-    {
-        fuse_allocator_builtin_free(ctx, ptr);
-        return true;
-    }
-    return false;
+    // TODO: Do this atomically
+    return (--block->ref == 0);
 }
 
-void** fuse_allocator_builtin_headptr(void *ptr) {
+void **fuse_allocator_builtin_headptr(void *ptr)
+{
     assert(ptr);
 
     // Get the header
@@ -194,7 +204,8 @@ void** fuse_allocator_builtin_headptr(void *ptr) {
     return &block->head;
 }
 
-void** fuse_allocator_builtin_tailptr(void *ptr) {
+void **fuse_allocator_builtin_tailptr(void *ptr)
+{
     assert(ptr);
 
     // Get the header

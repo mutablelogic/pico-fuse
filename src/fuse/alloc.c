@@ -6,69 +6,74 @@
 ///////////////////////////////////////////////////////////////////////////////
 // PUBLIC METHODS
 
-inline void fuse_allocator_destroy(fuse_allocator_t *self)
+inline void fuse_allocator_destroy(struct fuse_allocator *self)
 {
     assert(self);
     self->destroy(self);
 }
 
-inline void *fuse_allocator_malloc(fuse_allocator_t *self, size_t size, uint16_t magic, const char *file, int line)
+inline void *fuse_allocator_malloc(struct fuse_allocator *self, size_t size, uint16_t magic, const char *file, int line)
 {
     assert(self);
     return self->malloc(self, size, magic, file, line);
 }
 
-inline void fuse_allocator_free(fuse_allocator_t *self, void *ptr)
+inline void fuse_allocator_free(struct fuse_allocator *self, void *ptr)
 {
     assert(self);
     assert(ptr);
     self->free(self, ptr);
 }
 
-inline uint16_t fuse_allocator_magic(fuse_allocator_t *self, void *ptr)
+inline uint16_t fuse_allocator_magic(struct fuse_allocator *self, void *ptr)
 {
     assert(self);
     assert(ptr);
     return self->magic(self, ptr);
 }
 
-inline size_t fuse_allocator_size(fuse_allocator_t *self, void *ptr)
+inline size_t fuse_allocator_size(struct fuse_allocator *self, void *ptr)
 {
     assert(self);
     assert(ptr);
     return self->size(self, ptr);
 }
 
-inline void fuse_allocator_retain(fuse_allocator_t *self, void *ptr)
+inline void fuse_allocator_retain(struct fuse_allocator *self, void *ptr)
 {
     assert(self);
     assert(ptr);
     self->retain(self, ptr);
 }
 
-inline bool fuse_allocator_release(fuse_allocator_t *self, void *ptr)
+inline bool fuse_allocator_release(struct fuse_allocator *self, void *ptr)
 {
     assert(self);
     assert(ptr);
     return self->release(self, ptr);
 }
 
-void *fuse_allocator_walk(fuse_allocator_t *self, void *ctx, fuse_allocator_walk_callback_t callback, void *user)
+void *fuse_allocator_walk(struct fuse_allocator *self, void *ctx, fuse_allocator_walk_callback_t callback, void *user)
 {
     assert(self);
     assert(callback);
 
-    // Obtain the next unused block
-    struct fuse_allocator_header *block = ctx ? ctx : self->head;
-    while (block != NULL)
-    {
-        // Call the callback
-        callback(block, user);
+    fuse_debugf("Walking memory pool ctx=%p\n", ctx);
 
-        // Move to the next block
-        block = block->next;
+    // Obtain the next unused block
+    if (ctx == NULL)
+    {
+        ctx = self->head;
+        fuse_debugf("Walking returning first ctx=%p\n", ctx);
+        return ctx;
     }
 
-    // Return the context
-    return block;
+    // Call the callback on this header
+    struct fuse_allocator_header *block = ctx;
+    fuse_debugf("Walking callback ctx=%p\n", ctx);
+    callback(block, user);
+
+    // Return the next block
+    fuse_debugf("Walking next ctx=%p\n", block->next);
+    return block->next;
 }

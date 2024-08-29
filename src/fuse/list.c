@@ -41,6 +41,7 @@ void fuse_destroy_list(fuse_t *self, fuse_value_t *list)
         fuse_value_t *tmp = fuse_list_next(self, list, elem);
 
         // Release the value
+        fuse_printf(self, "LIST RELEASE: %v", elem);
         fuse_release(self, elem);
 
         // Move to the next element

@@ -32,29 +32,12 @@ int TEST_002()
         ptrs[i] = ptr;
     }
 
-    // Walk
-    void *ctx = NULL;
-    uint32_t count = 0;
-    while ((ctx = fuse_allocator_walk(pool, ctx, fuse_allocator_walk_callback, &count)) != NULL)
-    {
-        // Do nothing
-    }
-    assert(count == 64);
-
     // Free 64 memory blocks
     fuse_debugf("Free 64 memory blocks\n");
     for (int i = 0; i < 64; i++)
     {
         fuse_allocator_free(pool, ptrs[i]);
     }
-
-    count = 0;
-    ctx = NULL;
-    while ((ctx = fuse_allocator_walk(pool, ctx, fuse_allocator_walk_callback, &count)) != NULL)
-    {
-        // Do nothing
-    }
-    assert(count == 0);
 
     // Destroy the pool
     fuse_allocator_destroy(pool);

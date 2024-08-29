@@ -5,8 +5,7 @@
 #define FUSE_PRIVATE_FUSE_H
 
 #include <stdbool.h>
-#include <fuse/alloc.h>
-#include <fuse/value.h>
+#include <fuse/fuse.h>
 
 // Forward declaration
 struct fuse_application;
@@ -33,9 +32,8 @@ struct fuse_value_desc
  */
 struct fuse_application
 {
-    fuse_allocator_t *allocator;                   ///< The allocator for the application
+    struct fuse_allocator *allocator;                   ///< The allocator for the application
     struct fuse_value_desc desc[FUSE_MAGIC_COUNT]; ///< Value descriptors
-    struct fuse_autorelease *pool;                 ///< The autorelease pool
     int exit_code;                                 ///< Exit code of the application
 };
 

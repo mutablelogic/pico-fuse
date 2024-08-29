@@ -12,7 +12,6 @@
  */
 typedef struct fuse_application fuse_t;
 
-#include "alloc.h"
 #include "assert.h"
 #include "debug.h"
 #include "device.h"

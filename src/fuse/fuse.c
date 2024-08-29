@@ -8,16 +8,16 @@
 
 // Private
 #include "alloc.h"
+#include "alloc_builtin.h"
 #include "fuse.h"
 #include "list.h"
 #include "map.h"
 #include "printf.h"
-#include "autorelease.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // DECLARATIONS
 
-void fuse_destroy_callback(fuse_allocator_header_t *hdr, void *user);
+void fuse_destroy_callback(struct fuse_allocator_header *hdr, void *user);
 bool fuse_init_null(fuse_t *self, fuse_value_t *value, const void *user_data);
 bool fuse_init_number(fuse_t *self, fuse_value_t *value, const void *user_data);
 bool fuse_init_memcpy(fuse_t *self, fuse_value_t *value, const void *user_data);
@@ -38,7 +38,7 @@ size_t fuse_qstr_data(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t
 fuse_t *fuse_new()
 {
     // Create an allocator
-    fuse_allocator_t *allocator = fuse_allocator_builtin_new();
+    struct fuse_allocator *allocator = fuse_allocator_builtin_new();
     if (allocator == NULL)
     {
         return NULL;
@@ -57,14 +57,8 @@ fuse_t *fuse_new()
         fuse->exit_code = FUSE_EXIT_SUCCESS;
     }
 
-    // Create an autorelease pool
-    fuse->pool = fuse_autorelease_new(fuse, FUSE_AUTORELEASE_CAP);
-    if (fuse->pool == NULL)
-    {
-        fuse_allocator_free(allocator, fuse);
-        fuse_allocator_destroy(allocator);
-        return NULL;
-    }
+    // Retain the application so it isn't autoreleased
+    fuse_allocator_retain(allocator, fuse);
 
     // Register primitive types
     fuse->desc[FUSE_MAGIC_NULL] = (struct fuse_value_desc){
@@ -192,14 +186,24 @@ fuse_t *fuse_new()
 int fuse_destroy(fuse_t *fuse)
 {
     assert(fuse);
-    assert(fuse->pool);
-
-    // Drain the autorelease pool and free resources
-    fuse_autorelease_destroy(fuse, fuse->pool);
 
     // Store the exit code and allocator object
     int exit_code = fuse->exit_code;
-    fuse_allocator_t *allocator = fuse->allocator;
+    struct fuse_allocator *allocator = fuse->allocator;
+
+    // Repeatedly drain the allocator pool until no new memory blocks are freed
+    // It will call fuse_destroy_callback for each memory block that is freed,
+    // releasing resources
+    size_t drained = 0;
+    do
+    {
+        fuse_debugf("fuse_destroy: draining memory blocks\n");
+        drained = fuse_drain(fuse, 0);
+        if (drained > 0)
+        {
+            fuse_debugf("fuse_destroy: drained %lu memory blocks\n", drained);
+        }
+    } while (drained > 0);
 
     // Free the application
     fuse_allocator_free(allocator, fuse);
@@ -330,7 +334,7 @@ inline void fuse_exit(fuse_t *self, int exit_code)
 ///////////////////////////////////////////////////////////////////////////////
 // PRIVATE METHODS
 
-void fuse_destroy_callback(fuse_allocator_header_t *hdr, void *user)
+void fuse_destroy_callback(struct fuse_allocator_header *hdr, void *user)
 {
     // Increment the count
     (*((uint32_t *)user))++;

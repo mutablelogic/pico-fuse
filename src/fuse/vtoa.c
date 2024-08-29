@@ -6,6 +6,7 @@
 #include <fuse/fuse.h>
 
 // Private headers
+#include "alloc.h"
 #include "fuse.h"
 #include "printf.h"
 

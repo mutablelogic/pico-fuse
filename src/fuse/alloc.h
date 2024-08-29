@@ -43,35 +43,99 @@ struct fuse_allocator
     struct fuse_allocator_header *tail; ///< The tail of the list of memory blocks
 };
 
+/** @brief Allocate memory from the allocator
+ *
+ *  @param self The allocator object
+ *  @param size The size of the memory block to allocate
+ *  @param magic The magic number to use for the memory block
+ *  @param file The file where the allocation was made
+ *  @param line The line where the allocation was made
+ *  @returns A pointer to the allocated memory block, or NULL if no memory could be allocated
+ */
+void *fuse_allocator_malloc(struct fuse_allocator *self, size_t size, uint16_t magic, const char *file, int line);
+
+/** @brief Free a memory block in the memory pool
+ *
+ *  @param self The allocator object
+ *  @param ptr A pointer to the memory block
+ */
+void fuse_allocator_free(struct fuse_allocator *self, void *ptr);
+
+/** @brief Retrieve the magic number for a memory block
+ *
+ *  @param self The allocator object
+ *  @param ptr A pointer to the memory block
+ *  @returns The magic number for the memory block
+ */
+uint16_t fuse_allocator_magic(struct fuse_allocator *self, void *ptr);
+
+/** @brief Retrieve the size for a memory block
+ *
+ *  @param self The allocator object
+ *  @param ptr A pointer to the memory block
+ *  @returns The size in bytes for the memory block
+ */
+size_t fuse_allocator_size(struct fuse_allocator *self, void *ptr);
+
+/** @brief Retain a memory block by incrementing the reference counter
+ *
+ * @param self The allocator object
+ * @param ptr A pointer to the memory block
+ */
+void fuse_allocator_retain(struct fuse_allocator *self, void *ptr);
+
+/** @brief Release a memory block by decrementing the reference counter
+ *
+ * @param self The allocator object
+ * @param ptr A pointer to the memory block
+ * @returns True if the memory block was freed, false otherwise
+ */
+bool fuse_allocator_release(struct fuse_allocator *self, void *ptr);
+
+/** @brief Release all memory in the pool and destroy the allocator
+ *
+ *  @param self The allocator object
+ */
+void fuse_allocator_destroy(struct fuse_allocator *self);
+
 /** @brief Retrieve the head pointer for a memory block
- * 
+ *
  * The head pointer is the pointer to the previous value in a linked list.
  *
  * @param self The allocator object
  * @param ptr A pointer to the memory block
  * @returns A pointer to the head pointer
  */
-void **fuse_allocator_headptr(fuse_allocator_t *self, void *ptr);
+void **fuse_allocator_headptr(struct fuse_allocator *self, void *ptr);
 
 /** @brief Retrieve the tail pointer for a memory block
- * 
+ *
  * The tail pointer is the pointer to the next value in a linked list.
  *
  * @param self The allocator object
  * @param ptr A pointer to the memory block
  * @returns A pointer to the tail pointer
  */
-void **fuse_allocator_tailptr(fuse_allocator_t *self, void *ptr);
+void **fuse_allocator_tailptr(struct fuse_allocator *self, void *ptr);
 
-// Built-in methods
-void *fuse_allocator_builtin_malloc(struct fuse_allocator *ctx, size_t size, uint16_t magic, const char *file, int line);
-void fuse_allocator_builtin_free(struct fuse_allocator *ctx, void *ptr);
-void fuse_allocator_builtin_destroy(struct fuse_allocator *ctx);
-uint16_t fuse_allocator_builtin_magic(struct fuse_allocator *ctx, void *ptr);
-size_t fuse_allocator_builtin_size(struct fuse_allocator *ctx, void *ptr);
-void fuse_allocator_builtin_retain(struct fuse_allocator *ctx, void *ptr);
-bool fuse_allocator_builtin_release(struct fuse_allocator *ctx, void *ptr);
-void **fuse_allocator_builtin_headptr(void *ptr);
-void **fuse_allocator_builtin_tailptr(void *ptr);
+/** @brief Callback function for walking the memory pool
+ *
+ *  @param ptr A pointer to the memory block
+ *  @param size The size of the memory block, in bytes (not including any memory metadata)
+ *  @param magic The magic number for the memory block
+ *  @param file The file where the allocation was made
+ *  @param line The line of the file where the allocation was made
+ */
+typedef void (*fuse_allocator_walk_callback_t)(struct fuse_allocator_header *hdr, void *user);
+
+/** @brief Walk the memory pool from the head and call a callback function for each used memory block
+ *
+ * @param self The allocator object
+ * @param ctx The context to pass to the callback function, or NULL if there is no context yet
+ * @param callback The callback function to call for each memory block
+ * @param user_data The user data to pass to the callback function
+ * @returns The context to use for the next call to this function, or NULL if there are no more memory blocks
+ */
+void *fuse_allocator_walk(struct fuse_allocator *self, void *ctx, fuse_allocator_walk_callback_t callback, void *user_data);
 
 #endif
