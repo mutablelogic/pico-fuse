@@ -51,6 +51,41 @@ int TEST_002(fuse_t *self)
     return 0;
 }
 
+int TEST_003(fuse_t *self)
+{
+    fuse_debugf("TEST_003: push 100 values into a list and pop them\n");
+
+    // Make an empty list
+    fuse_value_t *list = fuse_new_list(self);
+
+    // check count
+    assert(fuse_count(self, list) == 0);
+
+    // append 10 values
+    for (uint8_t i = 0; i < 100; i++)
+    {
+        // Append a new value
+        assert(fuse_list_push(self, list, fuse_new_u8(self, i)));
+    }
+
+    // sprintf the value
+    fuse_printf(self, " list=%v\n", list);
+
+    // check count
+    assert(fuse_count(self, list) == 100);
+
+    // pop
+    for (uint8_t i = 0; i < 100; i++)
+    {
+        assert(fuse_count(self, list) == 100 - i);
+        fuse_value_t *v = fuse_list_pop(self, list);
+        assert(v);
+        fuse_printf(self, " popped=%v\n", v);
+    }
+
+    // Return success
+    return 0;
+}
 
 int main()
 {
@@ -58,5 +93,6 @@ int main()
     assert(self);
     assert(TEST_001(self) == 0);
     assert(TEST_002(self) == 0);
+    assert(TEST_003(self) == 0);
     assert(fuse_destroy(self) == 0);
 }

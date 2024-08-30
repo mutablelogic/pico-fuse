@@ -192,3 +192,90 @@ inline fuse_value_t *fuse_list_next(fuse_t *self, fuse_value_t *list, fuse_value
 
     return (elem == NULL) ? fuse_get_head(self, list) : fuse_get_tail(self, elem);
 }
+
+/** @brief Remove an element from the end of the list and return it
+ */
+fuse_value_t *fuse_list_pop(fuse_t *self, fuse_value_t *list)
+{
+    assert(self);
+    assert(list);
+    assert(self->allocator->magic(self->allocator, list) == FUSE_MAGIC_LIST);
+
+    // If tail is NULL, then the list is empty
+    fuse_value_t *tail = fuse_get_tail(self, list);
+    if (tail == NULL)
+    {
+        assert(((struct fuse_list *)list)->count == 0);
+        return NULL;
+    }
+
+    // Get the previous element
+    fuse_value_t *prev = fuse_get_head(self, tail);
+
+    // Update the tail pointer of the list
+    if (prev != NULL)
+    {
+        fuse_set_tail(self, list, prev);
+        fuse_set_tail(self, prev, NULL);
+    }
+    else
+    {
+        // This was the only element in the list
+        fuse_set_head(self, list, NULL);
+        fuse_set_tail(self, list, NULL);
+    }
+
+    // Decrement the list count
+    ((struct fuse_list *)list)->count--;
+
+    // Unlink the element and return it
+    fuse_set_head(self, tail, NULL);
+    fuse_set_tail(self, tail, NULL);
+
+    // Release the element
+    fuse_release(self, tail);
+
+    return tail;
+}
+
+/** @brief Append an element to the beginning of a list
+ */
+fuse_value_t *fuse_list_push(fuse_t *self, fuse_value_t *list, fuse_value_t *elem)
+{
+    assert(self);
+    assert(list);
+    assert(elem);
+    assert(fuse_get_head(self, elem) == NULL);
+    assert(fuse_get_tail(self, elem) == NULL);
+    assert(self->allocator->magic(self->allocator, list) == FUSE_MAGIC_LIST);
+    assert(elem != list);
+
+    // Retain the element, return NULL if the retain failed
+    elem = fuse_retain(self, elem);
+    if (elem == NULL)
+    {
+        return NULL;
+    }
+
+    // Link into the list
+    fuse_value_t *head = fuse_get_head(self, list);
+    if (head != NULL)
+    {
+        fuse_set_head(self, head, elem);
+    }
+    fuse_set_head(self, list, elem);
+    fuse_set_tail(self, elem, head);
+    fuse_set_head(self, elem, NULL);
+
+    // If there is no tail, set element as the new tail
+    if (fuse_get_tail(self, list) == NULL)
+    {
+        fuse_set_tail(self, list, elem);
+    }
+
+    // Increment the list count
+    ((struct fuse_list *)list)->count++;
+
+    // Return the element
+    return elem;
+}

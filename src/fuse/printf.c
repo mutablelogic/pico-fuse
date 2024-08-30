@@ -200,6 +200,7 @@ size_t fuse_printf(fuse_t *self, const char *format, ...)
     if (n < (sz - 1))
     {
         // Happy path - write the string to stdout
+        // TODO: Don't print the terminating \n
         puts(buffer);
     }
     else
@@ -217,6 +218,7 @@ size_t fuse_printf(fuse_t *self, const char *format, ...)
         va_end(va);
 
         // Write the string to stdout
+        // TODO: Don't print the terminating \n
         puts(tmp);
 
         // Free the memory

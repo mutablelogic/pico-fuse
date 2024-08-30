@@ -94,4 +94,14 @@ void fuse_run(fuse_t *self, int (*callback)(fuse_t *));
  */
 void fuse_exit(fuse_t *self, const int exit_code);
 
+/** @brief Drain the memory allocation pool
+ *
+ * This method empties auto-releaaed values (with a zero retain count).
+ *
+ * @param self The fuse instance
+ * @param sz The maximum number of values to release, or 0 for all
+ * @return The number of values that were released
+ */
+size_t fuse_drain(fuse_t *self, size_t cap);
+
 #endif

@@ -31,6 +31,8 @@ void fuse_register_value_desc(const fuse_t *self, const fuse_value_desc_t *desc)
     (fuse_new_value_ex((self), (FUSE_MAGIC_DATA), (void *)(sz), __FILE__, __LINE__))
 #define fuse_new_list(self) \
     (fuse_new_value_ex((self), (FUSE_MAGIC_LIST), (0), __FILE__, __LINE__))
+#define fuse_new_u8(self, u8) \
+    (fuse_new_value_ex((self), (FUSE_MAGIC_U8), (void *)(uintptr_t)(u8), __FILE__, __LINE__))
 #else
 #define fuse_new_null(self) \
     (fuse_new_value_ex((self), (FUSE_MAGIC_NULL), (0), 0, 0))
@@ -38,6 +40,8 @@ void fuse_register_value_desc(const fuse_t *self, const fuse_value_desc_t *desc)
     (fuse_new_value_ex((self), (FUSE_MAGIC_DATA), (void *)(sz), 0, 0))
 #define fuse_new_list(self) \
     (fuse_new_value_ex((self), (FUSE_MAGIC_LIST), (0), 0, 0))
+#define fuse_new_u8(self, u8) \
+    (fuse_new_value_ex((self), (FUSE_MAGIC_U8), (void *)(uintptr_t)(u8), 0, 0))
 #endif
 
 /** @brief Create a new autoreleased value
@@ -74,15 +78,5 @@ fuse_value_t *fuse_retain(fuse_t *self, fuse_value_t *value);
  * @param ptr The value to release
  */
 void fuse_release(fuse_t *self, fuse_value_t *value);
-
-/** @brief Drain the memory allocation pool
- *
- * This method empties auto-releaaed values (with a zero retain count).
- *
- * @param self The fuse instance
- * @param sz The maximum number of values to release, or 0 for all
- * @return The number of values that were released
- */
-size_t fuse_drain(fuse_t *self, size_t cap);
 
 #endif /* FUSE_VALUE_H */
