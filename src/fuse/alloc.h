@@ -118,24 +118,4 @@ void **fuse_allocator_headptr(struct fuse_allocator *self, void *ptr);
  */
 void **fuse_allocator_tailptr(struct fuse_allocator *self, void *ptr);
 
-/** @brief Callback function for walking the memory pool
- *
- *  @param ptr A pointer to the memory block
- *  @param size The size of the memory block, in bytes (not including any memory metadata)
- *  @param magic The magic number for the memory block
- *  @param file The file where the allocation was made
- *  @param line The line of the file where the allocation was made
- */
-typedef void (*fuse_allocator_walk_callback_t)(struct fuse_allocator_header *hdr, void *user);
-
-/** @brief Walk the memory pool from the head and call a callback function for each used memory block
- *
- * @param self The allocator object
- * @param ctx The context to pass to the callback function, or NULL if there is no context yet
- * @param callback The callback function to call for each memory block
- * @param user_data The user data to pass to the callback function
- * @returns The context to use for the next call to this function, or NULL if there are no more memory blocks
- */
-void *fuse_allocator_walk(struct fuse_allocator *self, void *ctx, fuse_allocator_walk_callback_t callback, void *user_data);
-
 #endif

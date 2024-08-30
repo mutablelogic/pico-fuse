@@ -52,28 +52,3 @@ inline bool fuse_allocator_release(struct fuse_allocator *self, void *ptr)
     assert(ptr);
     return self->release(self, ptr);
 }
-
-void *fuse_allocator_walk(struct fuse_allocator *self, void *ctx, fuse_allocator_walk_callback_t callback, void *user)
-{
-    assert(self);
-    assert(callback);
-
-    fuse_debugf("Walking memory pool ctx=%p\n", ctx);
-
-    // Obtain the next unused block
-    if (ctx == NULL)
-    {
-        ctx = self->head;
-        fuse_debugf("Walking returning first ctx=%p\n", ctx);
-        return ctx;
-    }
-
-    // Call the callback on this header
-    struct fuse_allocator_header *block = ctx;
-    fuse_debugf("Walking callback ctx=%p\n", ctx);
-    callback(block, user);
-
-    // Return the next block
-    fuse_debugf("Walking next ctx=%p\n", block->next);
-    return block->next;
-}

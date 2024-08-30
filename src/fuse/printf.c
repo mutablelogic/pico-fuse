@@ -18,7 +18,7 @@ size_t ptoa(char *buf, size_t sz, size_t i, void *v)
     i = cstrtoa_internal(buf, sz, i, "0x");
 
     // Output the value in hexadecimal, padded to the size of a pointer
-    i = utoa_internal(buf, sz, i, (uintptr_t)v, FUSE_PRINTF_FLAG_HEX | (sizeof(void *) << 3));
+    i = utoa_internal(buf, sz, i, (uintptr_t)v, FUSE_PRINTF_FLAG_HEX | (sizeof(void *) << 1));
 
     // return the new index
     return i;

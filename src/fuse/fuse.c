@@ -17,20 +17,18 @@
 ///////////////////////////////////////////////////////////////////////////////
 // DECLARATIONS
 
-void fuse_destroy_callback(struct fuse_allocator_header *hdr, void *user);
-bool fuse_init_null(fuse_t *self, fuse_value_t *value, const void *user_data);
-bool fuse_init_number(fuse_t *self, fuse_value_t *value, const void *user_data);
-bool fuse_init_memcpy(fuse_t *self, fuse_value_t *value, const void *user_data);
-bool fuse_init_cstr(fuse_t *self, fuse_value_t *value, const void *user_data);
-
-size_t fuse_cstr_null(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v);
-size_t fuse_qstr_null(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v);
-size_t fuse_qstr_bool(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v);
-size_t fuse_qstr_number(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v);
-size_t fuse_cstr_cstr(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v);
-size_t fuse_qstr_cstr(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v);
-size_t fuse_cstr_data(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v);
-size_t fuse_qstr_data(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v);
+static bool fuse_init_null(fuse_t *self, fuse_value_t *value, const void *user_data);
+static bool fuse_init_number(fuse_t *self, fuse_value_t *value, const void *user_data);
+static bool fuse_init_memcpy(fuse_t *self, fuse_value_t *value, const void *user_data);
+static bool fuse_init_cstr(fuse_t *self, fuse_value_t *value, const void *user_data);
+static size_t fuse_cstr_null(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v);
+static size_t fuse_qstr_null(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v);
+static size_t fuse_qstr_bool(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v);
+static size_t fuse_qstr_number(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v);
+static size_t fuse_cstr_cstr(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v);
+static size_t fuse_qstr_cstr(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v);
+static size_t fuse_cstr_data(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v);
+static size_t fuse_qstr_data(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v);
 
 ///////////////////////////////////////////////////////////////////////////////
 // PUBLIC METHODS
@@ -187,7 +185,7 @@ int fuse_destroy(fuse_t *fuse)
 {
     assert(fuse);
 
-    // Store the exit code and allocator object
+    // Store the exit code
     int exit_code = fuse->exit_code;
     struct fuse_allocator *allocator = fuse->allocator;
 
@@ -197,12 +195,7 @@ int fuse_destroy(fuse_t *fuse)
     size_t drained = 0;
     do
     {
-        fuse_debugf("fuse_destroy: draining memory blocks\n");
         drained = fuse_drain(fuse, 0);
-        if (drained > 0)
-        {
-            fuse_debugf("fuse_destroy: drained %lu memory blocks\n", drained);
-        }
     } while (drained > 0);
 
     // Free the application
@@ -210,12 +203,19 @@ int fuse_destroy(fuse_t *fuse)
 
     // Walk through any remaining memory blocks
 #ifdef DEBUG
-    void *ctx = NULL;
-    uint32_t count = 0;
-    while ((ctx = fuse_allocator_walk(allocator, ctx, fuse_destroy_callback, &count)) != NULL)
+    struct fuse_allocator_header *hdr = allocator->head;
+    size_t count = 0;
+    while (hdr != NULL)
     {
-        // Do nothing
-    }
+        // Print any memory leaks
+        fuse_debugf("LEAK: %p magic %04X (%d bytes)", hdr->ptr, hdr->magic, hdr->size);
+        if (hdr->file != NULL)
+        {
+            fuse_debugf(" [allocated at %s:%d]", hdr->file, hdr->line);
+        }
+        fuse_debugf("\n");
+        count++;        
+    }    
 
     // If the count is greater than zero, then there are memory leaks
     if (count > 0)
@@ -229,6 +229,27 @@ int fuse_destroy(fuse_t *fuse)
 
     // Return the exit code
     return exit_code == FUSE_EXIT_SUCCESS ? 0 : exit_code;
+}
+
+/** @brief Drain the memory allocation pool
+ */
+size_t fuse_drain(fuse_t *self, size_t cap)
+{
+    assert(self);
+
+    size_t count = 0;
+    struct fuse_allocator_header *hdr = self->allocator->head;
+    while (hdr != NULL && (cap == 0 || count < cap))
+    {
+        struct fuse_allocator_header *next = hdr->next;
+        if (hdr->ref == 0)
+        {
+            fuse_free(self, hdr->ptr);
+            count++;
+        }
+        hdr = next;
+    }    
+    return count;
 }
 
 void *fuse_alloc_ex(fuse_t *self, const uint16_t magic, const void *user_data, const char *file, const int line)
@@ -334,25 +355,9 @@ inline void fuse_exit(fuse_t *self, int exit_code)
 ///////////////////////////////////////////////////////////////////////////////
 // PRIVATE METHODS
 
-void fuse_destroy_callback(struct fuse_allocator_header *hdr, void *user)
-{
-    // Increment the count
-    (*((uint32_t *)user))++;
-
-    // Print any errors
-    fuse_debugf("LEAK: %p magic %04X (%d bytes)", hdr->ptr, hdr->magic, hdr->size);
-#ifdef DEBUG
-    if (hdr->file != NULL)
-    {
-        fuse_debugf(" [allocated at %s:%d]", hdr->file, hdr->line);
-    }
-#endif
-    fuse_debugf("\n");
-}
-
 /* @brief Initialise a number value
  */
-bool fuse_init_number(fuse_t *self, fuse_value_t *value, const void *user_data)
+static bool fuse_init_number(fuse_t *self, fuse_value_t *value, const void *user_data)
 {
     assert(self);
     assert(value);
@@ -396,7 +401,7 @@ bool fuse_init_number(fuse_t *self, fuse_value_t *value, const void *user_data)
 
 /* @brief Initialise by copying memory
  */
-bool fuse_init_memcpy(fuse_t *self, fuse_value_t *value, const void *user_data)
+static bool fuse_init_memcpy(fuse_t *self, fuse_value_t *value, const void *user_data)
 {
     assert(self);
     assert(value);
@@ -421,7 +426,7 @@ bool fuse_init_memcpy(fuse_t *self, fuse_value_t *value, const void *user_data)
 
 /* @brief Initialise by setting the string pointer
  */
-bool fuse_init_cstr(fuse_t *self, fuse_value_t *value, const void *user_data)
+static bool fuse_init_cstr(fuse_t *self, fuse_value_t *value, const void *user_data)
 {
     assert(self);
     assert(value);
@@ -435,21 +440,21 @@ bool fuse_init_cstr(fuse_t *self, fuse_value_t *value, const void *user_data)
 
 /* @brief Output a null as a cstr
  */
-size_t fuse_cstr_null(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v)
+static size_t fuse_cstr_null(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v)
 {
     return cstrtoa_internal(buf, sz, i, NULL);
 }
 
 /* @brief Output a null as a qstr
  */
-size_t fuse_qstr_null(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v)
+static size_t fuse_qstr_null(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v)
 {
     return cstrtoa_internal(buf, sz, i, FUSE_PRINTF_NULL_JSON);
 }
 
 /* @brief Output a bool as a cstr
  */
-size_t fuse_qstr_bool(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v)
+static size_t fuse_qstr_bool(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v)
 {
     assert(self);
     assert(v);
@@ -468,7 +473,7 @@ size_t fuse_qstr_bool(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t
 
 /* @brief Output an integer as a cstr
  */
-size_t fuse_qstr_number(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v)
+static size_t fuse_qstr_number(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v)
 {
     assert(self);
     assert(v);
@@ -503,7 +508,7 @@ size_t fuse_qstr_number(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value
 
 /* @brief Output a pointer to a null-terminated string as a cstr
  */
-size_t fuse_cstr_cstr(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v)
+static size_t fuse_cstr_cstr(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v)
 {
     assert(self);
     assert(v);
@@ -515,7 +520,7 @@ size_t fuse_cstr_cstr(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t
 
 /* @brief Output a pointer to a null-terminated string as a quoted cstr
  */
-size_t fuse_qstr_cstr(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v)
+static size_t fuse_qstr_cstr(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v)
 {
     assert(self);
     assert(v);
@@ -527,7 +532,7 @@ size_t fuse_qstr_cstr(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t
 
 /* @brief Output a data block as hex
  */
-size_t fuse_cstr_data(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v)
+static size_t fuse_cstr_data(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v)
 {
     assert(self);
     assert(v);
@@ -553,7 +558,7 @@ size_t fuse_cstr_data(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t
 
 /* @brief Output a data block as base64
  */
-size_t fuse_qstr_data(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v)
+static size_t fuse_qstr_data(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v)
 {
     assert(self);
     assert(v);

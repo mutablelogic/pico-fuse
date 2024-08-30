@@ -104,15 +104,15 @@ void fuse_allocator_builtin_free(struct fuse_allocator *ctx, void *ptr)
     {
         block->prev->next = block->next;
     }
+    else
+    { // Update head if this block was at the head
+        ctx->head = block->next;
+    }
     if (block->next != NULL)
     {
         block->next->prev = block->prev;
-    }
-    if (ctx->head == block)
-    {
-        ctx->head = block->next;
-    }
-    if (ctx->tail == block)
+    } // Update tail if this block was at the tail
+    else
     {
         ctx->tail = block->prev;
     }
