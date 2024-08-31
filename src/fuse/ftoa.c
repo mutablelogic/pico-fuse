@@ -1,7 +1,5 @@
 #include <float.h>
 #include <stdbool.h>
-
-// Public headers
 #include <fuse/fuse.h>
 
 // Private headers
