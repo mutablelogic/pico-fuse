@@ -7,18 +7,18 @@
 ///////////////////////////////////////////////////////////////////////////////
 // TYPES
 
+/** @brief Fuse device context
+ */
+typedef void *fuse_context_t;
+
 /** @brief Fuse device
  */
 typedef struct
 {
     const char *name;
-    void *(*init)(fuse_t *fuse, void *userdata);
-    void (*destroy)(fuse_t *fuse, void *context);
+    fuse_context_t *(*init)(fuse_t *fuse, void *userdata);
+    void (*destroy)(fuse_t *fuse, fuse_context_t *context);
 } fuse_device_t;
-
-/** @brief Fuse context
- */
-typedef void *fuse_context_t;
 
 ///////////////////////////////////////////////////////////////////////////////
 // METHODS

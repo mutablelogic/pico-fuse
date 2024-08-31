@@ -330,6 +330,8 @@ void fuse_run(fuse_t *self, int (*callback)(fuse_t *))
     assert(self);
     assert(callback);
 
+    // TODO: Register the timer device
+
     // Call the callback, and exit if it returns a non-zero value
     int exit_code = callback(self);
     if (exit_code)
