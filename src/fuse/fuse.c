@@ -178,12 +178,20 @@ fuse_t *fuse_new()
         .name = "MAP",
     };
 
-    // Register the timer
+    // Register the timer type
     fuse_register_value_timer(fuse);
 
-    // Retain a timer value
-    fuse->timer = fuse_retain(fuse, fuse_new_timer(fuse));
-    assert(fuse->timer);
+    // Create the event queue for Core 0 
+    fuse->core0 = (struct fuse_list *)fuse_retain(fuse, fuse_new_list(fuse));
+    if (fuse->core0 == NULL)
+    {
+        fuse_allocator_free(allocator, fuse);
+        fuse_allocator_destroy(allocator);
+        return NULL;
+    }
+
+    // TODO: Don't create an event queue for Core 1
+    fuse->core1 = NULL;
 
     // Return the fuse application
     return fuse;
@@ -193,12 +201,13 @@ int fuse_destroy(fuse_t *fuse)
 {
     assert(fuse);
 
+    // Release event queues
+    fuse_release(fuse, fuse->core0);
+    fuse_release(fuse, fuse->core1);
+
     // Store the exit code
     int exit_code = fuse->exit_code;
     struct fuse_allocator *allocator = fuse->allocator;
-
-    // Release the timer
-    fuse_release(fuse, fuse->timer);
 
     // Repeatedly drain the allocator pool until no new memory blocks are freed
     // It will call fuse_destroy_callback for each memory block that is freed,
@@ -219,7 +228,7 @@ int fuse_destroy(fuse_t *fuse)
     while (hdr != NULL)
     {
         // Print any memory leaks
-        fuse_debugf("LEAK: %p magic %04X (%d bytes)", hdr->ptr, hdr->magic, hdr->size);
+        fuse_debugf("LEAK: %p %s (%d bytes)", hdr->ptr, fuse->desc[hdr->magic].name, hdr->size);
         if (hdr->file != NULL)
         {
             fuse_debugf(" [allocated at %s:%d]", hdr->file, hdr->line);
@@ -353,7 +362,6 @@ void fuse_run(fuse_t *self, int (*callback)(fuse_t *))
     }
 
     // Run the loop
-    fuse_debugf("fuse_run\n");
     while (!self->exit_code)
     {
         sleep_ms(100);

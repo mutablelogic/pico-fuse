@@ -8,6 +8,14 @@
 
 #include "value.h"
 
+#ifdef DEBUG
+#define fuse_new_list(self) \
+    (fuse_new_value_ex((self), (FUSE_MAGIC_LIST), (0), __FILE__, __LINE__))
+#else
+#define fuse_new_list(self) \
+    (fuse_new_value_ex((self), (FUSE_MAGIC_LIST), (0), 0, 0))
+#endif
+
 /** @brief Append an element to the end of a list
  *
  *  The function will append a element to the end of a list and return that element.

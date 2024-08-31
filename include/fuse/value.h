@@ -30,8 +30,6 @@ void fuse_register_value_type(fuse_t *self, uint16_t magic, fuse_value_desc_t ty
     (fuse_new_value_ex((self), (FUSE_MAGIC_NULL), (0), __FILE__, __LINE__))
 #define fuse_new_data(self, sz) \
     (fuse_new_value_ex((self), (FUSE_MAGIC_DATA), (void *)(sz), __FILE__, __LINE__))
-#define fuse_new_list(self) \
-    (fuse_new_value_ex((self), (FUSE_MAGIC_LIST), (0), __FILE__, __LINE__))
 #define fuse_new_u8(self, u8) \
     (fuse_new_value_ex((self), (FUSE_MAGIC_U8), (void *)(uintptr_t)(u8), __FILE__, __LINE__))
 #else
@@ -39,8 +37,6 @@ void fuse_register_value_type(fuse_t *self, uint16_t magic, fuse_value_desc_t ty
     (fuse_new_value_ex((self), (FUSE_MAGIC_NULL), (0), 0, 0))
 #define fuse_new_data(self, sz) \
     (fuse_new_value_ex((self), (FUSE_MAGIC_DATA), (void *)(sz), 0, 0))
-#define fuse_new_list(self) \
-    (fuse_new_value_ex((self), (FUSE_MAGIC_LIST), (0), 0, 0))
 #define fuse_new_u8(self, u8) \
     (fuse_new_value_ex((self), (FUSE_MAGIC_U8), (void *)(uintptr_t)(u8), 0, 0))
 #endif

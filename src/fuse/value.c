@@ -60,9 +60,11 @@ fuse_value_t *fuse_retain(fuse_t *self, fuse_value_t *value)
 void fuse_release(fuse_t *self, fuse_value_t *value)
 {
     assert(self);
-    assert(value);
-    assert(fuse_allocator_magic(self->allocator, value) < FUSE_MAGIC_COUNT);
+    assert(value == NULL || fuse_allocator_magic(self->allocator, value) < FUSE_MAGIC_COUNT);
 
     // Decrement the reference count
-    fuse_allocator_release(self->allocator, value);
+    if (value != NULL)
+    {
+        fuse_allocator_release(self->allocator, value);
+    }
 }
