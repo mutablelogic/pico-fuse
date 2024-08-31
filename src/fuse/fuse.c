@@ -178,7 +178,9 @@ fuse_t *fuse_new()
 
     // Register types
     fuse_register_value_mutex(fuse);
+#ifdef TARGET_LINUX
     fuse_register_value_timer(fuse);
+#endif
 
     // Create the event queue for Core 0 
     fuse->core0 = (struct fuse_list *)fuse_retain(fuse, fuse_new_list(fuse));
