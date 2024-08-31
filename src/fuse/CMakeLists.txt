@@ -10,13 +10,14 @@ add_library(${NAME} STATIC
     itoa.c
     list.c
     map.c
+    mutex_posix.c
     panic.c
     printf.c
     random_pico.c
     random_posix.c
     sleep_posix.c
     strtoa.c
-    timer_posix.c
+    timer_linux.c
     value.c
     vtoa.c
 )

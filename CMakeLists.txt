@@ -6,13 +6,21 @@ set(CMAKE_C_STANDARD 11)
 if (DEFINED ENV{PICO_BOARD})
     set(PICO_BOARD "$ENV{PICO_BOARD}")
     set(TARGET_OS "pico")    
-    add_compile_definitions(TARGET_PICO)
     include(lib/pico-sdk/pico_sdk_init.cmake)
 else()
     set(TARGET_OS ${CMAKE_HOST_SYSTEM_NAME})
     string(TOLOWER ${TARGET_OS} TARGET_OS)
 endif()
 message("Target ${TARGET_OS}")
+
+# TARGET_DARWIN, TARGET_LINUX and TARGET_PICO
+if (TARGET_OS STREQUAL "darwin")
+    add_compile_definitions(TARGET_DARWIN)
+elseif (TARGET_OS STREQUAL "linux")
+    add_compile_definitions(TARGET_LINUX)
+elseif (TARGET_OS STREQUAL "pico")
+    add_compile_definitions(TARGET_PICO)
+endif()
 
 # Define project
 project(picofuse CXX C ASM)

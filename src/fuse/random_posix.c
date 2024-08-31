@@ -1,4 +1,4 @@
-#ifndef TARGET_PICO
+#if defined(TARGET_DARWIN) || defined(TARGET_LINUX)
 
 #include <limits.h>
 #include <time.h>

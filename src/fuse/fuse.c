@@ -12,6 +12,7 @@
 #include "fuse.h"
 #include "list.h"
 #include "map.h"
+#include "mutex.h"
 #include "printf.h"
 #include "timer.h"
 
@@ -69,10 +70,6 @@ fuse_t *fuse_new()
     fuse->desc[FUSE_MAGIC_APP] = (struct fuse_value_desc){
         .size = 0,
         .name = "APP",
-    };
-    fuse->desc[FUSE_MAGIC_POOL] = (struct fuse_value_desc){
-        .size = 0,
-        .name = "POOL",
     };
     fuse->desc[FUSE_MAGIC_DATA] = (struct fuse_value_desc){
         .size = 0,
@@ -178,7 +175,9 @@ fuse_t *fuse_new()
         .name = "MAP",
     };
 
-    // Register the timer type
+
+    // Register types
+    fuse_register_value_mutex(fuse);
     fuse_register_value_timer(fuse);
 
     // Create the event queue for Core 0 
