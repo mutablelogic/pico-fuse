@@ -6,8 +6,6 @@
 #ifndef FUSE_MAGIC_H
 #define FUSE_MAGIC_H
 
-#include <stdint.h>
-
 // Define the magic numbers for the values
 #define FUSE_MAGIC_NULL 0x00 ///< NULL value
 #define FUSE_MAGIC_APP 0x01  ///< Application

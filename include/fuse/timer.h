@@ -7,12 +7,7 @@
 #define FUSE_TIMER_H
 
 #include "fuse.h"
-#include "device.h"
 #include <stdint.h>
-
-/* @brief A timer device can be used to schedule alarms
- */
-extern fuse_device_t fuse_timer;
 
 /** @brief Create a new alarm
  *
@@ -24,6 +19,6 @@ extern fuse_device_t fuse_timer;
  * @param periodic If true, the timer will fire periodically rather than once
  * @param data The data to pass to the timer callback
  */
-void fuse_timer_schedule(fuse_t *self, fuse_context_t *timer, uint32_t ms, bool periodic, void *data);
+void fuse_timer_schedule(fuse_t *self, uint32_t ms, bool periodic, void *data);
 
 #endif /* FUSE_TIMER_H */

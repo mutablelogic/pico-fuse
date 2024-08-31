@@ -9,6 +9,24 @@
 ///////////////////////////////////////////////////////////////////////////////
 // PUBLIC METHODS
 
+/** @brief Register value type
+ *
+ * @param self The fuse instance
+ * @param desc The value descriptor
+ */
+void fuse_register_value_type(fuse_t *self, uint16_t magic, fuse_value_desc_t desc)
+{
+    assert(self);
+    assert(magic < FUSE_MAGIC_COUNT);
+    assert(desc.name);
+
+    // We can only register a value descriptor once
+    assert(self->desc[magic].name == 0);
+
+    // Register the value descriptor
+    self->desc[magic] = desc;
+}
+
 /** @brief Create a new autoreleased value
  */
 fuse_value_t *fuse_new_value_ex(fuse_t *self, const uint16_t magic, const void *user_data, const char *file, const int line)
@@ -25,11 +43,13 @@ fuse_value_t *fuse_new_value_ex(fuse_t *self, const uint16_t magic, const void *
 fuse_value_t *fuse_retain(fuse_t *self, fuse_value_t *value)
 {
     assert(self);
-    assert(value);
-    assert(fuse_allocator_magic(self->allocator, value) < FUSE_MAGIC_COUNT);
+    assert(value == NULL || fuse_allocator_magic(self->allocator, value) < FUSE_MAGIC_COUNT);
 
     // Retain value
-    fuse_allocator_retain(self->allocator, value);
+    if (value != NULL)
+    {
+        fuse_allocator_retain(self->allocator, value);
+    }
 
     // Return value
     return value;

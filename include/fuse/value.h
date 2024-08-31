@@ -17,12 +17,13 @@ typedef struct fuse_value fuse_value_t;
  */
 typedef struct fuse_value_desc fuse_value_desc_t;
 
-/** @brief Register value primitives
+/** @brief Register value type
  *
  * @param self The fuse instance
- * @param desc The value descriptor
+ * @param magic The magic number of the value type
+ * @param type The value type descriptor
  */
-void fuse_register_value_desc(const fuse_t *self, const fuse_value_desc_t *desc);
+void fuse_register_value_type(fuse_t *self, uint16_t magic, fuse_value_desc_t type);
 
 #ifdef DEBUG
 #define fuse_new_null(self) \

@@ -16,6 +16,7 @@ add_library(${NAME} STATIC
     random_posix.c
     sleep_posix.c
     strtoa.c
+    timer_posix.c
     value.c
     vtoa.c
 )

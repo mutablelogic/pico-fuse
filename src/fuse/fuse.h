@@ -32,9 +32,10 @@ struct fuse_value_desc
  */
 struct fuse_application
 {
-    struct fuse_allocator *allocator;                   ///< The allocator for the application
+    struct fuse_allocator *allocator;              ///< The allocator for the application
     struct fuse_value_desc desc[FUSE_MAGIC_COUNT]; ///< Value descriptors
     int exit_code;                                 ///< Exit code of the application
+    fuse_value_t *timer;                           ///< Timer value
 };
 
 #endif

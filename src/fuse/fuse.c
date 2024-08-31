@@ -13,6 +13,7 @@
 #include "list.h"
 #include "map.h"
 #include "printf.h"
+#include "timer.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // DECLARATIONS
@@ -177,6 +178,13 @@ fuse_t *fuse_new()
         .name = "MAP",
     };
 
+    // Register the timer
+    fuse_register_value_timer(fuse);
+
+    // Retain a timer value
+    fuse->timer = fuse_retain(fuse, fuse_new_timer(fuse));
+    assert(fuse->timer);
+
     // Return the fuse application
     return fuse;
 }
@@ -188,6 +196,9 @@ int fuse_destroy(fuse_t *fuse)
     // Store the exit code
     int exit_code = fuse->exit_code;
     struct fuse_allocator *allocator = fuse->allocator;
+
+    // Release the timer
+    fuse_release(fuse, fuse->timer);
 
     // Repeatedly drain the allocator pool until no new memory blocks are freed
     // It will call fuse_destroy_callback for each memory block that is freed,
@@ -214,8 +225,9 @@ int fuse_destroy(fuse_t *fuse)
             fuse_debugf(" [allocated at %s:%d]", hdr->file, hdr->line);
         }
         fuse_debugf("\n");
-        count++;        
-    }    
+        count++;
+        hdr = hdr->next;
+    }
 
     // If the count is greater than zero, then there are memory leaks
     if (count > 0)
@@ -248,7 +260,7 @@ size_t fuse_drain(fuse_t *self, size_t cap)
             count++;
         }
         hdr = next;
-    }    
+    }
     return count;
 }
 
