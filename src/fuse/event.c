@@ -51,13 +51,15 @@ fuse_event_t *fuse_new_event_ex(fuse_t *self, fuse_value_t *source, uint8_t type
     // Place the event on the event queues
     if (self->core0 != NULL)
     {
-        if (fuse_list_push(self, self->core0, (fuse_value_t*)evt) == NULL) {
+        if (fuse_list_push(self, self->core0, (fuse_value_t *)evt) == NULL)
+        {
             return NULL;
         }
     }
     if (self->core1 != NULL)
     {
-        if (fuse_list_push(self, self->core1,  (fuse_value_t*)evt) == NULL) {
+        if (fuse_list_push(self, self->core1, (fuse_value_t *)evt) == NULL)
+        {
             return NULL;
         }
     }
@@ -68,13 +70,15 @@ fuse_event_t *fuse_new_event_ex(fuse_t *self, fuse_value_t *source, uint8_t type
 
 /** @brief Retrieve an event from the event queue
  */
-fuse_event_t *fuse_next_event(fuse_t *self, uint8_t q) {
+fuse_event_t *fuse_next_event(fuse_t *self, uint8_t q)
+{
     assert(self);
     assert(q < 2);
 
     // Get the event queue
     fuse_list_t *queue = (q == 0) ? self->core0 : self->core1;
-    if (queue == NULL) {
+    if (queue == NULL)
+    {
         return NULL;
     }
 
@@ -82,37 +86,60 @@ fuse_event_t *fuse_next_event(fuse_t *self, uint8_t q) {
     return (fuse_event_t *)fuse_list_pop(self, queue);
 }
 
-
 /** @brief Register a callback for an event
  */
-bool fuse_register_callback(fuse_t *self, uint8_t type, uint8_t q, fuse_callback_t *callback) {
+bool fuse_register_callback(fuse_t *self, uint8_t type, uint8_t q, fuse_callback_t callback)
+{
     assert(self);
     assert(type < FUSE_EVENT_COUNT);
     assert(q < 2);
     assert(callback);
 
-    // TODO
+    // Get the event callbacks
+    struct event_callbacks callbacks;
+    switch (q)
+    {
+    case 0:
+        if (self->core0 == NULL)
+        {
+            return false;
+        }
+        callbacks = self->callbacks0[type];
+        break;
+    case 1:
+        if (self->core1 == NULL)
+        {
+            return false;
+        }
+        callbacks = self->callbacks1[type];
+        break;
+    default:
+        return false;
+    }
+
+    fuse_printf(self, "TODO: Registering callback for event %d on core %d\n", type, q);
 
     // Return success
     return true;
 }
-
 
 //////////////////////////////////////////////////////////////////////////////
 // PRIVATE METHODS
 
 /** @brief Append a quoted string representation of an event
  */
-static inline size_t fuse_qstr_event_type(char *buf, size_t sz, size_t i, uint8_t type) {
+static inline size_t fuse_qstr_event_type(char *buf, size_t sz, size_t i, uint8_t type)
+{
 #ifdef DEBUG
-    switch(type) {
-        case FUSE_EVENT_NULL:
-            return qstrtoa_internal(buf, sz, i, "NULL");
-        case FUSE_EVENT_TIMER:
-            return qstrtoa_internal(buf, sz, i, "TIMER");
-        default:
-            assert(false);
-            return i;
+    switch (type)
+    {
+    case FUSE_EVENT_NULL:
+        return qstrtoa_internal(buf, sz, i, "NULL");
+    case FUSE_EVENT_TIMER:
+        return qstrtoa_internal(buf, sz, i, "TIMER");
+    default:
+        assert(false);
+        return i;
     }
 #else
     return uitoa_internal(buf, sz, i, type, 0);
@@ -121,7 +148,8 @@ static inline size_t fuse_qstr_event_type(char *buf, size_t sz, size_t i, uint8_
 
 /** @brief Append a quoted string representation of an event
  */
-size_t fuse_qstr_event(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v) {
+size_t fuse_qstr_event(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v)
+{
     assert(self);
     assert(buf == NULL || sz > 0);
     assert(v);
@@ -146,7 +174,8 @@ size_t fuse_qstr_event(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_
     i = fuse_qstr_event_type(buf, sz, i, evt->type);
 
     // Add user data
-    if(evt->user_data) {
+    if (evt->user_data)
+    {
         i = chtoa_internal(buf, sz, i, ',');
         i = qstrtoa_internal(buf, sz, i, "user_data");
         i = chtoa_internal(buf, sz, i, ':');

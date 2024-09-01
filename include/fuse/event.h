@@ -10,7 +10,7 @@
 #define FUSE_EVENT_NULL 0x00  ///< NULL event
 #define FUSE_EVENT_TIMER 0x01 ///< Timer event
 
-// Maximum number of magic numbers
+// Maximum number of events
 #define FUSE_EVENT_COUNT 0x02 ///< Maximum number of events
 
 #ifdef DEBUG
@@ -58,7 +58,7 @@ fuse_event_t *fuse_next_event(fuse_t *self, uint8_t q);
 
 /** @brief Callback for an event
  */
-typedef void fuse_callback_t(fuse_t *self, fuse_event_t *evt, void *user_data);
+typedef void (*fuse_callback_t)(fuse_t *self, fuse_event_t *evt, void *user_data);
 
 /** @brief Register a callback for an event
  *
@@ -70,6 +70,6 @@ typedef void fuse_callback_t(fuse_t *self, fuse_event_t *evt, void *user_data);
  * @param type The event type
  * @return Returns true if the callback was registered, otherwise false
  */
-bool fuse_register_callback(fuse_t *self, uint8_t type, uint8_t q, fuse_callback_t *callback);
+bool fuse_register_callback(fuse_t *self, uint8_t type, uint8_t q, fuse_callback_t callback);
 
 #endif /* FUSE_EVENT_H */

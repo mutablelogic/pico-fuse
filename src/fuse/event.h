@@ -6,11 +6,21 @@
 
 #include <fuse/fuse.h>
 
+/** @brief Event data
+ */
 struct event_context
 {
     uint8_t type;
     fuse_value_t *source;
     void *user_data;
+};
+
+/** @brief Array of event callbacks
+ */
+struct event_callbacks
+{
+    size_t count;
+    fuse_callback_t* callback;
 };
 
 /** @brief Register value primitive for a mutex
