@@ -72,4 +72,13 @@ typedef void (*fuse_callback_t)(fuse_t *self, fuse_event_t *evt, void *user_data
  */
 bool fuse_register_callback(fuse_t *self, uint8_t type, uint8_t q, fuse_callback_t callback);
 
+/** @brief Execute callbacks for an event
+ *
+ * Callbacks for an event are called in order.
+ *
+ * @param self The fuse instance
+ * @param q The queue to retrieve the event from (0 or 1)
+ */
+void fuse_exec_event(fuse_t *self, uint8_t q, fuse_event_t *evt);
+
 #endif /* FUSE_EVENT_H */
