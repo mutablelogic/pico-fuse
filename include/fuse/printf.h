@@ -16,7 +16,7 @@
  * @param v      The value terminated by a zero byte, or NULL
  * @returns      The number of bytes that the value would require
  */
-size_t strtoa(char *buf, size_t sz, const char *v);
+size_t qstrtoa(char *buf, size_t sz, const char *v);
 
 /* @brief Return an double float value as a string
  *

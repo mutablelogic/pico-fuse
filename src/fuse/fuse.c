@@ -549,7 +549,7 @@ static size_t fuse_qstr_cstr(fuse_t *self, char *buf, size_t sz, size_t i, fuse_
     assert(fuse_allocator_magic(self->allocator, v) == FUSE_MAGIC_CSTR);
 
     const char *vp = *(const char **)v;
-    return strtoa_internal(buf, sz, i, vp);
+    return qstrtoa_internal(buf, sz, i, vp);
 }
 
 /* @brief Output a data block as hex

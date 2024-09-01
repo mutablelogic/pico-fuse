@@ -10,7 +10,7 @@
 
 /* @brief Append a pointer value
  */
-size_t ptoa(char *buf, size_t sz, size_t i, void *v)
+size_t ptoa_internal(char *buf, size_t sz, size_t i, void *v)
 {
     assert(buf == NULL || sz > 0);
 
@@ -137,7 +137,7 @@ int fuse_vsprintf(fuse_t *self, char *buf, size_t sz, const char *format, va_lis
             break;
         case 'p':
             // pointer
-            i = ptoa(buf, sz, i, va_arg(va, void *));
+            i = ptoa_internal(buf, sz, i, va_arg(va, void *));
             format++;
             break;
         case 'f':

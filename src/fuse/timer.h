@@ -19,4 +19,8 @@
 
 void fuse_register_value_timer(fuse_t *self);
 
+/** @brief Append a quoted string representation of an event
+ */
+size_t fuse_qstr_timer(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v);
+
 #endif

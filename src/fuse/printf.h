@@ -62,7 +62,7 @@ size_t cstrtoa_internal(char *buf, size_t sz, size_t i, const char *str);
  * @param str    Null-terminated string to append
  * @returns      The new index in the buffer
  */
-size_t strtoa_internal(char *buf, size_t sz, size_t i, const char *str);
+size_t qstrtoa_internal(char *buf, size_t sz, size_t i, const char *str);
 
 /* @brief Append an unsigned integer value to a string
  *
@@ -129,5 +129,15 @@ size_t vtoa_internal(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t 
  * @returns      The new index in the output buffer
  */
 size_t b64toa_internal(char *buf, size_t sz, size_t i, void *v, size_t len);
+
+/* @brief Append a pointer value
+ *
+ * @param buf    Output buffer
+ * @param sz     Size of the buffer, including the null terminator
+ * @param i      Current index in the buffer
+ * @param ptr    Value to append
+ * @returns      The new index in the output buffer
+ */
+size_t ptoa_internal(char *buf, size_t sz, size_t i, void *ptr);
 
 #endif

@@ -4,7 +4,7 @@
 int TEST_001(fuse_t *self)
 {
     // Schedule timer to run every second
-    fuse_timer_t *timer = fuse_timer_schedule(self, 1000, true, NULL);
+    fuse_timer_t *timer = fuse_timer_schedule(self, 1000, true, 100);
     assert(timer);
 
     // Start the run loop
@@ -19,7 +19,7 @@ int TEST_001(fuse_t *self)
         }
 
         // Print the event
-        fuse_printf(self,"Event: %v\n", event);
+        fuse_printf(self,"Core 0: Event: %v\n", event);
         i++;
     }
 

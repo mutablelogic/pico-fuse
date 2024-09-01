@@ -3,7 +3,9 @@
 #include <fuse/fuse.h>
 
 // Private includes
+#include "alloc.h"
 #include "fuse.h"
+#include "printf.h"
 #include "timer.h"
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -38,6 +40,8 @@ void fuse_register_value_timer(fuse_t *self)
         .name = "TIME",
         .init = timer_init,
         .destroy = timer_destroy,
+        .cstr = fuse_qstr_timer,
+        .qstr = fuse_qstr_timer
     };
     fuse_register_value_type(self, FUSE_MAGIC_TIMER, fuse_timer_type);
 
@@ -138,6 +142,37 @@ static void fuse_timer_callback(fuse_timer_t *timer)
 {
     fuse_event_t* evt = fuse_new_event(timer->self, (fuse_value_t* )timer, FUSE_EVENT_TIMER, (void* )timer->data);
     assert(evt);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// PRIVATE FUNCTIONS
+
+/** @brief Append a quoted string representation of a timer
+ */
+size_t fuse_qstr_timer(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v) {
+    assert(self);
+    assert(buf == NULL || sz > 0);
+    assert(v);
+    assert(fuse_allocator_magic(self->allocator, v) == FUSE_MAGIC_TIMER);
+
+    // Get the event properties
+    struct timer_context *timer = (struct timer_context *)v;
+
+    // Add prefix
+    i = chtoa_internal(buf, sz, i, '{');
+
+    // Add user data
+    if(timer->data) {
+        i = qstrtoa_internal(buf, sz, i, "data");
+        i = chtoa_internal(buf, sz, i, ':');
+        i = ptoa_internal(buf, sz, i, (void* )timer->data);
+    }
+
+    // Add suffix
+    i = chtoa_internal(buf, sz, i, '}');
+
+    // Return the index
+    return i;
 }
 
 #endif // TARGET_DARWIN

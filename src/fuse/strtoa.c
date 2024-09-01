@@ -46,7 +46,7 @@ size_t cstrtoa_internal(char *buf, size_t sz, size_t i, const char *str)
 
 /* @brief Append a quoted-string into the buffer
  */
-size_t strtoa_internal(char *buf, size_t sz, size_t i, const char *str)
+size_t qstrtoa_internal(char *buf, size_t sz, size_t i, const char *str)
 {
     assert(buf == NULL || sz > 0);
 
@@ -107,10 +107,10 @@ size_t strtoa_internal(char *buf, size_t sz, size_t i, const char *str)
 /* @brief Return a quoted string value
  *
  */
-size_t strtoa(char *buf, size_t sz, const char *v)
+size_t qstrtoa(char *buf, size_t sz, const char *v)
 {
     assert(buf == NULL || sz > 0);
-    size_t i = strtoa_internal(buf, sz, 0, v);
+    size_t i = qstrtoa_internal(buf, sz, 0, v);
 
     // Terminate the string
     if (buf)

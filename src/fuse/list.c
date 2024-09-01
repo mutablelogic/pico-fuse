@@ -20,7 +20,7 @@ bool fuse_init_list(fuse_t *self, fuse_value_t *list, const void *user_data)
     assert(self->allocator->magic(self->allocator, list) == FUSE_MAGIC_LIST);
 
     // Set the count to 0
-    ((struct fuse_list *)list)->count = 0;
+    ((fuse_list_t* )list)->count = 0;
 
     // Return success
     return true;
@@ -34,11 +34,11 @@ void fuse_destroy_list(fuse_t *self, fuse_value_t *list)
     assert(list);
     assert(self->allocator->magic(self->allocator, list) == FUSE_MAGIC_LIST);
 
-    fuse_value_t *elem = fuse_list_next(self, list, NULL);
+    fuse_value_t *elem = fuse_list_next(self, (fuse_list_t* )list, NULL);
     while (elem != NULL)
     {
         // Get the next element
-        fuse_value_t *tmp = fuse_list_next(self, list, elem);
+        fuse_value_t *tmp = fuse_list_next(self, (fuse_list_t* )list, elem);
 
         // Release the value
         fuse_release(self, elem);

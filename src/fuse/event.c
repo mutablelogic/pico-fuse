@@ -1,8 +1,10 @@
 #include <fuse/fuse.h>
 
 // Private includes
-#include "fuse.h"
+#include "alloc.h"
 #include "event.h"
+#include "fuse.h"
+#include "printf.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // LIFECYCLE
@@ -16,7 +18,9 @@ void fuse_register_value_event(fuse_t *self)
     // Register mutex type
     fuse_value_desc_t fuse_event_type = {
         .size = sizeof(struct event_context),
-        .name = "EVT"
+        .name = "EVT",
+        .cstr = fuse_qstr_event,
+        .qstr = fuse_qstr_event,
     };
     fuse_register_value_type(self, FUSE_MAGIC_EVENT, fuse_event_type);
 }
@@ -78,3 +82,64 @@ fuse_event_t *fuse_next_event(fuse_t *self, uint8_t q) {
     return (fuse_event_t *)fuse_list_pop(self, queue);
 }
 
+//////////////////////////////////////////////////////////////////////////////
+// PRIVATE METHODS
+
+/** @brief Append a quoted string representation of an event
+ */
+static inline size_t fuse_qstr_event_type(char *buf, size_t sz, size_t i, uint8_t type) {
+#ifdef DEBUG
+    switch(type) {
+        case FUSE_EVENT_NULL:
+            return qstrtoa_internal(buf, sz, i, "NULL");
+        case FUSE_EVENT_TIMER:
+            return qstrtoa_internal(buf, sz, i, "TIMER");
+        default:
+            assert(false);
+            return i;
+    }
+#else
+    return uitoa_internal(buf, sz, i, type, 0);
+#endif
+}
+
+/** @brief Append a quoted string representation of an event
+ */
+size_t fuse_qstr_event(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v) {
+    assert(self);
+    assert(buf == NULL || sz > 0);
+    assert(v);
+    assert(fuse_allocator_magic(self->allocator, v) == FUSE_MAGIC_EVENT);
+
+    // Get the event properties
+    struct event_context *evt = (struct event_context *)v;
+    assert(evt);
+
+    // Add prefix
+    i = chtoa_internal(buf, sz, i, '{');
+
+    // Add source
+    i = qstrtoa_internal(buf, sz, i, "source");
+    i = chtoa_internal(buf, sz, i, ':');
+    i = vtoa_internal(self, buf, sz, i, evt->source, true);
+
+    // Add type
+    i = chtoa_internal(buf, sz, i, ',');
+    i = qstrtoa_internal(buf, sz, i, "type");
+    i = chtoa_internal(buf, sz, i, ':');
+    i = fuse_qstr_event_type(buf, sz, i, evt->type);
+
+    // Add user data
+    if(evt->user_data) {
+        i = chtoa_internal(buf, sz, i, ',');
+        i = qstrtoa_internal(buf, sz, i, "user_data");
+        i = chtoa_internal(buf, sz, i, ':');
+        i = ptoa_internal(buf, sz, i, evt->user_data);
+    }
+
+    // Add suffix
+    i = chtoa_internal(buf, sz, i, '}');
+
+    // Return the index
+    return i;
+}
