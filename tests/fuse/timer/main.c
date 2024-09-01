@@ -4,11 +4,24 @@
 int TEST_001(fuse_t *self)
 {
     // Schedule timer to run every second
-    fuse_timer_t *timer = fuse_timer_schedule(self, 1000, true, 45);
+    fuse_timer_t *timer = fuse_timer_schedule(self, 1000, true, NULL);
     assert(timer);
 
-    // Sleep for 5 seconds
-    sleep_ms(5000);
+    // Start the run loop
+    uint8_t i = 0;
+    while (i < 5)
+    {
+        // Pop event from the event queue - core 0
+        fuse_event_t *event = fuse_next_event(self, 0);
+        if (event == NULL) {
+            sleep_ms(10);
+            continue;
+        }
+
+        // Print the event
+        fuse_printf(self,"Event: %v\n", event);
+        i++;
+    }
 
     // Cancel the timer
     fuse_timer_cancel(self, timer);

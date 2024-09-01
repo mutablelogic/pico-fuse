@@ -132,9 +132,12 @@ void fuse_timer_cancel(fuse_t *self, fuse_timer_t *timer)
     fuse_release(self, (fuse_value_t *)timer);
 }
 
+/** @brief Place a timer event onto the event queue
+ */
 static void fuse_timer_callback(fuse_timer_t *timer)
 {
-    fuse_printf(timer->self,"fuse_timer_callback: %p\n", timer->data);
+    fuse_event_t* evt = fuse_new_event(timer->self, (fuse_value_t* )timer, FUSE_EVENT_TIMER, (void* )timer->data);
+    assert(evt);
 }
 
 #endif // TARGET_DARWIN

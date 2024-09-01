@@ -117,10 +117,15 @@ void fuse_timer_cancel(fuse_t *self, fuse_timer_t* timer) {
     fuse_release(self, (fuse_value_t* )timer);
 }
 
+/** @brief Place a timer event onto the event queue
+ */
 static void fuse_timer_callback(union sigval timer_data)
 {
-    struct timer_context* ctx = (struct timer_context*)(timer_data.sival_ptr);
-    fuse_debugf("fuse_timer_callback: fuse=%p data=%p\n",ctx->self,ctx->data);
+    struct timer_context* timer = (struct timer_context*)(timer_data.sival_ptr);
+    assert(timer);
+    assert(timer->self);    
+    fuse_event_t* evt = fuse_new_event(timer->self, timer, FUSE_EVENT_TIMER, timer->data);
+    assert(evt);
 }
 
 #endif // TARGET_LINUX
