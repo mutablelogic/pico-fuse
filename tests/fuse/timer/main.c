@@ -3,9 +3,8 @@
 
 int TEST_001(fuse_t *self)
 {
-#ifdef TARGET_LINUX
     // Schedule timer to run every second
-    fuse_timer_t* timer = fuse_timer_schedule(self,1000,true,0);
+    fuse_timer_t *timer = fuse_timer_schedule(self, 1000, true, 45);
     assert(timer);
 
     // Sleep for 5 seconds
@@ -13,7 +12,6 @@ int TEST_001(fuse_t *self)
 
     // Cancel the timer
     fuse_timer_cancel(self, timer);
-#endif
 
     // Return success
     return 0;

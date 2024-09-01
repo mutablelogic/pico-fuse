@@ -11,8 +11,11 @@
     (fuse_new_value_ex((self), (FUSE_MAGIC_TIMER), (data), __FILE__, __LINE__))
 #else
 #define fuse_new_timer(self, data) \
-    (fuse_new_value_ex((self), (FUSE_MAGIC_TIMER), (data0), 0, 0))
+    (fuse_new_value_ex((self), (FUSE_MAGIC_TIMER), (data), 0, 0))
 #endif
+
+///////////////////////////////////////////////////////////////////////////////
+// DEFINITIONS
 
 void fuse_register_value_timer(fuse_t *self);
 

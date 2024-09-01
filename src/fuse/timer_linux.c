@@ -1,6 +1,5 @@
 #if defined(TARGET_LINUX)
 
-// Public includes
 #include <signal.h>
 #include <time.h>
 #include <unistd.h>

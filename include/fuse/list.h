@@ -10,11 +10,16 @@
 
 #ifdef DEBUG
 #define fuse_new_list(self) \
-    (fuse_new_value_ex((self), (FUSE_MAGIC_LIST), (0), __FILE__, __LINE__))
+    ((fuse_list_t* )fuse_new_value_ex((self), (FUSE_MAGIC_LIST), (0), __FILE__, __LINE__))
 #else
 #define fuse_new_list(self) \
-    (fuse_new_value_ex((self), (FUSE_MAGIC_LIST), (0), 0, 0))
+    ((fuse_list_t* )fuse_new_value_ex((self), (FUSE_MAGIC_LIST), (0), 0, 0))
 #endif
+
+
+/** @brief An opaque event object
+ */
+typedef struct fuse_list fuse_list_t;
 
 /** @brief Append an element to the end of a list
  *
@@ -25,7 +30,7 @@
  *  @param element The element to append
  *  @returns The appended element or NULL if the operation failed
  */
-fuse_value_t *fuse_list_append(fuse_t *self, fuse_value_t *list, fuse_value_t *element);
+fuse_value_t *fuse_list_append(fuse_t *self, fuse_list_t *list, fuse_value_t *element);
 
 /** @brief Append an element to the beginning of a list
  *
@@ -36,7 +41,7 @@ fuse_value_t *fuse_list_append(fuse_t *self, fuse_value_t *list, fuse_value_t *e
  *  @param element The element to add to the beginning of the list
  *  @returns The added element or NULL if the operation failed
  */
-fuse_value_t *fuse_list_push(fuse_t *self, fuse_value_t *list, fuse_value_t *element);
+fuse_value_t *fuse_list_push(fuse_t *self, fuse_list_t *list, fuse_value_t *element);
 
 /** @brief Remove an element from the end of the list
  *
@@ -46,7 +51,7 @@ fuse_value_t *fuse_list_push(fuse_t *self, fuse_value_t *list, fuse_value_t *ele
  *  @param list The list
  *  @returns The removed element or NULL if the operation failed (for example, if the list was empty)
  */
-fuse_value_t *fuse_list_pop(fuse_t *self, fuse_value_t *list);
+fuse_value_t *fuse_list_pop(fuse_t *self, fuse_list_t *list);
 
 /** @brief Return the next element in a list
  *
@@ -58,16 +63,16 @@ fuse_value_t *fuse_list_pop(fuse_t *self, fuse_value_t *list);
  *  @param elem The current element, or NULL to get the first element
  *  @returns The next element or NULL if the list is empty or the current element is the last element
  */
-fuse_value_t *fuse_list_next(fuse_t *self, fuse_value_t *list, fuse_value_t *elem);
+fuse_value_t *fuse_list_next(fuse_t *self, fuse_list_t *list, fuse_value_t *elem);
 
-/** @brief Return the number of elements in the list or map
+/** @brief Return the number of elements in the list
  *
- *  The function will return the number of elements in the list or map
+ *  The function will return the number of elements in the list
  *
  *  @param self The fuse instance
- *  @param value The list or map
+ *  @param list The list
  *  @returns The count of elements
  */
-size_t fuse_count(fuse_t *self, fuse_value_t *value);
+size_t fuse_list_count(fuse_t *self, fuse_list_t *list);
 
 #endif /* FUSE_LIST_H */

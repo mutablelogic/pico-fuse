@@ -9,6 +9,7 @@
 // Private
 #include "alloc.h"
 #include "alloc_builtin.h"
+#include "event.h"
 #include "fuse.h"
 #include "list.h"
 #include "map.h"
@@ -175,15 +176,13 @@ fuse_t *fuse_new()
         .name = "MAP",
     };
 
-
     // Register types
+    fuse_register_value_event(fuse);
     fuse_register_value_mutex(fuse);
-#ifdef TARGET_LINUX
     fuse_register_value_timer(fuse);
-#endif
 
     // Create the event queue for Core 0 
-    fuse->core0 = (struct fuse_list *)fuse_retain(fuse, fuse_new_list(fuse));
+    fuse->core0 = (struct fuse_list *)fuse_retain(fuse, (fuse_value_t* )fuse_new_list(fuse));
     if (fuse->core0 == NULL)
     {
         fuse_allocator_free(allocator, fuse);
@@ -203,8 +202,8 @@ int fuse_destroy(fuse_t *fuse)
     assert(fuse);
 
     // Release event queues
-    fuse_release(fuse, fuse->core0);
-    fuse_release(fuse, fuse->core1);
+    fuse_release(fuse, (fuse_value_t* )fuse->core0);
+    fuse_release(fuse, (fuse_value_t* )fuse->core1);
 
     // Store the exit code
     int exit_code = fuse->exit_code;

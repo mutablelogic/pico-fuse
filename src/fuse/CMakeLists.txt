@@ -5,6 +5,7 @@ add_library(${NAME} STATIC
     base64.c
     debug.c
     device.c
+    event.c
     ftoa.c
     fuse.c
     itoa.c
@@ -17,6 +18,7 @@ add_library(${NAME} STATIC
     random_posix.c
     sleep_posix.c
     strtoa.c
+    timer_darwin.c
     timer_linux.c
     value.c
     vtoa.c

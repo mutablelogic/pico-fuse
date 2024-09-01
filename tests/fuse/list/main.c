@@ -8,10 +8,10 @@ int TEST_001(fuse_t *self)
     fuse_debugf("TEST_001: zero-sized list value\n");
 
     // Make an empty list
-    fuse_value_t *list = fuse_new_list(self);
+    fuse_list_t *list = fuse_new_list(self);
 
     // check count
-    assert(fuse_count(self, list) == 0);
+    assert(fuse_list_count(self, list) == 0);
 
     // sprintf the value
     assert(fuse_sprintf(self, buf, n, "%v", list) > 0);
@@ -27,10 +27,10 @@ int TEST_002(fuse_t *self)
     fuse_debugf("TEST_002: list value with 10 nulls\n");
 
     // Make an empty list
-    fuse_value_t *list = fuse_new_list(self);
+    fuse_list_t *list = fuse_new_list(self);
 
     // check count
-    assert(fuse_count(self, list) == 0);
+    assert(fuse_list_count(self, list) == 0);
 
     // append 10 NULL values
     for (size_t i = 0; i < 10; i++)
@@ -40,7 +40,7 @@ int TEST_002(fuse_t *self)
     }
 
     // check count
-    assert(fuse_count(self, list) == 10);
+    assert(fuse_list_count(self, list) == 10);
 
     // sprintf the value
     assert(fuse_sprintf(self, buf, n, "%v", list) > 0);
@@ -56,10 +56,10 @@ int TEST_003(fuse_t *self)
     fuse_debugf("TEST_003: push 100 values into a list and pop them\n");
 
     // Make an empty list
-    fuse_value_t *list = fuse_new_list(self);
+    fuse_list_t *list = fuse_new_list(self);
 
     // check count
-    assert(fuse_count(self, list) == 0);
+    assert(fuse_list_count(self, list) == 0);
 
     // append 10 values
     for (uint8_t i = 0; i < 100; i++)
@@ -72,12 +72,12 @@ int TEST_003(fuse_t *self)
     fuse_printf(self, " list=%v\n", list);
 
     // check count
-    assert(fuse_count(self, list) == 100);
+    assert(fuse_list_count(self, list) == 100);
 
     // pop
     for (uint8_t i = 0; i < 100; i++)
     {
-        assert(fuse_count(self, list) == 100 - i);
+        assert(fuse_list_count(self, list) == 100 - i);
         fuse_value_t *v = fuse_list_pop(self, list);
         assert(v);
         fuse_printf(self, " popped=%v\n", v);

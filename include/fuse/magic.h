@@ -10,21 +10,22 @@
 #define FUSE_MAGIC_NULL  0x00  ///< NULL value
 #define FUSE_MAGIC_APP   0x01  ///< Application
 #define FUSE_MAGIC_MUTEX 0x02  ///< Mutex
-#define FUSE_MAGIC_DATA  0x03  ///< Memory block
-#define FUSE_MAGIC_U8    0x04  ///< uint8_t
-#define FUSE_MAGIC_U16   0x05  ///< uint16_t
-#define FUSE_MAGIC_U32   0x06  ///< uint32_t
-#define FUSE_MAGIC_U64   0x07  ///< uint64_t
-#define FUSE_MAGIC_S8    0x08  ///< int8_t
-#define FUSE_MAGIC_S16   0x09  ///< int16_t
-#define FUSE_MAGIC_S32   0x0A  ///< int32_t
-#define FUSE_MAGIC_S64   0x0B  ///< int64_t
-#define FUSE_MAGIC_F32   0x0C  ///< float
-#define FUSE_MAGIC_F64   0x0D  ///< double
-#define FUSE_MAGIC_BOOL  0x0E  ///< bool
-#define FUSE_MAGIC_CSTR  0x0F  ///< constant string with null terminator
-#define FUSE_MAGIC_LIST  0x10  ///< list[value]
-#define FUSE_MAGIC_MAP   0x11  ///< map[value][value]
+#define FUSE_MAGIC_EVENT 0x03  ///< Mutex
+#define FUSE_MAGIC_DATA  0x04  ///< Memory block
+#define FUSE_MAGIC_U8    0x05  ///< uint8_t
+#define FUSE_MAGIC_U16   0x06  ///< uint16_t
+#define FUSE_MAGIC_U32   0x07  ///< uint32_t
+#define FUSE_MAGIC_U64   0x08  ///< uint64_t
+#define FUSE_MAGIC_S8    0x09  ///< int8_t
+#define FUSE_MAGIC_S16   0x0A  ///< int16_t
+#define FUSE_MAGIC_S32   0x0B  ///< int32_t
+#define FUSE_MAGIC_S64   0x0C  ///< int64_t
+#define FUSE_MAGIC_F32   0x0D  ///< float
+#define FUSE_MAGIC_F64   0x0E  ///< double
+#define FUSE_MAGIC_BOOL  0x0F  ///< bool
+#define FUSE_MAGIC_CSTR  0x10  ///< constant string with null terminator
+#define FUSE_MAGIC_LIST  0x11  ///< list[value]
+#define FUSE_MAGIC_MAP   0x12  ///< map[value][value]
 #define FUSE_MAGIC_TIMER 0x13  ///< Timer source, which can fire at a regular interval
 #define FUSE_MAGIC_LED   0x14  ///< On-board LED
 #define FUSE_MAGIC_WIFI  0x15  ///< Wifi

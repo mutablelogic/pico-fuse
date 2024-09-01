@@ -132,7 +132,7 @@ size_t fuse_qstr_list(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t
 
 /* @brief Append an element to the end of a list and return it
  */
-fuse_value_t *fuse_list_append(fuse_t *self, fuse_value_t *list, fuse_value_t *elem)
+fuse_value_t *fuse_list_append(fuse_t *self, fuse_list_t *list, fuse_value_t *elem)
 {
     assert(self);
     assert(list);
@@ -173,7 +173,7 @@ fuse_value_t *fuse_list_append(fuse_t *self, fuse_value_t *list, fuse_value_t *e
 
 /** @brief Return the number of elements in the list or map
  */
-inline size_t fuse_count(fuse_t *self, fuse_value_t *value)
+inline size_t fuse_list_count(fuse_t *self, fuse_list_t *value)
 {
     assert(self);
     assert(value);
@@ -184,7 +184,7 @@ inline size_t fuse_count(fuse_t *self, fuse_value_t *value)
 
 /** @brief Return the next list element
  */
-inline fuse_value_t *fuse_list_next(fuse_t *self, fuse_value_t *list, fuse_value_t *elem)
+inline fuse_value_t *fuse_list_next(fuse_t *self, fuse_list_t *list, fuse_value_t *elem)
 {
     assert(self);
     assert(list);
@@ -195,7 +195,7 @@ inline fuse_value_t *fuse_list_next(fuse_t *self, fuse_value_t *list, fuse_value
 
 /** @brief Remove an element from the end of the list and return it
  */
-fuse_value_t *fuse_list_pop(fuse_t *self, fuse_value_t *list)
+fuse_value_t *fuse_list_pop(fuse_t *self, fuse_list_t *list)
 {
     assert(self);
     assert(list);
@@ -240,7 +240,7 @@ fuse_value_t *fuse_list_pop(fuse_t *self, fuse_value_t *list)
 
 /** @brief Append an element to the beginning of a list
  */
-fuse_value_t *fuse_list_push(fuse_t *self, fuse_value_t *list, fuse_value_t *elem)
+fuse_value_t *fuse_list_push(fuse_t *self, fuse_list_t *list, fuse_value_t *elem)
 {
     assert(self);
     assert(list);

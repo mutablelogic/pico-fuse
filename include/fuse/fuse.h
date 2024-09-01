@@ -15,6 +15,7 @@ typedef struct fuse_application fuse_t;
 #include "assert.h"
 #include "debug.h"
 #include "device.h"
+#include "event.h"
 #include "list.h"
 #include "magic.h"
 #include "map.h"
