@@ -4,7 +4,7 @@
 int TEST_001(fuse_t *self)
 {
     // Schedule timer to run every second
-    fuse_timer_t *timer = fuse_timer_schedule(self, 1000, true, 100);
+    fuse_timer_t *timer = fuse_timer_schedule(self, 1000, true, (void* )100);
     assert(timer);
 
     // Start the run loop

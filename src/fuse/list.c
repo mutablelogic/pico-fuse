@@ -104,14 +104,14 @@ size_t fuse_qstr_list(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t
     // Add prefix
     i = chtoa_internal(buf, sz, i, '[');
 
-    fuse_value_t *elem = fuse_list_next(self, list, NULL);
+    fuse_value_t *elem = fuse_list_next(self, (fuse_list_t* )list, NULL);
     while (elem != NULL)
     {
         // Append quoted string
         i = vtoa_internal(self, buf, sz, i, elem, true);
 
         // Get the next element
-        elem = fuse_list_next(self, list, elem);
+        elem = fuse_list_next(self, (fuse_list_t* )list, elem);
 
         // Add separator
         if (elem != NULL)
@@ -140,7 +140,6 @@ fuse_value_t *fuse_list_append(fuse_t *self, fuse_list_t *list, fuse_value_t *el
     assert(fuse_get_head(self, elem) == NULL);
     assert(fuse_get_tail(self, elem) == NULL);
     assert(self->allocator->magic(self->allocator, list) == FUSE_MAGIC_LIST);
-    assert(elem != list);
 
     // Retain the element, return NULL if the retain failed
     elem = fuse_retain(self, elem);
@@ -150,17 +149,17 @@ fuse_value_t *fuse_list_append(fuse_t *self, fuse_list_t *list, fuse_value_t *el
     }
 
     // Link into the list
-    fuse_value_t *head = fuse_get_head(self, list);
-    fuse_value_t *tail = fuse_get_tail(self, list);
+    fuse_value_t *head = fuse_get_head(self, (fuse_value_t* )list);
+    fuse_value_t *tail = fuse_get_tail(self, (fuse_value_t* )list);
     if (head == NULL)
     {
-        fuse_set_head(self, list, elem);
+        fuse_set_head(self,  (fuse_value_t* )list, elem);
     }
     if (tail != NULL)
     {
         fuse_set_tail(self, tail, elem);
     }
-    fuse_set_tail(self, list, elem);
+    fuse_set_tail(self,  (fuse_value_t* )list, elem);
     fuse_set_head(self, elem, tail);
     fuse_set_tail(self, elem, NULL);
 
@@ -190,7 +189,7 @@ inline fuse_value_t *fuse_list_next(fuse_t *self, fuse_list_t *list, fuse_value_
     assert(list);
     assert(self->allocator->magic(self->allocator, list) == FUSE_MAGIC_LIST);
 
-    return (elem == NULL) ? fuse_get_head(self, list) : fuse_get_tail(self, elem);
+    return (elem == NULL) ? fuse_get_head(self,  (fuse_value_t* )list) : fuse_get_tail(self, elem);
 }
 
 /** @brief Remove an element from the end of the list and return it
@@ -202,7 +201,7 @@ fuse_value_t *fuse_list_pop(fuse_t *self, fuse_list_t *list)
     assert(self->allocator->magic(self->allocator, list) == FUSE_MAGIC_LIST);
 
     // If tail is NULL, then the list is empty
-    fuse_value_t *tail = fuse_get_tail(self, list);
+    fuse_value_t *tail = fuse_get_tail(self,  (fuse_value_t* )list);
     if (tail == NULL)
     {
         assert(((struct fuse_list *)list)->count == 0);
@@ -215,14 +214,14 @@ fuse_value_t *fuse_list_pop(fuse_t *self, fuse_list_t *list)
     // Update the tail pointer of the list
     if (prev != NULL)
     {
-        fuse_set_tail(self, list, prev);
+        fuse_set_tail(self,  (fuse_value_t* )list, prev);
         fuse_set_tail(self, prev, NULL);
     }
     else
     {
         // This was the only element in the list
-        fuse_set_head(self, list, NULL);
-        fuse_set_tail(self, list, NULL);
+        fuse_set_head(self,  (fuse_value_t* )list, NULL);
+        fuse_set_tail(self,  (fuse_value_t* )list, NULL);
     }
 
     // Decrement the list count
@@ -248,7 +247,6 @@ fuse_value_t *fuse_list_push(fuse_t *self, fuse_list_t *list, fuse_value_t *elem
     assert(fuse_get_head(self, elem) == NULL);
     assert(fuse_get_tail(self, elem) == NULL);
     assert(self->allocator->magic(self->allocator, list) == FUSE_MAGIC_LIST);
-    assert(elem != list);
 
     // Retain the element, return NULL if the retain failed
     elem = fuse_retain(self, elem);
@@ -258,19 +256,19 @@ fuse_value_t *fuse_list_push(fuse_t *self, fuse_list_t *list, fuse_value_t *elem
     }
 
     // Link into the list
-    fuse_value_t *head = fuse_get_head(self, list);
+    fuse_value_t *head = fuse_get_head(self,  (fuse_value_t* )list);
     if (head != NULL)
     {
         fuse_set_head(self, head, elem);
     }
-    fuse_set_head(self, list, elem);
+    fuse_set_head(self,  (fuse_value_t* )list, elem);
     fuse_set_tail(self, elem, head);
     fuse_set_head(self, elem, NULL);
 
     // If there is no tail, set element as the new tail
-    if (fuse_get_tail(self, list) == NULL)
+    if (fuse_get_tail(self,  (fuse_value_t* )list) == NULL)
     {
-        fuse_set_tail(self, list, elem);
+        fuse_set_tail(self, (fuse_value_t* ) list, elem);
     }
 
     // Increment the list count

@@ -25,6 +25,7 @@
 // DECLARATIONS
 
 #include <stdint.h>
+#include <stdbool.h>
 #include "value.h"
 
 /** @brief An opaque event object
