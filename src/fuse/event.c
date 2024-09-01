@@ -82,6 +82,22 @@ fuse_event_t *fuse_next_event(fuse_t *self, uint8_t q) {
     return (fuse_event_t *)fuse_list_pop(self, queue);
 }
 
+
+/** @brief Register a callback for an event
+ */
+bool fuse_register_callback(fuse_t *self, uint8_t type, uint8_t q, fuse_callback_t *callback) {
+    assert(self);
+    assert(type < FUSE_EVENT_COUNT);
+    assert(q < 2);
+    assert(callback);
+
+    // TODO
+
+    // Return success
+    return true;
+}
+
+
 //////////////////////////////////////////////////////////////////////////////
 // PRIVATE METHODS
 

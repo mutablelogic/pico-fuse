@@ -55,4 +55,20 @@ fuse_event_t *fuse_new_event_ex(fuse_t *self, fuse_value_t *source, uint8_t type
  */
 fuse_event_t *fuse_next_event(fuse_t *self, uint8_t q);
 
+/** @brief Callback for an event
+ */
+typedef void fuse_callback_t(fuse_t *self, fuse_event_t *evt, void *user_data);
+
+/** @brief Register a callback for an event
+ *
+ * An event is retrieved from an event queue for the application. The event is released
+ * from the queue.
+ *
+ * @param self The fuse instance
+ * @param q The cpre to implement the callback execution for (0 or 1)
+ * @param type The event type
+ * @return Returns true if the callback was registered, otherwise false
+ */
+bool fuse_register_callback(fuse_t *self, uint8_t type, uint8_t q, fuse_callback_t *callback);
+
 #endif /* FUSE_EVENT_H */
