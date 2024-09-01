@@ -77,7 +77,8 @@ bool fuse_register_callback(fuse_t *self, uint8_t type, uint8_t q, fuse_callback
  * Callbacks for an event are called in order.
  *
  * @param self The fuse instance
- * @param q The queue to retrieve the event from (0 or 1)
+ * @param q The queue to retrieve the event callbacks from (0 or 1)
+ * @param evt The event to execute
  */
 void fuse_exec_event(fuse_t *self, uint8_t q, fuse_event_t *evt);
 
