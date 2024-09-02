@@ -1,7 +1,7 @@
 #include <fuse/fuse.h>
 #include "alloc.h"
-#include "null.h"
 #include "fuse.h"
+#include "null.h"
 #include "printf.h"
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -14,7 +14,7 @@ static size_t fuse_qstr_null(fuse_t *self, char *buf, size_t sz, size_t i, fuse_
 ///////////////////////////////////////////////////////////////////////////////
 // LIFECYCLE
 
-/** @brief Register primitive for a null value
+/** @brief Register type for a null value
  */
 void fuse_register_value_null(fuse_t *self)
 {

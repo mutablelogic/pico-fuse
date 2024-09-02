@@ -1,8 +1,6 @@
 #include <float.h>
 #include <stdbool.h>
 #include <fuse/fuse.h>
-
-// Private headers
 #include "printf.h"
 
 #define is_nan(x) __builtin_isnan(x)

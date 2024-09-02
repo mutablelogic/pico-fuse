@@ -3,6 +3,7 @@ add_library(${NAME} STATIC
     alloc.c
     alloc_builtin.c
     base64.c
+    data.c
     debug.c
     device.c
     event.c
@@ -13,12 +14,14 @@ add_library(${NAME} STATIC
     map.c
     mutex_pico.c
     mutex_posix.c
+    number.c
     null.c
     panic.c
     printf.c
     random_pico.c
     random_posix.c
     sleep_posix.c
+    string.c
     strtostr.c
     timer_darwin.c
     timer_linux.c

@@ -1,8 +1,6 @@
 #if defined(TARGET_DARWIN)
 #include <dispatch/dispatch.h>
 #include <fuse/fuse.h>
-
-// Private includes
 #include "alloc.h"
 #include "fuse.h"
 #include "printf.h"

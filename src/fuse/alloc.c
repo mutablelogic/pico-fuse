@@ -1,5 +1,3 @@
-
-// Includes
 #include <fuse/fuse.h>
 #include "alloc.h"
 

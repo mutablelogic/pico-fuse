@@ -1,10 +1,6 @@
 #include <stdio.h>
 #include <stdarg.h>
-
-// Public headers
 #include <fuse/fuse.h>
-
-// Private headers
 #include "fuse.h"
 #include "printf.h"
 

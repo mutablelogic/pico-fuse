@@ -3,17 +3,10 @@
  */
 #ifndef FUSE_PRIVATE_FUSE_H
 #define FUSE_PRIVATE_FUSE_H
-
 #include <stdbool.h>
 #include <fuse/fuse.h>
 #include "event.h"
 #include "list.h"
-
-// Forward declaration
-struct fuse_application;
-
-// Set initial capacity of autorelease pool
-#define FUSE_AUTORELEASE_CAP 16
 
 ///////////////////////////////////////////////////////////////////////////////
 // TYPES

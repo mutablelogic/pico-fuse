@@ -1,11 +1,8 @@
 #if defined(TARGET_LINUX)
-
 #include <signal.h>
 #include <time.h>
 #include <unistd.h>
 #include <fuse/fuse.h>
-
-// Private includes
 #include "alloc.h"
 #include "fuse.h"
 #include "printf.h"

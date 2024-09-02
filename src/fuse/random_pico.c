@@ -1,5 +1,4 @@
 #if defined(TARGET_PICO)
-
 #include <stdint.h>
 #include <pico/rand.h>
 

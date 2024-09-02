@@ -1,7 +1,5 @@
 #include <stdbool.h>
 #include <string.h>
-
-// Includes
 #include <fuse/fuse.h>
 #include "alloc.h"
 

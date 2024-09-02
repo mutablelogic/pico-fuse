@@ -1,8 +1,6 @@
 #if defined(TARGET_DARWIN) || defined(TARGET_LINUX)
-
 #include <limits.h>
 #include <time.h>
-
 #include <fuse/fuse.h>
 #include "random.h"
 

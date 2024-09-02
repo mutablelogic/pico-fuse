@@ -5,27 +5,17 @@
 #endif
 #include "alloc.h"
 #include "alloc_builtin.h"
+#include "data.h"
 #include "event.h"
 #include "fuse.h"
 #include "list.h"
 #include "map.h"
 #include "mutex.h"
+#include "number.h"
 #include "null.h"
 #include "printf.h"
+#include "string.h"
 #include "timer.h"
-
-///////////////////////////////////////////////////////////////////////////////
-// DECLARATIONS
-
-static bool fuse_init_number(fuse_t *self, fuse_value_t *value, const void *user_data);
-static bool fuse_init_memcpy(fuse_t *self, fuse_value_t *value, const void *user_data);
-static bool fuse_init_cstr(fuse_t *self, fuse_value_t *value, const void *user_data);
-static size_t fuse_qstr_bool(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v);
-static size_t fuse_qstr_number(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v);
-static size_t fuse_cstr_cstr(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v);
-static size_t fuse_qstr_cstr(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v);
-static size_t fuse_cstr_data(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v);
-static size_t fuse_qstr_data(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v);
 
 ///////////////////////////////////////////////////////////////////////////////
 // PUBLIC METHODS
@@ -65,115 +55,19 @@ fuse_t *fuse_new()
         .size = 0,
         .name = "APP",
     };
-    fuse->desc[FUSE_MAGIC_DATA] = (struct fuse_value_desc){
-        .size = 0,
-        .name = "DATA",
-        .init = fuse_init_memcpy,
-        .cstr = fuse_cstr_data,
-        .qstr = fuse_qstr_data,
-    };
-    fuse->desc[FUSE_MAGIC_U8] = (struct fuse_value_desc){
-        .size = sizeof(uint8_t),
-        .name = "U8",
-        .init = fuse_init_number,
-        .cstr = fuse_qstr_number,
-        .qstr = fuse_qstr_number,
-    };
-    fuse->desc[FUSE_MAGIC_U16] = (struct fuse_value_desc){
-        .size = sizeof(uint16_t),
-        .name = "U16",
-        .init = fuse_init_number,
-        .cstr = fuse_qstr_number,
-        .qstr = fuse_qstr_number,
-    };
-    fuse->desc[FUSE_MAGIC_U32] = (struct fuse_value_desc){
-        .size = sizeof(uint32_t),
-        .name = "U32",
-        .init = fuse_init_number,
-        .cstr = fuse_qstr_number,
-        .qstr = fuse_qstr_number,
-    };
-    fuse->desc[FUSE_MAGIC_U64] = (struct fuse_value_desc){
-        .size = sizeof(uint64_t),
-        .name = "U64",
-        .init = fuse_init_number,
-        .cstr = fuse_qstr_number,
-        .qstr = fuse_qstr_number,
-    };
-    fuse->desc[FUSE_MAGIC_S8] = (struct fuse_value_desc){
-        .size = sizeof(int8_t),
-        .name = "S8",
-        .init = fuse_init_number,
-        .cstr = fuse_qstr_number,
-        .qstr = fuse_qstr_number,
-    };
-    fuse->desc[FUSE_MAGIC_S16] = (struct fuse_value_desc){
-        .size = sizeof(int16_t),
-        .name = "S16",
-        .init = fuse_init_number,
-        .cstr = fuse_qstr_number,
-        .qstr = fuse_qstr_number,
-    };
-    fuse->desc[FUSE_MAGIC_S32] = (struct fuse_value_desc){
-        .size = sizeof(int32_t),
-        .name = "S32",
-        .init = fuse_init_number,
-        .cstr = fuse_qstr_number,
-        .qstr = fuse_qstr_number,
-    };
-    fuse->desc[FUSE_MAGIC_S64] = (struct fuse_value_desc){
-        .size = sizeof(int64_t),
-        .name = "S64",
-        .init = fuse_init_number,
-        .cstr = fuse_qstr_number,
-        .qstr = fuse_qstr_number,
-    };
-    fuse->desc[FUSE_MAGIC_F32] = (struct fuse_value_desc){
-        .size = sizeof(float),
-        .name = "F32",
-        .init = fuse_init_memcpy,
-        .cstr = fuse_qstr_number,
-        .qstr = fuse_qstr_number,
-    };
-    fuse->desc[FUSE_MAGIC_F64] = (struct fuse_value_desc){
-        .size = sizeof(double),
-        .name = "F64",
-        .init = fuse_init_memcpy,
-        .cstr = fuse_qstr_number,
-        .qstr = fuse_qstr_number,
-    };
-    fuse->desc[FUSE_MAGIC_BOOL] = (struct fuse_value_desc){
-        .size = sizeof(bool),
-        .name = "BOOL",
-        .init = fuse_init_number,
-        .cstr = fuse_qstr_bool,
-        .qstr = fuse_qstr_bool,
-    };
-    fuse->desc[FUSE_MAGIC_CSTR] = (struct fuse_value_desc){
-        .size = sizeof(const char *),
-        .name = "CSTR",
-        .init = fuse_init_cstr,
-        .cstr = fuse_cstr_cstr,
-        .qstr = fuse_qstr_cstr,
-    };
-    fuse->desc[FUSE_MAGIC_LIST] = (struct fuse_value_desc){
-        .size = sizeof(struct fuse_list),
-        .name = "LIST",
-        .init = fuse_init_list,
-        .destroy = fuse_destroy_list,
-        .cstr = fuse_qstr_list,
-        .qstr = fuse_qstr_list,
-    };
-    fuse->desc[FUSE_MAGIC_MAP] = (struct fuse_value_desc){
-        .size = sizeof(fuse_map_t),
-        .name = "MAP",
-    };
 
     // Register types
     fuse_register_value_null(fuse);
+    fuse_register_value_int(fuse);
+    fuse_register_value_uint(fuse);
+    fuse_register_value_bool(fuse);
+    fuse_register_value_data(fuse);
+    fuse_register_value_float(fuse);
     fuse_register_value_event(fuse);
     fuse_register_value_mutex(fuse);
+    fuse_register_value_string(fuse);
     fuse_register_value_timer(fuse);
+    fuse_register_value_list(fuse);
 
     // Create the event queue for Core 0 
     fuse->core0 = (struct fuse_list *)fuse_retain(fuse, (fuse_value_t* )fuse_new_list(fuse));
@@ -381,205 +275,4 @@ inline void fuse_exit(fuse_t *self, int exit_code)
 {
     assert(self);
     self->exit_code = exit_code ? exit_code : FUSE_EXIT_SUCCESS;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// PRIVATE METHODS
-
-/* @brief Initialise a number value
- */
-static bool fuse_init_number(fuse_t *self, fuse_value_t *value, const void *user_data)
-{
-    assert(self);
-    assert(value);
-
-    switch (fuse_allocator_magic(self->allocator, value))
-    {
-    case FUSE_MAGIC_U8:
-        *(uint8_t *)value = (uint8_t)(uintptr_t)user_data;
-        break;
-    case FUSE_MAGIC_U16:
-        *(uint16_t *)value = (uint16_t)(uintptr_t)user_data;
-        break;
-    case FUSE_MAGIC_U32:
-        *(uint32_t *)value = (uint32_t)(uintptr_t)user_data;
-        break;
-    case FUSE_MAGIC_U64:
-        *(uint64_t *)value = (uint64_t)(uintptr_t)user_data;
-        break;
-    case FUSE_MAGIC_S8:
-        *(int8_t *)value = (int8_t)(intptr_t)user_data;
-        break;
-    case FUSE_MAGIC_S16:
-        *(int16_t *)value = (int16_t)(intptr_t)user_data;
-        break;
-    case FUSE_MAGIC_S32:
-        *(int32_t *)value = (int32_t)(intptr_t)user_data;
-        break;
-    case FUSE_MAGIC_S64:
-        *(int64_t *)value = (int64_t)(intptr_t)user_data;
-        break;
-    case FUSE_MAGIC_BOOL:
-        *(bool *)value = (bool)user_data;
-        break;
-    default:
-        return false;
-    }
-
-    // Return success
-    return true;
-}
-
-/* @brief Initialise by copying memory
- */
-static bool fuse_init_memcpy(fuse_t *self, fuse_value_t *value, const void *user_data)
-{
-    assert(self);
-    assert(value);
-
-    uint16_t magic = fuse_allocator_magic(self->allocator, value);
-    assert(magic < FUSE_MAGIC_COUNT);
-    size_t size = self->desc[magic].size;
-
-    // Copy or zero the memory
-    if (user_data != NULL)
-    {
-        memcpy(value, user_data, size);
-    }
-    else
-    {
-        memset(value, 0, size);
-    }
-
-    // Return success
-    return true;
-}
-
-/* @brief Initialise by setting the string pointer
- */
-static bool fuse_init_cstr(fuse_t *self, fuse_value_t *value, const void *user_data)
-{
-    assert(self);
-    assert(value);
-
-    // Set the string pointer
-    *(const char **)value = (const char *)user_data;
-
-    // Return success
-    return true;
-}
-
-/* @brief Output a bool as a cstr
- */
-static size_t fuse_qstr_bool(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v)
-{
-    assert(self);
-    assert(v);
-    assert(fuse_allocator_magic(self->allocator, v) == FUSE_MAGIC_BOOL);
-
-    bool b = *(bool *)v;
-    if (b)
-    {
-        return cstrtostr_internal(buf, sz, i, FUSE_PRINTF_TRUE);
-    }
-    else
-    {
-        return cstrtostr_internal(buf, sz, i, FUSE_PRINTF_FALSE);
-    }
-}
-
-/* @brief Output an integer as a cstr
- */
-static size_t fuse_qstr_number(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v)
-{
-    assert(self);
-    assert(v);
-
-    switch (fuse_allocator_magic(self->allocator, v))
-    {
-    case FUSE_MAGIC_U8:
-        return utostr_internal(buf, sz, i, *(uint8_t *)v, 0);
-    case FUSE_MAGIC_U16:
-        return utostr_internal(buf, sz, i, *(uint16_t *)v, 0);
-    case FUSE_MAGIC_U32:
-        return utostr_internal(buf, sz, i, *(uint32_t *)v, 0);
-    case FUSE_MAGIC_U64:
-        return utostr_internal(buf, sz, i, *(uint64_t *)v, 0);
-    case FUSE_MAGIC_S8:
-        return itostr_internal(buf, sz, i, *(int8_t *)v, 0);
-    case FUSE_MAGIC_S16:
-        return itostr_internal(buf, sz, i, *(int16_t *)v, 0);
-    case FUSE_MAGIC_S32:
-        return itostr_internal(buf, sz, i, *(int32_t *)v, 0);
-    case FUSE_MAGIC_S64:
-        return itostr_internal(buf, sz, i, *(int64_t *)v, 0);
-    case FUSE_MAGIC_F32:
-        return ftostr_internal(buf, sz, i, *(float *)v, 0);
-    case FUSE_MAGIC_F64:
-        return ftostr_internal(buf, sz, i, *(double *)v, 0);
-    default:
-        assert(false);
-    }
-    return 0;
-}
-
-/* @brief Output a pointer to a null-terminated string as a cstr
- */
-static size_t fuse_cstr_cstr(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v)
-{
-    assert(self);
-    assert(v);
-    assert(fuse_allocator_magic(self->allocator, v) == FUSE_MAGIC_CSTR);
-
-    const char *vp = *(const char **)v;
-    return cstrtostr_internal(buf, sz, i, vp);
-}
-
-/* @brief Output a pointer to a null-terminated string as a quoted cstr
- */
-static size_t fuse_qstr_cstr(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v)
-{
-    assert(self);
-    assert(v);
-    assert(fuse_allocator_magic(self->allocator, v) == FUSE_MAGIC_CSTR);
-
-    const char *vp = *(const char **)v;
-    return qstrtostr_internal(buf, sz, i, vp);
-}
-
-/* @brief Output a data block as hex
- */
-static size_t fuse_cstr_data(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v)
-{
-    assert(self);
-    assert(v);
-    assert(fuse_allocator_magic(self->allocator, v) == FUSE_MAGIC_DATA);
-
-    // If data size is zero, then return empty string
-    size_t datasz = fuse_allocator_size(self->allocator, v);
-    if (datasz == 0)
-    {
-        return i;
-    }
-
-    // Write hex data
-    size_t j = 0;
-    while (j < datasz)
-    {
-        i = utostr_internal(buf, sz, i, ((uint8_t *)v)[j++], FUSE_PRINTF_FLAG_HEX | FUSE_PRINTF_FLAG_UPPER | 2);
-    }
-
-    // Return the new index
-    return i;
-}
-
-/* @brief Output a data block as base64
- */
-static size_t fuse_qstr_data(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v)
-{
-    assert(self);
-    assert(v);
-    assert(fuse_allocator_magic(self->allocator, v) == FUSE_MAGIC_DATA);
-
-    return b64tostr_internal(buf, sz, i, v, fuse_allocator_size(self->allocator, v));
 }

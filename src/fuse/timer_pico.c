@@ -1,9 +1,6 @@
 #if defined(TARGET_PICO)
-
 #include <fuse/fuse.h>
 #include <pico/time.h>
-
-// Private includes
 #include "alloc.h"
 #include "fuse.h"
 #include "printf.h"

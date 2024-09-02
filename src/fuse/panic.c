@@ -1,7 +1,5 @@
 #include <stdbool.h>
 #include <stdio.h>
-
-// Public headers
 #include <fuse/fuse.h>
 
 void abort(void);

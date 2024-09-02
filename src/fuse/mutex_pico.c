@@ -1,6 +1,4 @@
-
 #if defined(TARGET_PICO)
-
 #include <fuse/fuse.h>
 #include <pico/sync.h>
 #include "fuse.h"

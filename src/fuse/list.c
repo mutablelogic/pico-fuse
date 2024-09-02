@@ -1,19 +1,43 @@
-
-// Public Includes
 #include <fuse/fuse.h>
-
-// Private Includes
 #include "fuse.h"
 #include "alloc.h"
 #include "list.h"
 #include "printf.h"
 
 ////////////////////////////////////////////////////////////////////////////////
+// DECLARATIONS
+
+static bool fuse_init_list(fuse_t *self, fuse_value_t *list, const void *user_data);
+static void fuse_destroy_list(fuse_t *self, fuse_value_t *list);
+static size_t fuse_qstr_list(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *list);
+
+////////////////////////////////////////////////////////////////////////////////
 // LIFECYCLE
+
+/** @brief Register type for a list value
+ */
+void fuse_register_value_list(fuse_t *self)
+{
+    assert(self);
+
+    fuse_value_desc_t fuse_list_type = {
+        .size = sizeof(struct fuse_list),
+        .name = "LIST",
+        .init = fuse_init_list,
+        .destroy = fuse_destroy_list,
+        .cstr = fuse_qstr_list,
+        .qstr = fuse_qstr_list,
+    };
+
+    fuse_register_value_type(self, FUSE_MAGIC_LIST, fuse_list_type);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// PRIVATE METHODS
 
 /* @brief Initialise a list
  */
-bool fuse_init_list(fuse_t *self, fuse_value_t *list, const void *user_data)
+static bool fuse_init_list(fuse_t *self, fuse_value_t *list, const void *user_data)
 {
     assert(self);
     assert(list);
@@ -28,7 +52,7 @@ bool fuse_init_list(fuse_t *self, fuse_value_t *list, const void *user_data)
 
 /* @brief Destroy the list
  */
-void fuse_destroy_list(fuse_t *self, fuse_value_t *list)
+static void fuse_destroy_list(fuse_t *self, fuse_value_t *list)
 {
     assert(self);
     assert(list);
@@ -47,9 +71,6 @@ void fuse_destroy_list(fuse_t *self, fuse_value_t *list)
         elem = tmp;
     }
 }
-
-////////////////////////////////////////////////////////////////////////////////
-// PRIVATE METHODS
 
 static inline fuse_value_t *fuse_get_head(fuse_t *self, fuse_value_t *list)
 {
@@ -95,7 +116,7 @@ static inline void fuse_set_tail(fuse_t *self, fuse_value_t *list, fuse_value_t 
     *ptr = elem;
 }
 
-size_t fuse_qstr_list(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *list)
+static size_t fuse_qstr_list(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *list)
 {
     assert(self);
     assert(buf == NULL || sz > 0);
