@@ -18,5 +18,5 @@ int run(fuse_t *fuse)
     assert(mqtt);
 
     // Run fuse
-    return fuse_runloop(fuse);
+    return 0; //fuse_runloop(fuse);
 }

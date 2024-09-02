@@ -1,4 +1,6 @@
 #include <fuse/fuse.h>
+#include <pico/stdlib.h>
+#include <stdio.h>
 
 int run(fuse_t *fuse);
 

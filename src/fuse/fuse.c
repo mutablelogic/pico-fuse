@@ -5,6 +5,9 @@
 
 // Public
 #include <fuse/fuse.h>
+#if defined(TARGET_PICO)
+#include <pico/stdlib.h>
+#endif
 
 // Private
 #include "alloc.h"
@@ -60,6 +63,12 @@ fuse_t *fuse_new()
 
     // Retain the application so it isn't autoreleased
     fuse_allocator_retain(allocator, fuse);
+
+    // Reset name fields
+    for(size_t i = 0; i < FUSE_MAGIC_COUNT; i++)
+    {
+        fuse->desc[i].name = 0;
+    }
 
     // Register primitive types
     fuse->desc[FUSE_MAGIC_NULL] = (struct fuse_value_desc){
@@ -351,7 +360,13 @@ void fuse_run(fuse_t *self, int (*callback)(fuse_t *))
     assert(self);
     assert(callback);
 
-    // TODO: Register the timer device
+#if defined(TARGET_PICO)
+    // Initialize STDIO
+    stdio_init_all();
+
+    // Wait for 1500ms
+    sleep_ms(1500);
+#endif
 
     // Call the callback, and exit if it returns a non-zero value
     int exit_code = callback(self);
@@ -362,10 +377,19 @@ void fuse_run(fuse_t *self, int (*callback)(fuse_t *))
     }
 
     // Run the loop
+    fuse_printf(self, "picofuse_main: run\n");
     while (!self->exit_code)
     {
         sleep_ms(100);
     }
+
+#if defined(TARGET_PICO)
+    fuse_printf(self, "picofuse_main: halt\n");
+    while (1)
+    {
+        sleep_ms(1000);
+    }
+#endif
 }
 
 inline void fuse_exit(fuse_t *self, int exit_code)

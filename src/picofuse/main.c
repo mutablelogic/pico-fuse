@@ -24,7 +24,7 @@ int fuse_main(int main(fuse_t *fuse))
     fuse_debugf("picofuse_main: exit code %d\n", exit_code);
 
     // Endless loop on the pico
-#if TARGET_OS == pico
+#if defined(TARGET_PICO)
     fuse_debugf("picofuse_main: halt\n");
     while (1)
     {

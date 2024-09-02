@@ -125,7 +125,8 @@ bool fuse_register_callback(fuse_t *self, uint8_t type, uint8_t q, fuse_callback
 
 /** @brief Execute callbacks for an event
  */
-void fuse_exec_event(fuse_t *self, uint8_t q, fuse_event_t *evt) {
+void fuse_exec_event(fuse_t *self, uint8_t q, fuse_event_t *evt)
+{
     assert(self);
     assert(q < 2);
     assert(evt);

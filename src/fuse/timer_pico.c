@@ -163,4 +163,4 @@ size_t fuse_qstr_timer(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_
     return i;
 }
 
-#endif // TARGET_LINUX
+#endif // TARGET_PICO
