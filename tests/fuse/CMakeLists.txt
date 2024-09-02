@@ -113,6 +113,7 @@ target_link_libraries(${NAME} fuse)
 
 set(NAME "test_timer")
 add_executable(${NAME} 
+    common/main.c
     timer/main.c
 )
 add_test(NAME ${NAME} COMMAND ${NAME})

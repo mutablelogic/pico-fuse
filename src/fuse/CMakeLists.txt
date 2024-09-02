@@ -13,6 +13,7 @@ add_library(${NAME} STATIC
     map.c
     mutex_pico.c
     mutex_posix.c
+    null.c
     panic.c
     printf.c
     random_pico.c

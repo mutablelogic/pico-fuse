@@ -6,6 +6,8 @@
 
 #include <fuse/fuse.h>
 
+/** @brief Register value type for mutexes
+ */
 void fuse_register_value_mutex(fuse_t *self);
 
 #endif

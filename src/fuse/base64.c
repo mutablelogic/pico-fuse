@@ -1,11 +1,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdbool.h>
-
-// Public headers
 #include <fuse/fuse.h>
-
-// Private headers
 #include "printf.h"
 
 /* @brief Append a value to a buffer as a base64 string

@@ -95,7 +95,7 @@ fuse_timer_t *fuse_timer_schedule(fuse_t *self, uint32_t ms, bool periodic, void
 
     // Schedule the timer
     timer->periodic = periodic;
-    if (alarm_pool_add_repeating_timer_ms(pool, ms, fuse_timer_callback, timer, &timer->alarm) != 0)
+    if (!alarm_pool_add_repeating_timer_ms(pool, ms, fuse_timer_callback, timer, &timer->alarm))
     {
         fuse_release(self, (fuse_value_t *)timer);
         return NULL;
@@ -126,7 +126,8 @@ static bool fuse_timer_callback(repeating_timer_t *rt)
     struct timer_context *timer = (struct timer_context *)(rt->user_data);
     assert(timer);
     assert(timer->self);
-    fuse_printf(timer->self, "Timer event\n");
+    fuse_event_t* evt = fuse_new_event(timer->self, (fuse_value_t* )timer, FUSE_EVENT_TIMER, (void* )timer->data);
+    assert(evt);
     return timer->periodic;
 }
 

@@ -1,18 +1,13 @@
 
 #if defined(TARGET_PICO)
 
-// Public includes
 #include <fuse/fuse.h>
 #include <pico/sync.h>
-
-// Private includes
 #include "fuse.h"
 #include "mutex.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // DEFINITIONS
-
-static bool fuse_mutex_init(fuse_t *self, fuse_value_t *value, const void *user_data);
 
 struct mutex_context
 {
@@ -38,23 +33,6 @@ void fuse_register_value_mutex(fuse_t *self)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// PUBLIC METHODS
-
-/* @brief Lock critical section of code
- */
-inline void fuse_mutex_lock(fuse_mutex_t* mutex) {
-    struct mutex_context* ctx = (struct mutex_context*)mutex;
-    mutex_enter_blocking(&ctx->mutex);
-}
-
-/* @brief Unlock critical section of code
- */
-inline void fuse_mutex_unlock(fuse_mutex_t* mutex) {
-    struct mutex_context* ctx = (struct mutex_context*)mutex;
-    mutex_exit(&ctx->mutex);
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // PRIVATE METHODS
 
 /* @brief Initialise a mutex lock
@@ -69,6 +47,23 @@ static bool fuse_mutex_init(fuse_t *self, fuse_value_t *value, const void *user_
 
     // Return success
     return true;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// PUBLIC METHODS
+
+/* @brief Lock critical section of code
+ */
+inline void fuse_mutex_lock(fuse_mutex_t* mutex) {
+    struct mutex_context* ctx = (struct mutex_context*)mutex;
+    mutex_enter_blocking(&ctx->mutex);
+}
+
+/* @brief Unlock critical section of code
+ */
+inline void fuse_mutex_unlock(fuse_mutex_t* mutex) {
+    struct mutex_context* ctx = (struct mutex_context*)mutex;
+    mutex_exit(&ctx->mutex);
 }
 
 #endif

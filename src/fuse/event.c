@@ -1,6 +1,4 @@
 #include <fuse/fuse.h>
-
-// Private includes
 #include "alloc.h"
 #include "event.h"
 #include "fuse.h"

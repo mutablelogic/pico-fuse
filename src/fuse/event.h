@@ -23,7 +23,7 @@ struct event_callbacks
     fuse_callback_t* callback;
 };
 
-/** @brief Register value primitive for a mutex
+/** @brief Register value type for events
  */
 void fuse_register_value_event(fuse_t *self);
 

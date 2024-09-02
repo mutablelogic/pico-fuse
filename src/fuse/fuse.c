@@ -1,15 +1,8 @@
 #include <stdint.h>
-
-///////////////////////////////////////////////////////////////////////////////
-// DEFINITIONS
-
-// Public
 #include <fuse/fuse.h>
 #if defined(TARGET_PICO)
 #include <pico/stdlib.h>
 #endif
-
-// Private
 #include "alloc.h"
 #include "alloc_builtin.h"
 #include "event.h"
@@ -17,18 +10,16 @@
 #include "list.h"
 #include "map.h"
 #include "mutex.h"
+#include "null.h"
 #include "printf.h"
 #include "timer.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // DECLARATIONS
 
-static bool fuse_init_null(fuse_t *self, fuse_value_t *value, const void *user_data);
 static bool fuse_init_number(fuse_t *self, fuse_value_t *value, const void *user_data);
 static bool fuse_init_memcpy(fuse_t *self, fuse_value_t *value, const void *user_data);
 static bool fuse_init_cstr(fuse_t *self, fuse_value_t *value, const void *user_data);
-static size_t fuse_cstr_null(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v);
-static size_t fuse_qstr_null(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v);
 static size_t fuse_qstr_bool(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v);
 static size_t fuse_qstr_number(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v);
 static size_t fuse_cstr_cstr(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v);
@@ -70,13 +61,6 @@ fuse_t *fuse_new()
         fuse->desc[i].name = 0;
     }
 
-    // Register primitive types
-    fuse->desc[FUSE_MAGIC_NULL] = (struct fuse_value_desc){
-        .size = 0,
-        .name = "NULL",
-        .cstr = fuse_cstr_null,
-        .qstr = fuse_qstr_null,
-    };
     fuse->desc[FUSE_MAGIC_APP] = (struct fuse_value_desc){
         .size = 0,
         .name = "APP",
@@ -186,6 +170,7 @@ fuse_t *fuse_new()
     };
 
     // Register types
+    fuse_register_value_null(fuse);
     fuse_register_value_event(fuse);
     fuse_register_value_mutex(fuse);
     fuse_register_value_timer(fuse);
@@ -482,20 +467,6 @@ static bool fuse_init_cstr(fuse_t *self, fuse_value_t *value, const void *user_d
 
     // Return success
     return true;
-}
-
-/* @brief Output a null as a cstr
- */
-static size_t fuse_cstr_null(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v)
-{
-    return cstrtostr_internal(buf, sz, i, NULL);
-}
-
-/* @brief Output a null as a qstr
- */
-static size_t fuse_qstr_null(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v)
-{
-    return cstrtostr_internal(buf, sz, i, FUSE_PRINTF_NULL_JSON);
 }
 
 /* @brief Output a bool as a cstr
