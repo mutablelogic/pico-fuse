@@ -11,7 +11,7 @@ int TEST_001(fuse_t *self)
 
     // Test empty string
     {
-        size_t n = b64toa(buf, sz, "", 0);
+        size_t n = b64tostr(buf, sz, "", 0);
         fuse_debugf("  n=%u buf=%s\n", n, buf);
         assert(n == 0); // null
         assert_cstr_eq("", buf);
@@ -21,7 +21,7 @@ int TEST_001(fuse_t *self)
     {
         const char *in = "Many hands make light work.";
         const char *out = "TWFueSBoYW5kcyBtYWtlIGxpZ2h0IHdvcmsu";
-        size_t n = b64toa(buf, sz, (void *)in, strlen(in));
+        size_t n = b64tostr(buf, sz, (void *)in, strlen(in));
         fuse_debugf("  n=%u buf=%s\n", n, buf);
         assert(n == strlen(out)); // null
         assert_cstr_eq(out, buf);
@@ -31,7 +31,7 @@ int TEST_001(fuse_t *self)
     {
         const char *in = "light work.";
         const char *out = "bGlnaHQgd29yay4=";
-        size_t n = b64toa(buf, sz, (void *)in, strlen(in));
+        size_t n = b64tostr(buf, sz, (void *)in, strlen(in));
         fuse_debugf("  n=%u buf=%s\n", n, buf);
         assert(n == strlen(out)); // null
         assert_cstr_eq(out, buf);
@@ -41,7 +41,7 @@ int TEST_001(fuse_t *self)
     {
         const char *in = "light work";
         const char *out = "bGlnaHQgd29yaw==";
-        size_t n = b64toa(buf, sz, (void *)in, strlen(in));
+        size_t n = b64tostr(buf, sz, (void *)in, strlen(in));
         fuse_debugf("  n=%u buf=%s\n", n, buf);
         assert(n == strlen(out)); // null
         assert_cstr_eq(out, buf);
@@ -51,7 +51,7 @@ int TEST_001(fuse_t *self)
     {
         const char *in = "light wor";
         const char *out = "bGlnaHQgd29y";
-        size_t n = b64toa(buf, sz, (void *)in, strlen(in));
+        size_t n = b64tostr(buf, sz, (void *)in, strlen(in));
         fuse_debugf("  n=%u buf=%s\n", n, buf);
         assert(n == strlen(out)); // null
         assert_cstr_eq(out, buf);
@@ -61,7 +61,7 @@ int TEST_001(fuse_t *self)
     {
         const char *in = "light wo";
         const char *out = "bGlnaHQgd28=";
-        size_t n = b64toa(buf, sz, (void *)in, strlen(in));
+        size_t n = b64tostr(buf, sz, (void *)in, strlen(in));
         fuse_debugf("  n=%u buf=%s\n", n, buf);
         assert(n == strlen(out)); // null
         assert_cstr_eq(out, buf);
@@ -71,7 +71,7 @@ int TEST_001(fuse_t *self)
     {
         const char *in = "light w";
         const char *out = "bGlnaHQgdw==";
-        size_t n = b64toa(buf, sz, (void *)in, strlen(in));
+        size_t n = b64tostr(buf, sz, (void *)in, strlen(in));
         fuse_debugf("  n=%u buf=%s\n", n, buf);
         assert(n == strlen(out)); // null
         assert_cstr_eq(out, buf);

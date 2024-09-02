@@ -464,14 +464,14 @@ static bool fuse_init_cstr(fuse_t *self, fuse_value_t *value, const void *user_d
  */
 static size_t fuse_cstr_null(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v)
 {
-    return cstrtoa_internal(buf, sz, i, NULL);
+    return cstrtostr_internal(buf, sz, i, NULL);
 }
 
 /* @brief Output a null as a qstr
  */
 static size_t fuse_qstr_null(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v)
 {
-    return cstrtoa_internal(buf, sz, i, FUSE_PRINTF_NULL_JSON);
+    return cstrtostr_internal(buf, sz, i, FUSE_PRINTF_NULL_JSON);
 }
 
 /* @brief Output a bool as a cstr
@@ -485,11 +485,11 @@ static size_t fuse_qstr_bool(fuse_t *self, char *buf, size_t sz, size_t i, fuse_
     bool b = *(bool *)v;
     if (b)
     {
-        return cstrtoa_internal(buf, sz, i, FUSE_PRINTF_TRUE);
+        return cstrtostr_internal(buf, sz, i, FUSE_PRINTF_TRUE);
     }
     else
     {
-        return cstrtoa_internal(buf, sz, i, FUSE_PRINTF_FALSE);
+        return cstrtostr_internal(buf, sz, i, FUSE_PRINTF_FALSE);
     }
 }
 
@@ -503,25 +503,25 @@ static size_t fuse_qstr_number(fuse_t *self, char *buf, size_t sz, size_t i, fus
     switch (fuse_allocator_magic(self->allocator, v))
     {
     case FUSE_MAGIC_U8:
-        return utoa_internal(buf, sz, i, *(uint8_t *)v, 0);
+        return utostr_internal(buf, sz, i, *(uint8_t *)v, 0);
     case FUSE_MAGIC_U16:
-        return utoa_internal(buf, sz, i, *(uint16_t *)v, 0);
+        return utostr_internal(buf, sz, i, *(uint16_t *)v, 0);
     case FUSE_MAGIC_U32:
-        return utoa_internal(buf, sz, i, *(uint32_t *)v, 0);
+        return utostr_internal(buf, sz, i, *(uint32_t *)v, 0);
     case FUSE_MAGIC_U64:
-        return utoa_internal(buf, sz, i, *(uint64_t *)v, 0);
+        return utostr_internal(buf, sz, i, *(uint64_t *)v, 0);
     case FUSE_MAGIC_S8:
-        return itoa_internal(buf, sz, i, *(int8_t *)v, 0);
+        return itostr_internal(buf, sz, i, *(int8_t *)v, 0);
     case FUSE_MAGIC_S16:
-        return itoa_internal(buf, sz, i, *(int16_t *)v, 0);
+        return itostr_internal(buf, sz, i, *(int16_t *)v, 0);
     case FUSE_MAGIC_S32:
-        return itoa_internal(buf, sz, i, *(int32_t *)v, 0);
+        return itostr_internal(buf, sz, i, *(int32_t *)v, 0);
     case FUSE_MAGIC_S64:
-        return itoa_internal(buf, sz, i, *(int64_t *)v, 0);
+        return itostr_internal(buf, sz, i, *(int64_t *)v, 0);
     case FUSE_MAGIC_F32:
-        return ftoa_internal(buf, sz, i, *(float *)v, 0);
+        return ftostr_internal(buf, sz, i, *(float *)v, 0);
     case FUSE_MAGIC_F64:
-        return ftoa_internal(buf, sz, i, *(double *)v, 0);
+        return ftostr_internal(buf, sz, i, *(double *)v, 0);
     default:
         assert(false);
     }
@@ -537,7 +537,7 @@ static size_t fuse_cstr_cstr(fuse_t *self, char *buf, size_t sz, size_t i, fuse_
     assert(fuse_allocator_magic(self->allocator, v) == FUSE_MAGIC_CSTR);
 
     const char *vp = *(const char **)v;
-    return cstrtoa_internal(buf, sz, i, vp);
+    return cstrtostr_internal(buf, sz, i, vp);
 }
 
 /* @brief Output a pointer to a null-terminated string as a quoted cstr
@@ -549,7 +549,7 @@ static size_t fuse_qstr_cstr(fuse_t *self, char *buf, size_t sz, size_t i, fuse_
     assert(fuse_allocator_magic(self->allocator, v) == FUSE_MAGIC_CSTR);
 
     const char *vp = *(const char **)v;
-    return qstrtoa_internal(buf, sz, i, vp);
+    return qstrtostr_internal(buf, sz, i, vp);
 }
 
 /* @brief Output a data block as hex
@@ -571,7 +571,7 @@ static size_t fuse_cstr_data(fuse_t *self, char *buf, size_t sz, size_t i, fuse_
     size_t j = 0;
     while (j < datasz)
     {
-        i = utoa_internal(buf, sz, i, ((uint8_t *)v)[j++], FUSE_PRINTF_FLAG_HEX | FUSE_PRINTF_FLAG_UPPER | 2);
+        i = utostr_internal(buf, sz, i, ((uint8_t *)v)[j++], FUSE_PRINTF_FLAG_HEX | FUSE_PRINTF_FLAG_UPPER | 2);
     }
 
     // Return the new index
@@ -586,5 +586,5 @@ static size_t fuse_qstr_data(fuse_t *self, char *buf, size_t sz, size_t i, fuse_
     assert(v);
     assert(fuse_allocator_magic(self->allocator, v) == FUSE_MAGIC_DATA);
 
-    return b64toa_internal(buf, sz, i, v, fuse_allocator_size(self->allocator, v));
+    return b64tostr_internal(buf, sz, i, v, fuse_allocator_size(self->allocator, v));
 }

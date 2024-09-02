@@ -10,7 +10,7 @@
 
 /* @brief Append a character into the buffer
  */
-inline size_t chtoa_internal(char *buf, size_t sz, size_t i, const char ch)
+inline size_t chtostr_internal(char *buf, size_t sz, size_t i, const char ch)
 {
     assert(buf == NULL || sz > 0);
     if (buf && i < (sz - 1))
@@ -22,7 +22,7 @@ inline size_t chtoa_internal(char *buf, size_t sz, size_t i, const char ch)
 
 /* @brief Append a null-terminated string into the buffer
  */
-size_t cstrtoa_internal(char *buf, size_t sz, size_t i, const char *str)
+size_t cstrtostr_internal(char *buf, size_t sz, size_t i, const char *str)
 {
     assert(buf == NULL || sz > 0);
 
@@ -46,17 +46,17 @@ size_t cstrtoa_internal(char *buf, size_t sz, size_t i, const char *str)
 
 /* @brief Append a quoted-string into the buffer
  */
-size_t qstrtoa_internal(char *buf, size_t sz, size_t i, const char *str)
+size_t qstrtostr_internal(char *buf, size_t sz, size_t i, const char *str)
 {
     assert(buf == NULL || sz > 0);
 
     if (str == NULL)
     {
-        return cstrtoa_internal(buf, sz, i, FUSE_PRINTF_NULL_JSON);
+        return cstrtostr_internal(buf, sz, i, FUSE_PRINTF_NULL_JSON);
     }
 
     // Output the prefix
-    i = chtoa_internal(buf, sz, i, '"');
+    i = chtostr_internal(buf, sz, i, '"');
 
     // Output characters
     while (*str)
@@ -64,41 +64,41 @@ size_t qstrtoa_internal(char *buf, size_t sz, size_t i, const char *str)
         switch (*str++)
         {
         case '"':
-            i = cstrtoa_internal(buf, sz, i, "\\\"");
+            i = cstrtostr_internal(buf, sz, i, "\\\"");
             break;
         case '\b':
-            i = cstrtoa_internal(buf, sz, i, "\\b");
+            i = cstrtostr_internal(buf, sz, i, "\\b");
             break;
         case '\f':
-            i = cstrtoa_internal(buf, sz, i, "\\f");
+            i = cstrtostr_internal(buf, sz, i, "\\f");
             break;
         case '\n':
-            i = cstrtoa_internal(buf, sz, i, "\\n");
+            i = cstrtostr_internal(buf, sz, i, "\\n");
             break;
         case '\r':
-            i = cstrtoa_internal(buf, sz, i, "\\r");
+            i = cstrtostr_internal(buf, sz, i, "\\r");
             break;
         case '\t':
-            i = cstrtoa_internal(buf, sz, i, "\\t");
+            i = cstrtostr_internal(buf, sz, i, "\\t");
             break;
         default:
         {
             const char ch = *(str - 1);
             if (ch <= 0x1F || ch == 0x7F)
             {
-                i = cstrtoa_internal(buf, sz, i, "\\u");
-                i = utoa_internal(buf, sz, i, ch, FUSE_PRINTF_FLAG_HEX | FUSE_PRINTF_FLAG_UPPER | 4);
+                i = cstrtostr_internal(buf, sz, i, "\\u");
+                i = utostr_internal(buf, sz, i, ch, FUSE_PRINTF_FLAG_HEX | FUSE_PRINTF_FLAG_UPPER | 4);
             }
             else
             {
-                i = chtoa_internal(buf, sz, i, ch);
+                i = chtostr_internal(buf, sz, i, ch);
             }
         }
         }
     }
 
     // Output the suffix
-    i = chtoa_internal(buf, sz, i, '"');
+    i = chtostr_internal(buf, sz, i, '"');
 
     // Return the new index
     return i;
@@ -107,15 +107,15 @@ size_t qstrtoa_internal(char *buf, size_t sz, size_t i, const char *str)
 /* @brief Return a quoted string value
  *
  */
-size_t qstrtoa(char *buf, size_t sz, const char *v)
+size_t qstrtostr(char *buf, size_t sz, const char *v)
 {
     assert(buf == NULL || sz > 0);
-    size_t i = qstrtoa_internal(buf, sz, 0, v);
+    size_t i = qstrtostr_internal(buf, sz, 0, v);
 
     // Terminate the string
     if (buf)
     {
-        size_t k = MIN(i, sz - 1);
+        size_t k = MIN_(i, sz - 1);
         buf[k] = '\0';
     }
 

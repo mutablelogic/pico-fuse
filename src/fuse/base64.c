@@ -10,7 +10,7 @@
 
 /* @brief Append a value to a buffer as a base64 string
  */
-size_t b64toa_internal(char *buf, size_t sz, size_t i, void *v, size_t len)
+size_t b64tostr_internal(char *buf, size_t sz, size_t i, void *v, size_t len)
 {
     assert(buf == NULL || sz > 0);
     assert(v);
@@ -25,10 +25,10 @@ size_t b64toa_internal(char *buf, size_t sz, size_t i, void *v, size_t len)
         bits = (bits << 8) | ((j < len) ? in[j + 2] : 0);
 
         // Output the binary - 4 characters
-        i = chtoa_internal(buf, sz, i, b64_table[(bits >> 18) & 0x3f]);
-        i = chtoa_internal(buf, sz, i, j > (len - 1) ? '=' : b64_table[(bits >> 12) & 0x3f]);
-        i = chtoa_internal(buf, sz, i, j > (len - 2) ? '=' : b64_table[(bits >> 6) & 0x3f]);
-        i = chtoa_internal(buf, sz, i, j > (len - 3) ? '=' : b64_table[(bits >> 0) & 0x3F]);
+        i = chtostr_internal(buf, sz, i, b64_table[(bits >> 18) & 0x3f]);
+        i = chtostr_internal(buf, sz, i, j > (len - 1) ? '=' : b64_table[(bits >> 12) & 0x3f]);
+        i = chtostr_internal(buf, sz, i, j > (len - 2) ? '=' : b64_table[(bits >> 6) & 0x3f]);
+        i = chtostr_internal(buf, sz, i, j > (len - 3) ? '=' : b64_table[(bits >> 0) & 0x3F]);
 
         // Increment j by 3 bytes
         j += 3;
@@ -40,18 +40,18 @@ size_t b64toa_internal(char *buf, size_t sz, size_t i, void *v, size_t len)
 
 /* @brief Convert a value to a base64 string
  */
-size_t b64toa(char *buf, size_t sz, void *v, size_t len)
+size_t b64tostr(char *buf, size_t sz, void *v, size_t len)
 {
     assert(buf == NULL || sz > 0);
     assert(v);
 
     // Decode
-    size_t i = b64toa_internal(buf, sz, 0, v, len);
+    size_t i = b64tostr_internal(buf, sz, 0, v, len);
 
     // Terminate the string
     if (buf)
     {
-        size_t k = MIN(i, sz - 1);
+        size_t k = MIN_(i, sz - 1);
         buf[k] = '\0';
     }
 

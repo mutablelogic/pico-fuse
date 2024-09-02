@@ -23,9 +23,9 @@ target_link_libraries(${NAME} fuse)
 
 ##########################################################################################
 
-set(NAME "test_ftoa")
+set(NAME "test_ftostr")
 add_executable(${NAME} 
-    ftoa/main.c
+    ftostr/main.c
 )
 add_test(NAME ${NAME} COMMAND ${NAME})
 set_tests_properties(${NAME} PROPERTIES WILL_FAIL FALSE)
@@ -34,9 +34,9 @@ target_link_libraries(${NAME} fuse)
 
 ##########################################################################################
 
-set(NAME "test_itoa")
+set(NAME "test_itostr")
 add_executable(${NAME} 
-    itoa/main.c
+    itostr/main.c
 )
 add_test(NAME ${NAME} COMMAND ${NAME})
 set_tests_properties(${NAME} PROPERTIES WILL_FAIL FALSE)
@@ -100,9 +100,9 @@ target_link_libraries(${NAME} fuse)
 
 ##########################################################################################
 
-set(NAME "test_strtoa")
+set(NAME "test_strtostr")
 add_executable(${NAME} 
-    strtoa/main.c
+    strtostr/main.c
 )
 add_test(NAME ${NAME} COMMAND ${NAME})
 set_tests_properties(${NAME} PROPERTIES WILL_FAIL FALSE)
@@ -122,9 +122,9 @@ target_link_libraries(${NAME} fuse)
 
 ##########################################################################################
 
-set(NAME "test_utoa")
+set(NAME "test_utostr")
 add_executable(${NAME} 
-    utoa/main.c
+    utostr/main.c
 )
 add_test(NAME ${NAME} COMMAND ${NAME})
 set_tests_properties(${NAME} PROPERTIES WILL_FAIL FALSE)

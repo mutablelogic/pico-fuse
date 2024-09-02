@@ -102,13 +102,13 @@ size_t fuse_qstr_list(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t
     assert(list);
 
     // Add prefix
-    i = chtoa_internal(buf, sz, i, '[');
+    i = chtostr_internal(buf, sz, i, '[');
 
     fuse_value_t *elem = fuse_list_next(self, (fuse_list_t* )list, NULL);
     while (elem != NULL)
     {
         // Append quoted string
-        i = vtoa_internal(self, buf, sz, i, elem, true);
+        i = vtostr_internal(self, buf, sz, i, elem, true);
 
         // Get the next element
         elem = fuse_list_next(self, (fuse_list_t* )list, elem);
@@ -116,12 +116,12 @@ size_t fuse_qstr_list(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t
         // Add separator
         if (elem != NULL)
         {
-            i = chtoa_internal(buf, sz, i, ',');
+            i = chtostr_internal(buf, sz, i, ',');
         }
     }
 
     // Add suffix
-    i = chtoa_internal(buf, sz, i, ']');
+    i = chtostr_internal(buf, sz, i, ']');
 
     // Return the index
     return i;

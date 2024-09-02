@@ -6,22 +6,24 @@ add_library(${NAME} STATIC
     debug.c
     device.c
     event.c
-    ftoa.c
+    ftostr.c
     fuse.c
-    itoa.c
+    itostr.c
     list.c
     map.c
+    mutex_pico.c
     mutex_posix.c
     panic.c
     printf.c
     random_pico.c
     random_posix.c
     sleep_posix.c
-    strtoa.c
+    strtostr.c
     timer_darwin.c
     timer_linux.c
+    timer_pico.c
     value.c
-    vtoa.c
+    vtostr.c
 )
 
 target_include_directories(${NAME} PRIVATE
@@ -30,6 +32,8 @@ target_include_directories(${NAME} PRIVATE
 
 if(TARGET_OS STREQUAL "pico")
     target_link_libraries(${NAME}
+        pico_rand
         pico_stdlib
+        pico_time
     )
 endif()

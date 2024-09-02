@@ -148,17 +148,17 @@ size_t fuse_qstr_timer(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_
     struct timer_context *timer = (struct timer_context *)v;
 
     // Add prefix
-    i = chtoa_internal(buf, sz, i, '{');
+    i = chtostr_internal(buf, sz, i, '{');
 
     // Add user data
     if(timer->data) {
-        i = qstrtoa_internal(buf, sz, i, "data");
-        i = chtoa_internal(buf, sz, i, ':');
-        i = ptoa_internal(buf, sz, i, (void* )timer->data);
+        i = qstrtostr_internal(buf, sz, i, "data");
+        i = chtostr_internal(buf, sz, i, ':');
+        i = ptostr_internal(buf, sz, i, (void* )timer->data);
     }
 
     // Add suffix
-    i = chtoa_internal(buf, sz, i, '}');
+    i = chtostr_internal(buf, sz, i, '}');
 
     // Return the index
     return i;

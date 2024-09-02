@@ -16,7 +16,7 @@
  * @param v      The value terminated by a zero byte, or NULL
  * @returns      The number of bytes that the value would require
  */
-size_t qstrtoa(char *buf, size_t sz, const char *v);
+size_t qstrtostr(char *buf, size_t sz, const char *v);
 
 /* @brief Return an double float value as a string
  *
@@ -25,7 +25,7 @@ size_t qstrtoa(char *buf, size_t sz, const char *v);
  * @param v      The value
  * @returns      The number of bytes that the value would require
  */
-size_t ftoa(char *buf, size_t sz, double v);
+size_t ftostr(char *buf, size_t sz, double v);
 
 /* @brief Convert a value to a string
  *
@@ -37,7 +37,7 @@ size_t ftoa(char *buf, size_t sz, double v);
  * @param quoted If true, the value is quoted for JSON output
  * @returns      The number of bytes that the value would require
  */
-size_t vtoa(fuse_t *self, char *buf, size_t sz, fuse_value_t *v, bool quoted);
+size_t vtostr(fuse_t *self, char *buf, size_t sz, fuse_value_t *v, bool quoted);
 
 /* @brief Return a signed integer value as a string
  *
@@ -46,7 +46,7 @@ size_t vtoa(fuse_t *self, char *buf, size_t sz, fuse_value_t *v, bool quoted);
  * @param v      The value
  * @returns      The number of bytes that the value would require
  */
-size_t itoa(char *buf, size_t sz, int64_t v);
+size_t itostr(char *buf, size_t sz, int64_t v);
 
 /* @brief Return an unsigned integer value as a string
  *
@@ -55,7 +55,7 @@ size_t itoa(char *buf, size_t sz, int64_t v);
  * @param v      The value
  * @returns      The number of bytes that the value would require
  */
-size_t utoa(char *buf, size_t sz, uint64_t v);
+size_t utostr(char *buf, size_t sz, uint64_t v);
 
 /* @brief Return an unsigned integer value as a string, formatted as binary
  *
@@ -65,7 +65,7 @@ size_t utoa(char *buf, size_t sz, uint64_t v);
  * @param bits   The number of bits to format the value as, or zero for the minimum
  * @returns      The number of bytes that the value would require
  */
-size_t utoa_binary(char *buf, size_t sz, uint64_t v, uint8_t bits);
+size_t utostr_binary(char *buf, size_t sz, uint64_t v, uint8_t bits);
 
 /* @brief Return an unsigned integer value as a string, formatted as hexidecimal
  *
@@ -77,7 +77,7 @@ size_t utoa_binary(char *buf, size_t sz, uint64_t v, uint8_t bits);
  * @param upper  If true, use uppercase hex digits
  * @returns      The number of bytes that the value would require
  */
-size_t utoa_hex(char *buf, size_t sz, uint64_t v, uint8_t bits, bool upper);
+size_t utostr_hex(char *buf, size_t sz, uint64_t v, uint8_t bits, bool upper);
 
 /* @brief Convert a value to a  base64 string
  * 
@@ -87,7 +87,7 @@ size_t utoa_hex(char *buf, size_t sz, uint64_t v, uint8_t bits, bool upper);
  * @param len    The length of the value in bytes
  * @returns      The number of bytes that the value would require
  */
-size_t b64toa(char *buf, size_t sz, void *v, size_t len);
+size_t b64tostr(char *buf, size_t sz, void *v, size_t len);
 
 /* @brief Format a string into the output buffer, replacing formatting directives
  *

@@ -10,15 +10,15 @@
 
 /* @brief Append a pointer value
  */
-size_t ptoa_internal(char *buf, size_t sz, size_t i, void *v)
+size_t ptostr_internal(char *buf, size_t sz, size_t i, void *v)
 {
     assert(buf == NULL || sz > 0);
 
     // Output the prefix
-    i = cstrtoa_internal(buf, sz, i, "0x");
+    i = cstrtostr_internal(buf, sz, i, "0x");
 
     // Output the value in hexadecimal, padded to the size of a pointer
-    i = utoa_internal(buf, sz, i, (uintptr_t)v, FUSE_PRINTF_FLAG_HEX | (sizeof(void *) << 1));
+    i = utostr_internal(buf, sz, i, (uintptr_t)v, FUSE_PRINTF_FLAG_HEX | (sizeof(void *) << 1));
 
     // return the new index
     return i;
@@ -38,7 +38,7 @@ int fuse_vsprintf(fuse_t *self, char *buf, size_t sz, const char *format, va_lis
     {
         if (*format != '%')
         {
-            i = chtoa_internal(buf, sz, i, *format);
+            i = chtostr_internal(buf, sz, i, *format);
             format++;
             continue;
         }
@@ -47,7 +47,7 @@ int fuse_vsprintf(fuse_t *self, char *buf, size_t sz, const char *format, va_lis
             format++;
             if (*format == '\0')
             {
-                i = chtoa_internal(buf, sz, i, '%');
+                i = chtostr_internal(buf, sz, i, '%');
                 continue;
             }
         }
@@ -60,7 +60,7 @@ int fuse_vsprintf(fuse_t *self, char *buf, size_t sz, const char *format, va_lis
             flags |= FUSE_PRINTF_FLAG_LONG;
             if (*++format == '\0')
             {
-                i = cstrtoa_internal(buf, sz, i, "%l");
+                i = cstrtostr_internal(buf, sz, i, "%l");
                 continue;
             }
             break;
@@ -71,18 +71,18 @@ int fuse_vsprintf(fuse_t *self, char *buf, size_t sz, const char *format, va_lis
         {
         case 's':
             // cstring
-            i = cstrtoa_internal(buf, sz, i, va_arg(va, const char *));
+            i = cstrtostr_internal(buf, sz, i, va_arg(va, const char *));
             format++;
             break;
         case 'd':
             // signed integer
             if (flags & FUSE_PRINTF_FLAG_LONG)
             {
-                i = itoa_internal(buf, sz, i, va_arg(va, int64_t), flags);
+                i = itostr_internal(buf, sz, i, va_arg(va, int64_t), flags);
             }
             else
             {
-                i = itoa_internal(buf, sz, i, va_arg(va, int32_t), flags);
+                i = itostr_internal(buf, sz, i, va_arg(va, int32_t), flags);
             }
             format++;
             break;
@@ -90,11 +90,11 @@ int fuse_vsprintf(fuse_t *self, char *buf, size_t sz, const char *format, va_lis
             // unsigned integer
             if (flags & FUSE_PRINTF_FLAG_LONG)
             {
-                i = utoa_internal(buf, sz, i, va_arg(va, uint64_t), flags);
+                i = utostr_internal(buf, sz, i, va_arg(va, uint64_t), flags);
             }
             else
             {
-                i = utoa_internal(buf, sz, i, va_arg(va, uint32_t), flags);
+                i = utostr_internal(buf, sz, i, va_arg(va, uint32_t), flags);
             }
             format++;
             break;
@@ -105,11 +105,11 @@ int fuse_vsprintf(fuse_t *self, char *buf, size_t sz, const char *format, va_lis
             // unsigned hexadecimal value
             if (flags & FUSE_PRINTF_FLAG_LONG)
             {
-                i = utoa_internal(buf, sz, i, va_arg(va, uint64_t), flags | FUSE_PRINTF_FLAG_HEX);
+                i = utostr_internal(buf, sz, i, va_arg(va, uint64_t), flags | FUSE_PRINTF_FLAG_HEX);
             }
             else
             {
-                i = utoa_internal(buf, sz, i, va_arg(va, uint32_t), flags | FUSE_PRINTF_FLAG_HEX);
+                i = utostr_internal(buf, sz, i, va_arg(va, uint32_t), flags | FUSE_PRINTF_FLAG_HEX);
             }
             format++;
             break;
@@ -117,37 +117,37 @@ int fuse_vsprintf(fuse_t *self, char *buf, size_t sz, const char *format, va_lis
             // unsigned binary value
             if (flags & FUSE_PRINTF_FLAG_LONG)
             {
-                i = utoa_internal(buf, sz, i, va_arg(va, uint64_t), flags | FUSE_PRINTF_FLAG_BIN);
+                i = utostr_internal(buf, sz, i, va_arg(va, uint64_t), flags | FUSE_PRINTF_FLAG_BIN);
             }
             else
             {
-                i = utoa_internal(buf, sz, i, va_arg(va, uint32_t), flags | FUSE_PRINTF_FLAG_BIN);
+                i = utostr_internal(buf, sz, i, va_arg(va, uint32_t), flags | FUSE_PRINTF_FLAG_BIN);
             }
             format++;
             break;
         case 'v':
             // value
-            i = vtoa_internal(self, buf, sz, i, va_arg(va, fuse_value_t *), false);
+            i = vtostr_internal(self, buf, sz, i, va_arg(va, fuse_value_t *), false);
             format++;
             break;
         case 'q':
             // quoted value
-            i = vtoa_internal(self, buf, sz, i, va_arg(va, fuse_value_t *), true);
+            i = vtostr_internal(self, buf, sz, i, va_arg(va, fuse_value_t *), true);
             format++;
             break;
         case 'p':
             // pointer
-            i = ptoa_internal(buf, sz, i, va_arg(va, void *));
+            i = ptostr_internal(buf, sz, i, va_arg(va, void *));
             format++;
             break;
         case 'f':
             // float or double
-            i = ftoa_internal(buf, sz, i, va_arg(va, double), 0);
+            i = ftostr_internal(buf, sz, i, va_arg(va, double), 0);
             format++;
             break;
         case '%':
             // quote a %
-            i = chtoa_internal(buf, sz, i, '%');
+            i = chtostr_internal(buf, sz, i, '%');
             format++;
             break;
         default:
@@ -158,7 +158,7 @@ int fuse_vsprintf(fuse_t *self, char *buf, size_t sz, const char *format, va_lis
     // Terminate the string
     if (buf)
     {
-        size_t k = MIN(i, sz - 1);
+        size_t k = MIN_(i, sz - 1);
         buf[k] = '\0';
     }
 

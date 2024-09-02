@@ -2,14 +2,14 @@
 int TEST_HEX_001(fuse_t *self)
 {
     // Cycle through all the uint8_t values
-    fuse_debugf("TEST_HEX_001 utoa_hex uint8_t\n");
+    fuse_debugf("TEST_HEX_001 utostr_hex uint8_t\n");
 
     for (size_t sz = 0; sz < 12; sz++)
     {
         char *buf = fuse_alloc(self, FUSE_MAGIC_DATA, (void *)sz);
         for (uint8_t v = 0;; v++)
         {
-            size_t n = utoa_hex(sz == 0 ? NULL : buf, sz, v, 8, false);
+            size_t n = utostr_hex(sz == 0 ? NULL : buf, sz, v, 8, false);
             fuse_debugf("  n=%u value=%u buf[%u]=%s\n", n, v, sz, sz == 0 ? NULL : buf);
             assert(n == 2);
             if (v == UINT8_MAX)
@@ -25,14 +25,14 @@ int TEST_HEX_001(fuse_t *self)
 int TEST_HEX_002(fuse_t *self)
 {
     // Cycle through all the uint8_t values
-    fuse_debugf("TEST_HEX_002 utoa_hex uint8_t bits=16\n");
+    fuse_debugf("TEST_HEX_002 utostr_hex uint8_t bits=16\n");
 
     for (size_t sz = 0; sz < 12; sz++)
     {
         char *buf = fuse_alloc(self, FUSE_MAGIC_DATA, (void *)sz);
         for (uint8_t v = 0;; v++)
         {
-            size_t n = utoa_hex(sz == 0 ? NULL : buf, sz, v, 16, false);
+            size_t n = utostr_hex(sz == 0 ? NULL : buf, sz, v, 16, false);
             fuse_debugf("  n=%u value=%u buf[%u]=%s\n", n, v, sz, sz == 0 ? NULL : buf);
             assert(n == 4);
 
@@ -57,14 +57,14 @@ int TEST_HEX_002(fuse_t *self)
 int TEST_HEX_003(fuse_t *self)
 {
     // Cycle through all the uint8_t values
-    fuse_debugf("TEST_HEX_003 utoa_hex uint8_t bits=12 upper\n");
+    fuse_debugf("TEST_HEX_003 utostr_hex uint8_t bits=12 upper\n");
 
     for (size_t sz = 0; sz < 12; sz++)
     {
         char *buf = fuse_alloc(self, FUSE_MAGIC_DATA, (void *)sz);
         for (uint8_t v = 0;; v++)
         {
-            size_t n = utoa_hex(sz == 0 ? NULL : buf, sz, v, 12, true);
+            size_t n = utostr_hex(sz == 0 ? NULL : buf, sz, v, 12, true);
             fuse_debugf("  n=%u value=%u buf[%u]=%s\n", n, v, sz, sz == 0 ? NULL : buf);
             assert(n == 3);
 

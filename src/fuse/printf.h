@@ -4,6 +4,8 @@
 #ifndef FUSE_PRIVATE_PRINTF_H
 #define FUSE_PRIVATE_PRINTF_H
 
+#include <fuse/fuse.h>
+
 /* @brief Flags for printf functions
  */
 #define FUSE_PRINTF_NULL "(null)"         ///< How a NULL value is printed
@@ -17,7 +19,7 @@
 
 /* @brief Return the minimum of two values
  */
-#define MIN(a, b) ((a) < (b) ? (a) : (b))
+#define MIN_(a, b) ((a) < (b) ? (a) : (b))
 
 /* @brief Flags to modify the output format
  *
@@ -42,7 +44,7 @@ typedef enum
  * @param ch     Character to append
  * @returns      The new index in the buffer
  */
-size_t chtoa_internal(char *buf, size_t sz, size_t i, const char ch);
+size_t chtostr_internal(char *buf, size_t sz, size_t i, const char ch);
 
 /* @brief Append a null-terminated string to a string
  *
@@ -52,7 +54,7 @@ size_t chtoa_internal(char *buf, size_t sz, size_t i, const char ch);
  * @param str    Null-terminated string to append
  * @returns      The new index in the buffer
  */
-size_t cstrtoa_internal(char *buf, size_t sz, size_t i, const char *str);
+size_t cstrtostr_internal(char *buf, size_t sz, size_t i, const char *str);
 
 /* @brief Append a null-terminated string to a string in quoted format
  *
@@ -62,7 +64,7 @@ size_t cstrtoa_internal(char *buf, size_t sz, size_t i, const char *str);
  * @param str    Null-terminated string to append
  * @returns      The new index in the buffer
  */
-size_t qstrtoa_internal(char *buf, size_t sz, size_t i, const char *str);
+size_t qstrtostr_internal(char *buf, size_t sz, size_t i, const char *str);
 
 /* @brief Append an unsigned integer value to a string
  *
@@ -73,7 +75,7 @@ size_t qstrtoa_internal(char *buf, size_t sz, size_t i, const char *str);
  * @param flags  Flags to modify the output format
  * @returns      The new index in the output buffer
  */
-size_t itoa_internal(char *buf, size_t sz, size_t i, int64_t v, fuse_printf_flags_t flags);
+size_t itostr_internal(char *buf, size_t sz, size_t i, int64_t v, fuse_printf_flags_t flags);
 
 /* @brief Append a signed integer value to a string
  *
@@ -84,7 +86,7 @@ size_t itoa_internal(char *buf, size_t sz, size_t i, int64_t v, fuse_printf_flag
  * @param flags  Flags to modify the output format
  * @returns      The new index in the output buffer
  */
-size_t utoa_internal(char *buf, size_t sz, size_t i, uint64_t v, fuse_printf_flags_t flags);
+size_t utostr_internal(char *buf, size_t sz, size_t i, uint64_t v, fuse_printf_flags_t flags);
 
 /* @brief Append a float value to a string
  *
@@ -95,7 +97,7 @@ size_t utoa_internal(char *buf, size_t sz, size_t i, uint64_t v, fuse_printf_fla
  * @param flags  Flags to modify the output format
  * @returns      The new index in the output buffer
  */
-size_t ftoa_internal(char *buf, size_t sz, size_t i, double v, fuse_printf_flags_t flags);
+size_t ftostr_internal(char *buf, size_t sz, size_t i, double v, fuse_printf_flags_t flags);
 
 /* @brief Append a null-terminated string
  *
@@ -105,7 +107,7 @@ size_t ftoa_internal(char *buf, size_t sz, size_t i, double v, fuse_printf_flags
  * @param v      Value to append
  * @returns      The new index in the output buffer
  */
-size_t cstrtoa_internal(char *buf, size_t sz, size_t i, const char *str);
+size_t cstrtostr_internal(char *buf, size_t sz, size_t i, const char *str);
 
 /* @brief Append a value
  *
@@ -117,7 +119,7 @@ size_t cstrtoa_internal(char *buf, size_t sz, size_t i, const char *str);
  * @param quoted If true, the value is quoted for JSON output
  * @returns      The new index in the output buffer
  */
-size_t vtoa_internal(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v, bool quoted);
+size_t vtostr_internal(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v, bool quoted);
 
 /* @brief Append a value to a buffer as a base64 string
  *
@@ -128,7 +130,7 @@ size_t vtoa_internal(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t 
  * @param len    The number of bytes
  * @returns      The new index in the output buffer
  */
-size_t b64toa_internal(char *buf, size_t sz, size_t i, void *v, size_t len);
+size_t b64tostr_internal(char *buf, size_t sz, size_t i, void *v, size_t len);
 
 /* @brief Append a pointer value
  *
@@ -138,6 +140,6 @@ size_t b64toa_internal(char *buf, size_t sz, size_t i, void *v, size_t len);
  * @param ptr    Value to append
  * @returns      The new index in the output buffer
  */
-size_t ptoa_internal(char *buf, size_t sz, size_t i, void *ptr);
+size_t ptostr_internal(char *buf, size_t sz, size_t i, void *ptr);
 
 #endif

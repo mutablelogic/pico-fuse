@@ -1,17 +1,17 @@
-#ifdef TARGET_PICO
+#if defined(TARGET_PICO)
 
 #include <stdint.h>
-#include <pico.h>
+#include <pico/rand.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 // PUBLIC METHODS
 
-inline uint32_t rand_u32() {
-    return get_rand_u32();
+uint32_t rand_u32() {
+    return get_rand_32();
 }
 
-inline uint64_t rand_u64() {
-    return get_rand_u64();
+uint64_t rand_u64() {
+    return get_rand_64();
 }
 
 #endif

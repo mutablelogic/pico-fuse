@@ -123,6 +123,38 @@ bool fuse_register_callback(fuse_t *self, uint8_t type, uint8_t q, fuse_callback
     return true;
 }
 
+/** @brief Execute callbacks for an event
+ */
+void fuse_exec_event(fuse_t *self, uint8_t q, fuse_event_t *evt) {
+    assert(self);
+    assert(q < 2);
+    assert(evt);
+
+    // Get the event callbacks
+    struct event_callbacks callbacks;
+    switch (q)
+    {
+    case 0:
+        if (self->core0 == NULL)
+        {
+            return;
+        }
+        callbacks = self->callbacks0[evt->type];
+        break;
+    case 1:
+        if (self->core1 == NULL)
+        {
+            return;
+        }
+        callbacks = self->callbacks1[evt->type];
+        break;
+    default:
+        return;
+    }
+
+    fuse_printf(self, "TODO: Executing callbacks for event %d on core %d\n", evt->type, q);
+}
+
 //////////////////////////////////////////////////////////////////////////////
 // PRIVATE METHODS
 
@@ -134,15 +166,15 @@ static inline size_t fuse_qstr_event_type(char *buf, size_t sz, size_t i, uint8_
     switch (type)
     {
     case FUSE_EVENT_NULL:
-        return qstrtoa_internal(buf, sz, i, "NULL");
+        return qstrtostr_internal(buf, sz, i, "NULL");
     case FUSE_EVENT_TIMER:
-        return qstrtoa_internal(buf, sz, i, "TIMER");
+        return qstrtostr_internal(buf, sz, i, "TIMER");
     default:
         assert(false);
         return i;
     }
 #else
-    return uitoa_internal(buf, sz, i, type, 0);
+    return uitostr_internal(buf, sz, i, type, 0);
 #endif
 }
 
@@ -160,30 +192,30 @@ size_t fuse_qstr_event(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_
     assert(evt);
 
     // Add prefix
-    i = chtoa_internal(buf, sz, i, '{');
+    i = chtostr_internal(buf, sz, i, '{');
 
     // Add source
-    i = qstrtoa_internal(buf, sz, i, "source");
-    i = chtoa_internal(buf, sz, i, ':');
-    i = vtoa_internal(self, buf, sz, i, evt->source, true);
+    i = qstrtostr_internal(buf, sz, i, "source");
+    i = chtostr_internal(buf, sz, i, ':');
+    i = vtostr_internal(self, buf, sz, i, evt->source, true);
 
     // Add type
-    i = chtoa_internal(buf, sz, i, ',');
-    i = qstrtoa_internal(buf, sz, i, "type");
-    i = chtoa_internal(buf, sz, i, ':');
+    i = chtostr_internal(buf, sz, i, ',');
+    i = qstrtostr_internal(buf, sz, i, "type");
+    i = chtostr_internal(buf, sz, i, ':');
     i = fuse_qstr_event_type(buf, sz, i, evt->type);
 
     // Add user data
     if (evt->user_data)
     {
-        i = chtoa_internal(buf, sz, i, ',');
-        i = qstrtoa_internal(buf, sz, i, "user_data");
-        i = chtoa_internal(buf, sz, i, ':');
-        i = ptoa_internal(buf, sz, i, evt->user_data);
+        i = chtostr_internal(buf, sz, i, ',');
+        i = qstrtostr_internal(buf, sz, i, "user_data");
+        i = chtostr_internal(buf, sz, i, ':');
+        i = ptostr_internal(buf, sz, i, evt->user_data);
     }
 
     // Add suffix
-    i = chtoa_internal(buf, sz, i, '}');
+    i = chtostr_internal(buf, sz, i, '}');
 
     // Return the index
     return i;

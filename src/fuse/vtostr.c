@@ -12,7 +12,7 @@
 
 /* @brief Convert a value to a string
  */
-size_t vtoa_internal(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v, bool quoted)
+size_t vtostr_internal(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v, bool quoted)
 {
     assert(self);
     assert(buf == NULL || sz > 0);
@@ -35,13 +35,13 @@ size_t vtoa_internal(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t 
 
 /* @brief Convert a value to a string
  */
-size_t vtoa(fuse_t *self, char *buf, size_t sz, fuse_value_t *v, bool quoted)
+size_t vtostr(fuse_t *self, char *buf, size_t sz, fuse_value_t *v, bool quoted)
 {
     assert(self);
     assert(v);
     assert(buf == NULL || sz > 0);
 
-    size_t i = vtoa_internal(self, buf, sz, 0, v, quoted);
+    size_t i = vtostr_internal(self, buf, sz, 0, v, quoted);
 
     // Terminate the string
     if (buf)

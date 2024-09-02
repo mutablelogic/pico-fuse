@@ -9,22 +9,22 @@
 
 /* @brief Append an float32 to a string buffer
  */
-size_t ftoa_internal(char *buf, size_t sz, size_t i, double v, fuse_printf_flags_t flags)
+size_t ftostr_internal(char *buf, size_t sz, size_t i, double v, fuse_printf_flags_t flags)
 {
     assert(buf == NULL || sz > 0);
 
     // test for special values
     if (is_nan(v))
     {
-        return cstrtoa_internal(buf, sz, 0, FUSE_PRINTF_NAN);
+        return cstrtostr_internal(buf, sz, 0, FUSE_PRINTF_NAN);
     }
     if (v < -DBL_MAX)
     {
-        return cstrtoa_internal(buf, sz, 0, FUSE_PRINTF_MINUS_INF);
+        return cstrtostr_internal(buf, sz, 0, FUSE_PRINTF_MINUS_INF);
     }
     if (v > DBL_MAX)
     {
-        return cstrtoa_internal(buf, sz, 0, FUSE_PRINTF_PLUS_INF);
+        return cstrtostr_internal(buf, sz, 0, FUSE_PRINTF_PLUS_INF);
     }
 
     // test for negative values
@@ -40,17 +40,17 @@ size_t ftoa_internal(char *buf, size_t sz, size_t i, double v, fuse_printf_flags
     double frac = v - (double)whole;
 
     // precision up to 10 decimal places
-    int prec = MIN(flags & 0xF, 10);
+    int prec = MIN_(flags & 0xF, 10);
     static const double pow10[] = {1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000};
 
     // output the negative sign
     if (neg)
     {
-        i = chtoa_internal(buf, sz, i, '-');
+        i = chtostr_internal(buf, sz, i, '-');
     }
 
     // output the whole part
-    i = utoa_internal(buf, sz, i, whole, 0);
+    i = utostr_internal(buf, sz, i, whole, 0);
 
     if(prec == 0)
     {
@@ -60,9 +60,8 @@ size_t ftoa_internal(char *buf, size_t sz, size_t i, double v, fuse_printf_flags
     // output the fractional part
     if (prec > 0 || frac > 0)
     {
-        fuse_debugf("frac = %f prec = %d whole = %u\n", frac, prec, (uint64_t)(frac * pow10[prec]));
-        i = chtoa_internal(buf, sz, i, '.');
-        i = utoa_internal(buf, sz, i, frac * pow10[prec], prec | FUSE_PRINTF_FLAG_ZEROPAD);
+        i = chtostr_internal(buf, sz, i, '.');
+        i = utostr_internal(buf, sz, i, frac * pow10[prec], prec | FUSE_PRINTF_FLAG_ZEROPAD);
     }
 
     // return the new index
@@ -71,15 +70,15 @@ size_t ftoa_internal(char *buf, size_t sz, size_t i, double v, fuse_printf_flags
 
 /* @brief Return an double float value as a string
  */
-size_t ftoa(char *buf, size_t sz, double v)
+size_t ftostr(char *buf, size_t sz, double v)
 {
     assert(buf == NULL || sz > 0);
-    size_t i = ftoa_internal(buf, sz, 0, v, 0);
+    size_t i = ftostr_internal(buf, sz, 0, v, 0);
 
     // Terminate the string
     if (buf)
     {
-        size_t k = MIN(i, sz - 1);
+        size_t k = MIN_(i, sz - 1);
         buf[k] = '\0';
     }
 

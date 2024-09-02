@@ -3,14 +3,14 @@
 
 int TEST_001(fuse_t *self)
 {
-    fuse_debugf("TEST_001 ftoa float\n");
+    fuse_debugf("TEST_001 ftostr float\n");
 
     const int sz = 20;
     char buf[sz];
     for (size_t i = 0; i < 100; i++)
     {
         float v = (float)i / 10.0;
-        size_t n = ftoa(buf, sz, v);
+        size_t n = ftostr(buf, sz, v);
         fuse_debugf("  n=%u value=%.1f buf[%u]=%s\n", n, v, sz, buf);
         assert(n > 0);
     }

@@ -1,6 +1,7 @@
-#if defined(TARGET_DARWIN)
-#include <dispatch/dispatch.h>
+#if defined(TARGET_PICO)
+
 #include <fuse/fuse.h>
+#include <pico/time.h>
 
 // Private includes
 #include "alloc.h"
@@ -13,17 +14,17 @@
 
 static bool timer_init(fuse_t *self, fuse_value_t *value, const void *user_data);
 static void timer_destroy(fuse_t *self, fuse_value_t *value);
-static void fuse_timer_callback(fuse_timer_t *timer);
+static bool fuse_timer_callback(repeating_timer_t *rt);
 
 struct timer_context
 {
-    dispatch_source_t timer;
+    bool periodic;
+    repeating_timer_t alarm;
     struct fuse_application *self;
     const void *data;
 };
 
-// Custom dispatch queue for background execution
-static dispatch_queue_t queue;
+static alarm_pool_t *pool = NULL;
 
 ///////////////////////////////////////////////////////////////////////////////
 // LIFECYCLE
@@ -41,12 +42,12 @@ void fuse_register_value_timer(fuse_t *self)
         .init = timer_init,
         .destroy = timer_destroy,
         .cstr = fuse_qstr_timer,
-        .qstr = fuse_qstr_timer
-    };
+        .qstr = fuse_qstr_timer};
     fuse_register_value_type(self, FUSE_MAGIC_TIMER, fuse_timer_type);
 
-    // Create a custom dispatch queue for background execution
-    queue = dispatch_queue_create("com.mutablelogic.picofuse", DISPATCH_QUEUE_CONCURRENT);
+    // Get alarm pool
+    pool = alarm_pool_get_default();
+    assert(pool);
 }
 
 /** @brief Create a new timer context
@@ -61,13 +62,6 @@ static bool timer_init(fuse_t *self, fuse_value_t *value, const void *user_data)
     ctx->self = self;
     ctx->data = user_data;
 
-    // Create the timer
-    ctx->timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, queue);
-    if (!ctx->timer)
-    {
-        return false;
-    }
-
     // Return success
     return true;
 }
@@ -77,8 +71,9 @@ static void timer_destroy(fuse_t *self, fuse_value_t *value)
     assert(self);
     assert(value);
 
-    // Delete the timer
-    dispatch_source_cancel(((struct timer_context *)value)->timer);
+    // Cancel the timer
+    struct timer_context *timer = (struct timer_context *)value;
+    cancel_repeating_timer(&timer->alarm);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -98,28 +93,13 @@ fuse_timer_t *fuse_timer_schedule(fuse_t *self, uint32_t ms, bool periodic, void
         return NULL;
     }
 
-    // Initialize the timer
-    uint64_t interval_nsec = (uint64_t)(ms) * 1000000; // 1 millisecond = 1E6 nanoseconds
-    if (periodic)
+    // Schedule the timer
+    timer->periodic = periodic;
+    if (alarm_pool_add_repeating_timer_ms(pool, ms, fuse_timer_callback, timer, &timer->alarm) != 0)
     {
-        dispatch_source_set_timer(timer->timer, dispatch_time(DISPATCH_TIME_NOW, interval_nsec), interval_nsec, 0);
+        fuse_release(self, (fuse_value_t *)timer);
+        return NULL;
     }
-    else
-    {
-        dispatch_source_set_timer(timer->timer, dispatch_time(DISPATCH_TIME_NOW, interval_nsec), DISPATCH_TIME_FOREVER, 0);
-    }
-
-    // Set the event handler
-    dispatch_source_set_event_handler(timer->timer, ^{
-      fuse_timer_callback(timer);
-      if (!periodic)
-      {
-          dispatch_source_cancel(timer->timer);
-      }
-    });
-
-    // Start the timer
-    dispatch_resume(timer->timer);
 
     // Return the timer
     return timer;
@@ -132,16 +112,22 @@ void fuse_timer_cancel(fuse_t *self, fuse_timer_t *timer)
     assert(self);
     assert(timer);
 
+    // Cancel the timer
+    cancel_repeating_timer(&timer->alarm);
+
     // Release the timer
     fuse_release(self, (fuse_value_t *)timer);
 }
 
 /** @brief Place a timer event onto the event queue
  */
-static void fuse_timer_callback(fuse_timer_t *timer)
+static bool fuse_timer_callback(repeating_timer_t *rt)
 {
-    fuse_event_t* evt = fuse_new_event(timer->self, (fuse_value_t* )timer, FUSE_EVENT_TIMER, (void* )timer->data);
-    assert(evt);
+    struct timer_context *timer = (struct timer_context *)(rt->user_data);
+    assert(timer);
+    assert(timer->self);
+    fuse_printf(timer->self, "Timer event\n");
+    return timer->periodic;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -149,7 +135,8 @@ static void fuse_timer_callback(fuse_timer_t *timer)
 
 /** @brief Append a quoted string representation of a timer
  */
-size_t fuse_qstr_timer(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v) {
+size_t fuse_qstr_timer(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v)
+{
     assert(self);
     assert(buf == NULL || sz > 0);
     assert(v);
@@ -162,10 +149,11 @@ size_t fuse_qstr_timer(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_
     i = chtostr_internal(buf, sz, i, '{');
 
     // Add user data
-    if(timer->data) {
+    if (timer->data)
+    {
         i = qstrtostr_internal(buf, sz, i, "data");
         i = chtostr_internal(buf, sz, i, ':');
-        i = ptostr_internal(buf, sz, i, (void* )timer->data);
+        i = ptostr_internal(buf, sz, i, (void *)timer->data);
     }
 
     // Add suffix
@@ -175,4 +163,4 @@ size_t fuse_qstr_timer(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_
     return i;
 }
 
-#endif // TARGET_DARWIN
+#endif // TARGET_LINUX
