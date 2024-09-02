@@ -46,7 +46,7 @@ size_t vtostr(fuse_t *self, char *buf, size_t sz, fuse_value_t *v, bool quoted)
     // Terminate the string
     if (buf)
     {
-        size_t k = MIN(i, sz - 1);
+        size_t k = MIN_(i, sz - 1);
         buf[k] = '\0';
     }
 
