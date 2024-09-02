@@ -136,6 +136,15 @@ int fuse_destroy(fuse_t *fuse)
     // Free the allocator
     fuse_allocator_destroy(allocator);
 
+    // Halt the application with a loop if pico
+#if defined(TARGET_PICO)
+    // TODO: Print the exit code
+    while (1)
+    {
+        sleep_ms(1000);
+    }
+#endif
+
     // Return the exit code
     return exit_code == FUSE_EXIT_SUCCESS ? 0 : exit_code;
 }
@@ -256,19 +265,11 @@ void fuse_run(fuse_t *self, int (*callback)(fuse_t *))
     }
 
     // Run the loop
-    fuse_printf(self, "picofuse_main: run\n");
+    fuse_printf(self, "fuse_run: entering the run loop\n");
     while (!self->exit_code)
     {
         sleep_ms(100);
     }
-
-#if defined(TARGET_PICO)
-    fuse_printf(self, "picofuse_main: halt\n");
-    while (1)
-    {
-        sleep_ms(1000);
-    }
-#endif
 }
 
 inline void fuse_exit(fuse_t *self, int exit_code)
