@@ -1,7 +1,7 @@
 
 ##############################################################################
 
-set(NAME "helloworld")
+set(NAME "eg_helloworld")
 
 add_executable(${NAME}
     common/main.c
@@ -21,7 +21,7 @@ pico_add_extra_outputs(${NAME})
 
 ##############################################################################
 
-set(NAME "panic")
+set(NAME "eg_panic")
 
 add_executable(${NAME}
     common/main.c
@@ -41,7 +41,7 @@ pico_add_extra_outputs(${NAME})
 
 ##############################################################################
 
-set(NAME "blink")
+set(NAME "eg_blink")
 
 add_executable(${NAME}
     common/main.c
@@ -61,7 +61,7 @@ pico_add_extra_outputs(${NAME})
 
 ##############################################################################
 
-set(NAME "temp")
+set(NAME "eg_temp")
 
 add_executable(${NAME}
     common/main.c
@@ -81,7 +81,7 @@ pico_add_extra_outputs(${NAME})
 
 ##############################################################################
 
-set(NAME "wifi")
+set(NAME "eg_wifi")
 
 add_executable(${NAME}
     common/main.c
@@ -101,7 +101,7 @@ pico_add_extra_outputs(${NAME})
 
 ##############################################################################
 
-set(NAME "mqtt")
+set(NAME "eg_mqtt")
 
 add_executable(${NAME}
     common/main.c
