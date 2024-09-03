@@ -5,6 +5,7 @@
 #define FUSE_PRIVATE_EVENT_H
 
 #include <fuse/fuse.h>
+#include <stdint.h>
 
 /** @brief Event data
  */

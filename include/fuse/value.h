@@ -8,6 +8,8 @@
 
 #include "fuse.h"
 #include <stdint.h>
+#include <stddef.h>
+#include <stdbool.h>
 
 /** @brief The representation of a fuse value
  */

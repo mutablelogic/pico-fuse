@@ -4,7 +4,6 @@ add_library(${NAME} STATIC
     alloc_builtin.c
     base64.c
     data.c
-    device.c
     event.c
     ftostr.c
     fuse.c

@@ -1,11 +1,16 @@
 #include <picofuse/picofuse.h>
 #include <hardware/gpio.h>
 #include "gpio.h"
+#include "printf.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // DECLARATIONS
 
 static void fuse_gpio_setfunc(uint8_t pin, fuse_gpio_func_t func);
+
+/** @brief Append a string representation of a GPIO pin
+ */
+static size_t fuse_gpio_cstr(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v);
 
 ///////////////////////////////////////////////////////////////////////////////
 // GLOBALS
@@ -24,7 +29,8 @@ void fuse_register_value_gpio(fuse_t *self)
     // Register mutex type
     fuse_value_desc_t fuse_gpio_type = {
         .size = sizeof(struct gpio_context),
-        .name = "GPIO"
+        .name = "GPIO",
+        .cstr = fuse_gpio_cstr
     };
     fuse_register_value_type(self, FUSE_MAGIC_GPIO, fuse_gpio_type);
 
@@ -108,12 +114,6 @@ static void fuse_gpio_setfunc(uint8_t pin, fuse_gpio_func_t func)
     // Set GPIO pin to SIO
     gpio_init(pin);
 
-<<<<<<< HEAD
-=======
-    // If true, adc_init has been called
-    static bool adc = false;
-
->>>>>>> 2278aef4da32cc3a813ebe2a7fc33b28a0c0b093
     // Set function based on function
     switch (func)
     {
@@ -151,6 +151,18 @@ static void fuse_gpio_setfunc(uint8_t pin, fuse_gpio_func_t func)
     default:
         assert(false);
     }
+}
+
+/** @brief Append a string representation of a GPIO pin
+ */
+static size_t fuse_gpio_cstr(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v) {
+    assert(self);
+    assert(buf == NULL || sz > 0);
+    assert(v);
+
+    i = chtostr_internal(buf, sz, i, '{');
+
+    return i;
 }
 
 /*
