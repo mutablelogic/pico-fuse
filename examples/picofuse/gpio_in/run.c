@@ -1,15 +1,28 @@
 #include <picofuse/picofuse.h>
 
-int run(fuse_t *fuse)
+/* @brief Callback fro when there is a rising or falling edge on GPIO32
+ */
+void gpio23_callback(fuse_t *self, fuse_event_t *evt, void *user_data)
+{
+    assert(self);
+    assert(evt);
+    assert(user_data);
+
+    // Print the event
+    fuse_printf(self, "Event: evt=%q user_data=%p\n", evt, user_data);
+}
+
+int run(fuse_t *self)
 {
     // Initialize picofuse
-    picofuse_init(fuse);
+    picofuse_init(self);
 
-    // GPIO Pin 26 input
-    fuse_gpio_t *pin = fuse_new_gpio(fuse, 23, FUSE_GPIO_IN);
+    // GPIO Pin 26 input - BOOLSEL on the pico lipo
+    fuse_gpio_t *pin = fuse_new_gpio(self, 23, FUSE_GPIO_IN);
     assert(pin);
 
-    fuse_printf(fuse,"gpio %v", pin);
+    // Register a callback
+    assert(fuse_register_callback(self, FUSE_EVENT_GPIO, 0, gpio23_callback));
 
     return 0;
 }

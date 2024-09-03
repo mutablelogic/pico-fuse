@@ -1,5 +1,6 @@
 #include <picofuse/picofuse.h>
 #include <hardware/gpio.h>
+#include <stdio.h>
 #include "gpio.h"
 #include "printf.h"
 
@@ -12,10 +13,15 @@ static void fuse_gpio_setfunc(uint8_t pin, fuse_gpio_func_t func);
  */
 static size_t fuse_gpio_cstr(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v);
 
+/** @brief Callback for interrupt
+ */
+static void fuse_gpio_callback(uint pin, uint32_t events);
+
 ///////////////////////////////////////////////////////////////////////////////
 // GLOBALS
 
-static bool fuse_gpio_init[NUM_BANK0_GPIOS];
+static fuse_gpio_t * fuse_gpio_pin[NUM_BANK0_GPIOS];
+static fuse_t* fuse_gpio_instance = NULL;
 
 ///////////////////////////////////////////////////////////////////////////////
 // LIFECYCLE
@@ -30,14 +36,18 @@ void fuse_register_value_gpio(fuse_t *self)
     fuse_value_desc_t fuse_gpio_type = {
         .size = sizeof(struct gpio_context),
         .name = "GPIO",
-        .cstr = fuse_gpio_cstr
+        .cstr = fuse_gpio_cstr,
+        .qstr = fuse_gpio_cstr
     };
     fuse_register_value_type(self, FUSE_MAGIC_GPIO, fuse_gpio_type);
 
     // Reset the GPIO pins
     for(size_t i = 0; i < NUM_BANK0_GPIOS; i++) {
-        fuse_gpio_init[i] = false;
+        fuse_gpio_pin[i] = NULL;
     }
+
+    // Set the callback instance
+    fuse_gpio_instance = self;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -54,7 +64,7 @@ fuse_gpio_t *fuse_new_gpio_ex(fuse_t *self, uint8_t pin, fuse_gpio_func_t func, 
     assert(func < FUSE_GPIO_FUNC_COUNT);
 
     // If pin alreadt initialized, return
-    if(fuse_gpio_init[pin]) {
+    if(fuse_gpio_pin[pin] != NULL) {
         return NULL;
     }
 
@@ -71,7 +81,10 @@ fuse_gpio_t *fuse_new_gpio_ex(fuse_t *self, uint8_t pin, fuse_gpio_func_t func, 
     fuse_gpio_setfunc(pin, func);
 
     // Indicate the GPIO pin is initialized
-    fuse_gpio_init[pin] = true;
+    fuse_gpio_pin[pin] = ctx;
+
+    // Set up the interrupt
+    gpio_set_irq_enabled_with_callback(pin, GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL, true, &fuse_gpio_callback);
 
     // Return the GPIO context
     return ctx;
@@ -160,9 +173,21 @@ static size_t fuse_gpio_cstr(fuse_t *self, char *buf, size_t sz, size_t i, fuse_
     assert(buf == NULL || sz > 0);
     assert(v);
 
-    i = chtostr_internal(buf, sz, i, '{');
+    i = cstrtostr_internal(buf, sz, i, self->desc[FUSE_MAGIC_GPIO].name);
+    i = utostr_internal(buf, sz, i, ((fuse_gpio_t *)v)->pin, 0);
 
     return i;
+}
+
+/** @brief GPIO callback - place event on the queues
+ */
+static void fuse_gpio_callback(uint pin, uint32_t events) {
+    fuse_t* self = fuse_gpio_instance;
+    fuse_gpio_t* source = fuse_gpio_pin[pin];
+    if(self && pin) {
+        fuse_event_t* evt = fuse_new_event(self, (fuse_value_t* )source, FUSE_EVENT_GPIO, (void* )events);
+        assert(evt);
+    }
 }
 
 /*
