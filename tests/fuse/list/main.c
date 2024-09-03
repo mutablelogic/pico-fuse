@@ -5,7 +5,7 @@ char buf[128];
 
 int TEST_001(fuse_t *self)
 {
-    fuse_debugf("TEST_001: zero-sized list value\n");
+    fuse_debugf(self, "TEST_001: zero-sized list value\n");
 
     // Make an empty list
     fuse_list_t *list = fuse_new_list(self);
@@ -15,7 +15,7 @@ int TEST_001(fuse_t *self)
 
     // sprintf the value
     assert(fuse_sprintf(self, buf, n, "%v", list) > 0);
-    fuse_debugf("  value=%s\n", buf);
+    fuse_debugf(self, "  value=%s\n", buf);
     assert_cstr_eq("[]", buf);
 
     // Return success
@@ -24,7 +24,7 @@ int TEST_001(fuse_t *self)
 
 int TEST_002(fuse_t *self)
 {
-    fuse_debugf("TEST_002: list value with 10 nulls\n");
+    fuse_debugf(self, "TEST_002: list value with 10 nulls\n");
 
     // Make an empty list
     fuse_list_t *list = fuse_new_list(self);
@@ -44,7 +44,7 @@ int TEST_002(fuse_t *self)
 
     // sprintf the value
     assert(fuse_sprintf(self, buf, n, "%v", list) > 0);
-    fuse_debugf("  value=%s\n", buf);
+    fuse_debugf(self, "  value=%s\n", buf);
     assert_cstr_eq("[null,null,null,null,null,null,null,null,null,null]", buf);
 
     // Return success
@@ -53,7 +53,7 @@ int TEST_002(fuse_t *self)
 
 int TEST_003(fuse_t *self)
 {
-    fuse_debugf("TEST_003: push 100 values into a list and pop them\n");
+    fuse_debugf(self, "TEST_003: push 100 values into a list and pop them\n");
 
     // Make an empty list
     fuse_list_t *list = fuse_new_list(self);

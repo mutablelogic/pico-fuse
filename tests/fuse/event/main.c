@@ -3,7 +3,7 @@
 
 int TEST_001(fuse_t *self)
 {
-    fuse_debugf("TEST_001 event\n");
+    fuse_debugf(self, "TEST_001 event\n");
 
     // Push event onto the event queue
     fuse_event_t *event = fuse_new_event(self, (fuse_value_t* )self, FUSE_EVENT_NULL, NULL);

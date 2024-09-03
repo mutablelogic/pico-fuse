@@ -24,7 +24,7 @@ int TEST_002()
     void *ptrs[64];
 
     // Create 64 memory blocks
-    fuse_debugf("Allocating 64 memory blocks\n");
+    printf("Allocating 64 memory blocks\n");
     for (int i = 0; i < 64; i++)
     {
         void *ptr = fuse_allocator_malloc(pool, 1024, 0xFF, __FILE__, __LINE__);
@@ -33,7 +33,7 @@ int TEST_002()
     }
 
     // Free 64 memory blocks
-    fuse_debugf("Free 64 memory blocks\n");
+    printf("Free 64 memory blocks\n");
     for (int i = 0; i < 64; i++)
     {
         fuse_allocator_free(pool, ptrs[i]);

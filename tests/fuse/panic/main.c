@@ -3,12 +3,13 @@
 #include <signal.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 /*
  * handle abort signal
  */
 void abort_handler(int sig) {
-    fuse_debugf("Abort signal received\n");
+    printf("Abort signal received\n");
     exit(sig);
 }
 
@@ -17,9 +18,9 @@ void abort_handler(int sig) {
  */
 int main()
 {
-    fuse_debugf("starting test\n");
+    printf("starting test\n");
     signal(SIGABRT, abort_handler);
-    fuse_debugf("asserting false\n");
+    printf("asserting false\n");
     assert(false);
     return -1;
 }

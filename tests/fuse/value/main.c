@@ -5,19 +5,19 @@ char buf[128];
 
 int TEST_001(fuse_t *self)
 {
-    fuse_debugf("NULL value\n");
+    fuse_debugf(self, "NULL value\n");
 
     // Make and free a NULL value
     fuse_value_t *value = fuse_alloc(self, FUSE_MAGIC_NULL, NULL);
 
     // sprintf the value
     assert(fuse_sprintf(self, buf, n, "%v", value) > 0);
-    fuse_debugf("  value=%s\n", buf);
+    fuse_debugf(self, "  value=%s\n", buf);
     assert_cstr_eq("(null)", buf);
 
     // sprintf the json value
     assert(fuse_sprintf(self, buf, n, "%q", value) > 0);
-    fuse_debugf("  quoted=%s\n", buf);
+    fuse_debugf(self, "  quoted=%s\n", buf);
     assert_cstr_eq("null", buf);
 
     // Free the value
@@ -29,14 +29,14 @@ int TEST_001(fuse_t *self)
 
 int TEST_002(fuse_t *self)
 {
-    fuse_debugf("TRUE value\n");
+    fuse_debugf(self, "TRUE value\n");
 
     // Make and free a NULL value
     fuse_value_t *value = fuse_alloc(self, FUSE_MAGIC_BOOL, (void *)true);
 
     // sprintf the value
     assert(fuse_sprintf(self, buf, n, "%v", value) > 0);
-    fuse_debugf("  value=%s\n", buf);
+    fuse_debugf(self, "  value=%s\n", buf);
     assert_cstr_eq("true", buf);
 
     // Free the value
@@ -48,14 +48,14 @@ int TEST_002(fuse_t *self)
 
 int TEST_003(fuse_t *self)
 {
-    fuse_debugf("FALSE value\n");
+    fuse_debugf(self, "FALSE value\n");
 
     // Make and free a NULL value
     fuse_value_t *value = fuse_alloc(self, FUSE_MAGIC_BOOL, (void *)false);
 
     // sprintf the value
     assert(fuse_sprintf(self, buf, n, "%v", value) > 0);
-    fuse_debugf("  value=%s\n", buf);
+    fuse_debugf(self, "  value=%s\n", buf);
     assert_cstr_eq("false", buf);
 
     // Free the value
@@ -67,7 +67,7 @@ int TEST_003(fuse_t *self)
 
 int TEST_004(fuse_t *self)
 {
-    fuse_debugf("int8_t value\n");
+    fuse_debugf(self, "int8_t value\n");
 
     // Make a S8 value
     fuse_value_t *value = fuse_alloc(self, FUSE_MAGIC_S8, NULL);
@@ -91,7 +91,7 @@ int TEST_004(fuse_t *self)
 
 int TEST_005(fuse_t *self)
 {
-    fuse_debugf("int16_t value\n");
+    fuse_debugf(self, "int16_t value\n");
 
     // Make a S16 value
     fuse_value_t *value = fuse_alloc(self, FUSE_MAGIC_S16, NULL);
@@ -115,7 +115,7 @@ int TEST_005(fuse_t *self)
 
 int TEST_006(fuse_t *self)
 {
-    fuse_debugf("int32_t value\n");
+    fuse_debugf(self, "int32_t value\n");
 
     // Make a S32 value
     fuse_value_t *value = fuse_alloc(self, FUSE_MAGIC_S32, NULL);
@@ -140,7 +140,7 @@ int TEST_006(fuse_t *self)
 
 int TEST_007(fuse_t *self)
 {
-    fuse_debugf("int64_t value\n");
+    fuse_debugf(self, "int64_t value\n");
 
     // Make a S32 value
     fuse_value_t *value = fuse_alloc(self, FUSE_MAGIC_S64, NULL);
@@ -165,7 +165,7 @@ int TEST_007(fuse_t *self)
 
 int TEST_008(fuse_t *self)
 {
-    fuse_debugf("uint8_t value\n");
+    fuse_debugf(self, "uint8_t value\n");
 
     // Make a U8 value
     fuse_value_t *value = fuse_alloc(self, FUSE_MAGIC_U8, NULL);
@@ -189,7 +189,7 @@ int TEST_008(fuse_t *self)
 
 int TEST_009(fuse_t *self)
 {
-    fuse_debugf("uint16_t value\n");
+    fuse_debugf(self, "uint16_t value\n");
 
     // Make a U16 value
     fuse_value_t *value = fuse_alloc(self, FUSE_MAGIC_U16, NULL);
@@ -213,7 +213,7 @@ int TEST_009(fuse_t *self)
 
 int TEST_010(fuse_t *self)
 {
-    fuse_debugf("uint32_t value\n");
+    fuse_debugf(self, "uint32_t value\n");
 
     // Make a U32 value
     fuse_value_t *value = fuse_alloc(self, FUSE_MAGIC_U16, NULL);
@@ -237,7 +237,7 @@ int TEST_010(fuse_t *self)
 
 int TEST_011(fuse_t *self)
 {
-    fuse_debugf("uint64_t value\n");
+    fuse_debugf(self, "uint64_t value\n");
 
     // Make a U64 value
     fuse_value_t *value = fuse_alloc(self, FUSE_MAGIC_U64, NULL);
@@ -261,7 +261,7 @@ int TEST_011(fuse_t *self)
 
 int TEST_012(fuse_t *self)
 {
-    fuse_debugf("cstr value\n");
+    fuse_debugf(self, "cstr value\n");
 
     // Make a CSTR value
     fuse_value_t *value = fuse_alloc(self, FUSE_MAGIC_CSTR, "hello, world!");
@@ -278,7 +278,7 @@ int TEST_012(fuse_t *self)
 
 int TEST_013(fuse_t *self)
 {
-    fuse_debugf("cstr value\n");
+    fuse_debugf(self, "cstr value\n");
 
     // Make two CSTR values
     fuse_value_t *value1 = fuse_alloc(self, FUSE_MAGIC_CSTR, "hello");
@@ -297,7 +297,7 @@ int TEST_013(fuse_t *self)
 
 int TEST_014(fuse_t *self)
 {
-    fuse_debugf("qstr value\n");
+    fuse_debugf(self, "qstr value\n");
 
     // Make a CSTR value
     fuse_value_t *value = fuse_alloc(self, FUSE_MAGIC_CSTR, "hello, world");
@@ -314,7 +314,7 @@ int TEST_014(fuse_t *self)
 
 int TEST_015(fuse_t *self)
 {
-    fuse_debugf("qstr value with control characters\n");
+    fuse_debugf(self, "qstr value with control characters\n");
 
     // Make a CSTR value
     fuse_value_t *value = fuse_alloc(self, FUSE_MAGIC_CSTR, " \b \f \n \r \t \\ ");
@@ -331,7 +331,7 @@ int TEST_015(fuse_t *self)
 
 int TEST_016(fuse_t *self)
 {
-    fuse_debugf("qstr value with quotes\n");
+    fuse_debugf(self, "qstr value with quotes\n");
 
     // Make a CSTR value
     fuse_value_t *value = fuse_alloc(self, FUSE_MAGIC_CSTR, "\"hello, world\n\"");
@@ -348,13 +348,13 @@ int TEST_016(fuse_t *self)
 
 int TEST_017(fuse_t *self)
 {
-    fuse_debugf("qstr value with hex characters\n");
+    fuse_debugf(self, "qstr value with hex characters\n");
 
     // Make a CSTR value
     fuse_value_t *value = fuse_alloc(self, FUSE_MAGIC_CSTR, "\x01\x02");
 
     assert(fuse_sprintf(self, buf, n, "%q", value) > 0);
-    fuse_debugf("  value=%s\n", buf);
+    fuse_debugf(self, "  value=%s\n", buf);
     assert_cstr_eq("\"\\u0001\\u0002\"", buf);
 
     // Free the values
@@ -366,21 +366,21 @@ int TEST_017(fuse_t *self)
 
 int TEST_018(fuse_t *self)
 {
-    fuse_debugf("data value\n");
+    fuse_debugf(self, "data value\n");
 
     // Make a DATA value
     const char *data = "\x01\x02";
-    fuse_value_t *value = fuse_alloc(self, FUSE_MAGIC_DATA, (void* )(strlen(data) + 1));
+    fuse_value_t *value = fuse_alloc(self, FUSE_MAGIC_DATA, (void *)(strlen(data) + 1));
     memcpy(value, data, strlen(data) + 1);
 
     // cstr
     assert(fuse_sprintf(self, buf, n, "%v", value) > 0);
-    fuse_debugf("  value=%s\n", buf);
+    fuse_debugf(self, "  value=%s\n", buf);
     assert_cstr_eq("010200", buf);
 
     // qstr
     assert(fuse_sprintf(self, buf, n, "%q", value) > 0);
-    fuse_debugf("  value=%s\n", buf);
+    fuse_debugf(self, "  value=%s\n", buf);
     assert_cstr_eq("AQIA", buf);
 
     // Free the values

@@ -7,13 +7,13 @@ int TEST_001(fuse_t *self)
     char buf[128];
 
     // Test quoted values
-    fuse_debugf("TEST_001 qstrtostr\n");
+    fuse_debugf(self,"TEST_001 qstrtostr\n");
 
     // Test NULL
     {
         const char *str = NULL;
         size_t n = qstrtostr(NULL, 0, str);
-        fuse_debugf("  n=%u\n", n);
+        fuse_debugf(self,"  n=%u\n", n);
         assert(n == 4); // null
     }
 
@@ -21,7 +21,7 @@ int TEST_001(fuse_t *self)
     {
         const char *str = NULL;
         size_t n = qstrtostr(buf, sz, str);
-        fuse_debugf("  n=%u buf=%s\n", n, buf);
+        fuse_debugf(self,"  n=%u buf=%s\n", n, buf);
         assert(n == 4); // null
         assert_cstr_eq("null", buf);
     }
@@ -30,7 +30,7 @@ int TEST_001(fuse_t *self)
     {
         const char *str = "";
         size_t n = qstrtostr(buf, sz, str);
-        fuse_debugf("  n=%u buf=%s\n", n, buf);
+        fuse_debugf(self,"  n=%u buf=%s\n", n, buf);
         assert(n == 2); 
         assert_cstr_eq("\"\"", buf);
     }
@@ -40,7 +40,7 @@ int TEST_001(fuse_t *self)
     {
         const char *str = "hello";
         size_t n = qstrtostr(buf, sz, str);
-        fuse_debugf("  n=%u buf=%s\n", n, buf);
+        fuse_debugf(self,"  n=%u buf=%s\n", n, buf);
         assert(n == 7);
         assert_cstr_eq("\"hello\"", buf);
     }
@@ -49,7 +49,7 @@ int TEST_001(fuse_t *self)
     {
         const char *str = "\"";
         size_t n = qstrtostr(buf, sz, str);
-        fuse_debugf("  n=%u buf=%s\n", n, buf);
+        fuse_debugf(self,"  n=%u buf=%s\n", n, buf);
         assert(n == 4);
         assert_cstr_eq("\"\\\"\"", buf);
     }
@@ -58,7 +58,7 @@ int TEST_001(fuse_t *self)
     {
         const char *str = "\b\f\n\r\t";
         size_t n = qstrtostr(buf, sz, str);
-        fuse_debugf("  n=%u buf=%s\n", n, buf);
+        fuse_debugf(self,"  n=%u buf=%s\n", n, buf);
         assert(n == 12);
         assert_cstr_eq("\"\\b\\f\\n\\r\\t\"", buf);
     }    
@@ -67,7 +67,7 @@ int TEST_001(fuse_t *self)
     {
         const char *str = "\x7F";
         size_t n = qstrtostr(buf, sz, str);
-        fuse_debugf("  n=%u buf=%s\n", n, buf);
+        fuse_debugf(self,"  n=%u buf=%s\n", n, buf);
         assert(n == 8);
         assert_cstr_eq("\"\\u007F\"", buf);
     }    

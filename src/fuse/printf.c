@@ -162,6 +162,53 @@ int fuse_vsprintf(fuse_t *self, char *buf, size_t sz, const char *format, va_lis
     return i;
 }
 
+/* @brief Format a string to stdout, replacing formatting directives
+ */
+size_t fuse_vprintf(fuse_t *self, const char *format, va_list va)
+{
+    assert(self);
+    assert(format);
+
+    // We have a static buffer for printf
+    static const int sz = FUSE_PRINTF_BUFFER_SIZE;
+    static char buffer[FUSE_PRINTF_BUFFER_SIZE];
+    va_list va2;
+
+    // Make a copy
+    va_copy(va2, va);
+
+    // Try to print into the buffer first
+    const int n = fuse_vsprintf(self, buffer, sz, format, va);
+    if (n < (sz - 1))
+    {
+        // Happy path - write the string to stdout
+        // TODO: Don't print the terminating \n
+        puts(buffer);
+    }
+    else
+    {
+        // Unhappy path - allocate data, format and write the string to stdout
+        char *tmp = fuse_alloc(self, FUSE_MAGIC_DATA, (void *)(uintptr_t)(n + 1));
+        if (tmp == NULL)
+        {
+            return 0;
+        }
+
+        // Do it again...
+        fuse_vsprintf(self, tmp, n + 1, format, va2);
+
+        // Write the string to stdout
+        // TODO: Don't print the terminating \n
+        puts(tmp);
+
+        // Free the memory
+        fuse_free(self, tmp);
+    }
+
+    // return the number of characters written
+    return n;
+}
+
 /* @brief Format a string into the output buffer, replacing formatting directives
  */
 size_t fuse_sprintf(fuse_t *self, char *buffer, size_t size, const char *format, ...)
@@ -180,47 +227,23 @@ size_t fuse_sprintf(fuse_t *self, char *buffer, size_t size, const char *format,
  */
 size_t fuse_printf(fuse_t *self, const char *format, ...)
 {
-    assert(self);
-    assert(format);
-
-    // We have a static buffer for printf
-    static const int sz = FUSE_PRINTF_BUFFER_SIZE;
-    static char buffer[FUSE_PRINTF_BUFFER_SIZE];
-
-    // Try to print into the buffer first
     va_list va;
     va_start(va, format);
-    const int n = fuse_vsprintf(self, buffer, sz, format, va);
+    const size_t n = fuse_vprintf(self, format, va);
     va_end(va);
-
-    if (n < (sz - 1))
-    {
-        // Happy path - write the string to stdout
-        // TODO: Don't print the terminating \n
-        puts(buffer);
-    }
-    else
-    {
-        // Unhappy path - allocate data, format and write the string to stdout
-        char *tmp = fuse_alloc(self, FUSE_MAGIC_DATA, (void *)(uintptr_t)(n + 1));
-        if (tmp == NULL)
-        {
-            return 0;
-        }
-
-        // Do it again...
-        va_start(va, format);
-        fuse_vsprintf(self, tmp, n + 1, format, va);
-        va_end(va);
-
-        // Write the string to stdout
-        // TODO: Don't print the terminating \n
-        puts(tmp);
-
-        // Free the memory
-        fuse_free(self, tmp);
-    }
-
-    // return the number of characters written
     return n;
+}
+
+/** @brief Prints formatted debugging messages in debug mode
+ */
+size_t fuse_debugf(fuse_t *self, const char *format, ...) {
+#ifndef DEBUG
+    return 0;
+#else
+    va_list va;
+    va_start(va, format);
+    const size_t n = fuse_vprintf(self,format, va);
+    va_end(va);
+    return n;
+#endif
 }

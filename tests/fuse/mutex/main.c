@@ -2,7 +2,7 @@
 
 int TEST_001(fuse_t *self)
 {
-    fuse_debugf("TEST_001: mutex\n");
+    fuse_debugf(self, "TEST_001: mutex\n");
 
     // Make a mutex
     fuse_mutex_t *mutex = fuse_new_mutex(self);

@@ -140,4 +140,13 @@ size_t fuse_sprintf(fuse_t *self, char *buffer, size_t size, const char *format,
  */
 size_t fuse_printf(fuse_t *self, const char *format, ...);
 
+/** @brief Prints formatted debugging messages in debug mode
+ *
+ * @param self       The fuse application
+ * @param format     The format string. See below for the list of supported directives
+ * @param ...        The arguments to format
+ * @returns          The number of characters written, not including the null terminator
+ */
+size_t fuse_debugf(fuse_t *self, const char *format, ...);
+
 #endif /* FUSE_PRINTF_H */

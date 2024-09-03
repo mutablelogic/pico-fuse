@@ -3,7 +3,6 @@ add_library(${NAME} STATIC
     adc.c
     gpio.c
     led.c
-    main.c
     mqtt.c
     serial.c
     stdio.c

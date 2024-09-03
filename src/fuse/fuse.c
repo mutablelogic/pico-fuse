@@ -106,22 +106,26 @@ int fuse_destroy(fuse_t *fuse)
         drained = fuse_drain(fuse, 0);
     } while (drained > 0);
 
-    // Free the application
-    fuse_allocator_free(allocator, fuse);
-
     // Walk through any remaining memory blocks
 #ifdef DEBUG
     struct fuse_allocator_header *hdr = allocator->head;
     size_t count = 0;
     while (hdr != NULL)
     {
+        // Skip the application
+        if (hdr->magic == FUSE_MAGIC_APP)
+        {
+            hdr = hdr->next;
+            continue;
+        }
+        
         // Print any memory leaks
-        fuse_debugf("LEAK: %p %s (%d bytes)", hdr->ptr, fuse->desc[hdr->magic].name, hdr->size);
+        fuse_debugf(fuse, "LEAK: %p %s (%d bytes)", hdr->ptr, fuse->desc[hdr->magic].name, hdr->size);
         if (hdr->file != NULL)
         {
-            fuse_debugf(" [allocated at %s:%d]", hdr->file, hdr->line);
+            fuse_debugf(fuse, " [allocated at %s:%d]", hdr->file, hdr->line);
         }
-        fuse_debugf("\n");
+        fuse_debugf(fuse, "\n");
         count++;
         hdr = hdr->next;
     }
@@ -132,18 +136,18 @@ int fuse_destroy(fuse_t *fuse)
         exit_code = FUSE_EXIT_MEMORYLEAKS;
     }
 #endif
-
-    // Free the allocator
-    fuse_allocator_destroy(allocator);
-
     // Halt the application with a loop if pico
 #if defined(TARGET_PICO)
-    // TODO: Print the exit code
+    fuse_debugf(fuse, "fuse: exit_code=%d\n", exit_code);
     while (1)
     {
         sleep_ms(1000);
     }
 #endif
+
+    // Free the application and allocator
+    fuse_allocator_free(allocator, fuse);
+    fuse_allocator_destroy(allocator);
 
     // Return the exit code
     return exit_code == FUSE_EXIT_SUCCESS ? 0 : exit_code;
@@ -192,12 +196,12 @@ void *fuse_alloc_ex(fuse_t *self, const uint16_t magic, const void *user_data, c
     if (ptr == NULL)
     {
 #ifdef DEBUG
-        fuse_debugf("fuse_alloc_ex: %s: Could not allocate %lu bytes", self->desc[magic].size);
+        fuse_debugf(self, "fuse_alloc_ex: %s: Could not allocate %lu bytes", self->desc[magic].size);
         if (file != NULL)
         {
-            fuse_debugf(" [allocated at %s:%d]", file, line);
+            fuse_debugf(self, " [allocated at %s:%d]", file, line);
         }
-        fuse_debugf("\n");
+        fuse_debugf(self, "\n");
 #endif
         return NULL;
     }
@@ -208,12 +212,12 @@ void *fuse_alloc_ex(fuse_t *self, const uint16_t magic, const void *user_data, c
         if (!self->desc[magic].init((struct fuse_application *)self, ptr, user_data))
         {
 #ifdef DEBUG
-            fuse_debugf("fuse_alloc_ex: %s: initialise failed", self->desc[magic].name);
+            fuse_debugf(self, "fuse_alloc_ex: %s: initialise failed", self->desc[magic].name);
             if (file != NULL)
             {
-                fuse_debugf(" [allocated at %s:%d]", file, line);
+                fuse_debugf(self, " [allocated at %s:%d]", file, line);
             }
-            fuse_debugf("\n");
+            fuse_debugf(self, "\n");
 #endif
             fuse_allocator_free(self->allocator, ptr);
             return NULL;
@@ -265,7 +269,7 @@ void fuse_run(fuse_t *self, int (*callback)(fuse_t *))
     }
 
     // Run the loop
-    fuse_printf(self, "fuse_run: entering the run loop\n");
+    fuse_debugf(self, "fuse_run: entering the run loop\n");
     while (!self->exit_code)
     {
         sleep_ms(100);

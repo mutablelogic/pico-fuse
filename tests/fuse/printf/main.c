@@ -9,7 +9,7 @@ int TEST_002(fuse_t *self)
     const int sz = 1;
     char buf[sz];
 
-    fuse_debugf("TEST_002 buffer with only a terminator\n");
+    fuse_debugf(self,"TEST_002 buffer with only a terminator\n");
 
     // sprintf the value
     assert(fuse_sprintf(self, buf, sz, "test") == 4);
@@ -24,7 +24,7 @@ int TEST_003(fuse_t *self)
     const int sz = 2;
     char buf[sz];
 
-    fuse_debugf("TEST_003 buffer with only a %%\n");
+    fuse_debugf(self,"TEST_003 buffer with only a %%\n");
 
     // sprintf the value
     assert(fuse_sprintf(self, buf, sz, "%") == 1);
@@ -39,7 +39,7 @@ int TEST_004(fuse_t *self)
     const int sz = 2;
     char buf[sz];
 
-    fuse_debugf("TEST_004 buffer quoting a %%\n");
+    fuse_debugf(self,"TEST_004 buffer quoting a %%\n");
 
     // sprintf the value
     assert(fuse_sprintf(self, buf, sz, "%%") == 1);
@@ -54,7 +54,7 @@ int TEST_005(fuse_t *self)
     const int sz = 4;
     char buf[sz];
 
-    fuse_debugf("TEST_005 buffer quoting a %% twice\n");
+    fuse_debugf(self,"TEST_005 buffer quoting a %% twice\n");
 
     // sprintf the value
     assert(fuse_sprintf(self, buf, sz, "%%%%") == 2);
@@ -69,7 +69,7 @@ int TEST_006(fuse_t *self)
     const int sz = 5;
     char buf[sz];
 
-    fuse_debugf("TEST_006 buffer curtailment\n");
+    fuse_debugf(self,"TEST_006 buffer curtailment\n");
 
     // sprintf the value
     assert(fuse_sprintf(self, buf, sz, "hello, world") == 12);
@@ -84,7 +84,7 @@ int TEST_007(fuse_t *self)
     const int sz = 5;
     char buf[sz];
 
-    fuse_debugf("TEST_007 buffer curtailment with string\n");
+    fuse_debugf(self,"TEST_007 buffer curtailment with string\n");
 
     // sprintf the value
     assert(fuse_sprintf(self, buf, sz, "%s", "hello, world") == 12);
@@ -99,7 +99,7 @@ int TEST_008(fuse_t *self)
     const int sz = 7;
     char buf[sz];
 
-    fuse_debugf("TEST_008 null string\n");
+    fuse_debugf(self,"TEST_008 null string\n");
 
     // sprintf the value
     assert(fuse_sprintf(self, buf, sz, "%s", NULL) == 6);
@@ -115,7 +115,7 @@ int TEST_009(fuse_t *self)
     char inbuf[sz];
     char outbuf[sz];
 
-    fuse_debugf("TEST_009 (uint8) string\n");
+    fuse_debugf(self,"TEST_009 (uint8) string\n");
 
     for (uint8_t i = 0; i <= UINT8_MAX; i++)
     {
@@ -136,7 +136,7 @@ int TEST_010(fuse_t *self)
     char inbuf[sz];
     char outbuf[sz];
 
-    fuse_debugf("TEST_010 (int8) string\n");
+    fuse_debugf(self,"TEST_010 (int8) string\n");
 
     for (int8_t i = INT8_MIN; i <= INT8_MAX; i++)
     {
@@ -157,7 +157,7 @@ int TEST_011(fuse_t *self)
     char inbuf[sz];
     char outbuf[sz];
 
-    fuse_debugf("TEST_011 (int16) string\n");
+    fuse_debugf(self,"TEST_011 (int16) string\n");
 
     for (int16_t i = INT16_MIN; i <= INT16_MAX; i++)
     {
@@ -178,7 +178,7 @@ int TEST_012(fuse_t *self)
     char inbuf[sz];
     char outbuf[sz];
 
-    fuse_debugf("TEST_012 (int32) string\n");
+    fuse_debugf(self,"TEST_012 (int32) string\n");
 
     for (int i = 0; i < 1000; i++)
     {
@@ -199,7 +199,7 @@ int TEST_013(fuse_t *self)
     char inbuf[sz];
     char outbuf[sz];
 
-    fuse_debugf("TEST_013 (int64) string\n");
+    fuse_debugf(self,"TEST_013 (int64) string\n");
 
     for (int i = 0; i < 1000; i++)
     {
@@ -220,7 +220,7 @@ int TEST_014(fuse_t *self)
     char inbuf[sz];
     char outbuf[sz];
 
-    fuse_debugf("TEST_014 (uint16) string\n");
+    fuse_debugf(self,"TEST_014 (uint16) string\n");
 
     for (int i = 0; i < 1000; i++)
     {
@@ -240,7 +240,7 @@ int TEST_015(fuse_t *self)
     char inbuf[sz];
     char outbuf[sz];
 
-    fuse_debugf("TEST_015 (uint16) hex string\n");
+    fuse_debugf(self,"TEST_015 (uint16) hex string\n");
 
     for (int i = 0; i < 1000; i++)
     {
@@ -260,7 +260,7 @@ int TEST_016(fuse_t *self)
     char inbuf[sz];
     char outbuf[sz];
 
-    fuse_debugf("TEST_016 (uint32) uppercase hex string\n");
+    fuse_debugf(self,"TEST_016 (uint32) uppercase hex string\n");
 
     for (int i = 0; i < 1000; i++)
     {
@@ -280,7 +280,7 @@ int TEST_017(fuse_t *self)
     char inbuf[sz];
     char outbuf[sz];
 
-    fuse_debugf("TEST_017 (uint64) string\n");
+    fuse_debugf(self,"TEST_017 (uint64) string\n");
 
     for (int i = 0; i < 1000; i++)
     {
@@ -300,14 +300,14 @@ int TEST_018(fuse_t *self)
     char inbuf[sz];
     char outbuf[sz];
 
-    fuse_debugf("TEST_018 ptr\n");
+    fuse_debugf(self,"TEST_018 ptr\n");
 
     for (uintptr_t p = 0; p < 1000; p++)
     {
         assert(fuse_sprintf(self, inbuf, sz, "%p", (void *)p) != 0);
         assert(snprintf(outbuf, sz, "%p", (void *)p) != 0);
-        fuse_debugf("  inbuf: %s\n", inbuf);
-        fuse_debugf("  outbuf: %s\n", outbuf);
+        fuse_debugf(self,"  inbuf: %s\n", inbuf);
+        fuse_debugf(self,"  outbuf: %s\n", outbuf);
         //assert_cstr_eq(outbuf, inbuf);
     }
 
@@ -317,7 +317,7 @@ int TEST_018(fuse_t *self)
 
 int TEST_019(fuse_t *self)
 {
-    fuse_debugf("TEST_019 stdout\n");
+    fuse_debugf(self,"TEST_019 stdout\n");
 
     for (size_t p = 0; p < 100; p++)
     {

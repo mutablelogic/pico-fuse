@@ -3,7 +3,7 @@
 
 int TEST_001(fuse_t *self)
 {
-    fuse_debugf("TEST_001 ftostr float\n");
+    fuse_debugf(self, "TEST_001 ftostr float\n");
 
     const int sz = 20;
     char buf[sz];
@@ -11,7 +11,7 @@ int TEST_001(fuse_t *self)
     {
         float v = (float)i / 10.0;
         size_t n = ftostr(buf, sz, v);
-        fuse_debugf("  n=%u value=%.1f buf[%u]=%s\n", n, v, sz, buf);
+        fuse_debugf(self, "  n=%u value=%f buf[%u]=%s\n", n, v, sz, buf);
         assert(n > 0);
     }
 
