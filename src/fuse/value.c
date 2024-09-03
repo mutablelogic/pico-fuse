@@ -36,32 +36,33 @@ fuse_value_t *fuse_new_value_ex(fuse_t *self, const uint16_t magic, const void *
 
 /** @brief Retain the value and return it.
  */
-fuse_value_t *fuse_retain(fuse_t *self, fuse_value_t *value)
+fuse_value_t *fuse_retain(fuse_t *self, void *value)
 {
     assert(self);
-    assert(value == NULL || fuse_allocator_magic(self->allocator, value) < FUSE_MAGIC_COUNT);
+    assert(value == NULL || fuse_allocator_magic(self->allocator, (fuse_value_t *)value) < FUSE_MAGIC_COUNT);
 
     // Retain value
     if (value != NULL)
     {
-        fuse_allocator_retain(self->allocator, value);
+        fuse_allocator_retain(self->allocator, (fuse_value_t *)value);
     }
 
     // Return value
-    return value;
+    return (fuse_value_t *)value;
 }
 
 /** @brief Release a value and destroy it if the reference count reaches 0
  */
-void fuse_release(fuse_t *self, fuse_value_t *value)
+void fuse_release(fuse_t *self, void *value)
 {
     assert(self);
-    assert(value == NULL || fuse_allocator_magic(self->allocator, value) < FUSE_MAGIC_COUNT);
+    assert(value == NULL || fuse_allocator_magic(self->allocator, (fuse_value_t *)value) < FUSE_MAGIC_COUNT);
 
     // Decrement the reference count
     if (value != NULL)
     {
-        if(fuse_allocator_release(self->allocator, value)) {
+        if (fuse_allocator_release(self->allocator, (fuse_value_t *)value))
+        {
             // Indicate we should drain the memory pool
             self->drain = true;
         }

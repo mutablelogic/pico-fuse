@@ -14,7 +14,7 @@
 #include "number.h"
 #include "null.h"
 #include "printf.h"
-#include "string.h"
+#include "str.h"
 #include "timer.h"
 
 ///////////////////////////////////////////////////////////////////////////////

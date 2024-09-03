@@ -19,7 +19,7 @@ add_library(${NAME} STATIC
     random_pico.c
     random_posix.c
     sleep_posix.c
-    string.c
+    str.c
     strtostr.c
     timer_darwin.c
     timer_linux.c

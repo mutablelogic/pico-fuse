@@ -21,7 +21,7 @@ typedef struct fuse_application fuse_t;
 #include "printf.h"
 #include "random.h"
 #include "sleep.h"
-#include "string.h"
+#include "str.h"
 #include "timer.h"
 #include "value.h"
 

@@ -1,4 +1,4 @@
-/** @file string.h
+/** @file str.h
  *  @brief String storage and manipulation
  *
  *  This file contains the function prototypes for working with UTF-8 strings
