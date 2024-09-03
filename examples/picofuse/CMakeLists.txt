@@ -1,11 +1,11 @@
 
 ##############################################################################
 
-set(NAME "eg_helloworld")
+set(NAME "gpio_in")
 
 add_executable(${NAME}
     common/main.c
-    helloworld/run.c
+    gpio_in/run.c
 )
 target_include_directories(${NAME} PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/../../include

@@ -133,7 +133,8 @@ static void fuse_gpio_setfunc(uint8_t pin, fuse_gpio_func_t func)
         gpio_set_function(pin, GPIO_FUNC_SPI);
         break;
     case FUSE_GPIO_ADC:
-        fuse_adc_new(pin);
+        // TODO
+        //fuse_adc_new(pin);
         break;
     case FUSE_GPIO_I2C:
         gpio_set_function(pin, FUSE_GPIO_I2C);
