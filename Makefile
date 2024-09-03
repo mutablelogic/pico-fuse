@@ -20,11 +20,11 @@ test: config
 examples: config
 	@make -C ${BUILD_DIR} all examples
 
-config: dependencies mkdir
+config: dependencies mkdir submodule
 	@echo cmake config
 	@${CMAKE} -B ${BUILD_DIR} -DPICO_BOARD=${PICO_BOARD}
 
-picotool: dependencies mkdir 
+picotool: dependencies mkdir submodule
 	@echo make picotool
 	@PICO_SDK_PATH=../../../lib/pico-sdk ${CMAKE} -S lib/picotool -B ${BUILD_DIR}/lib/picotool
 	@make -C ${BUILD_DIR}/lib/picotool

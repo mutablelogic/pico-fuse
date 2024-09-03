@@ -12,6 +12,8 @@ struct mutex_context
     mutex_t mutex;
 };
 
+static bool fuse_mutex_init(fuse_t *self, fuse_value_t *value, const void *user_data);
+
 ///////////////////////////////////////////////////////////////////////////////
 // LIFECYCLE
 

@@ -44,8 +44,7 @@ On Mac with homebrew, the following packages need installed:
 
 ```bash
 brew install make cmake libusb git
-brew tap ArmMbed/homebrew-formulae
-brew install arm-none-eabi-gcc
+brew install --cask gcc-arm-embedded
 ```
 
 If you haven't done so already, [create an ssh key](https://www.digitalocean.com/community/tutorials/how-to-create-ssh-keys-with-openssh-on-macos-or-linux)
