@@ -2,6 +2,7 @@
 
 void TEST_001_callback(fuse_t *self, fuse_event_t *evt, void *user_data)
 {
+    // Callback when the timer matures
     assert(self);
     assert(evt);
 
@@ -12,6 +13,7 @@ void TEST_001_callback(fuse_t *self, fuse_event_t *evt, void *user_data)
     fuse_printf(self," Iter: %d\n", i++);
     if (i == 5)
     {
+        // TODO: release the event source, or maybe cancel the timer
         fuse_exit(self, 0);
     }
 }
