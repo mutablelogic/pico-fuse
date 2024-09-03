@@ -7,16 +7,6 @@
 #define PICOFUSE_H
 
 #include <fuse/fuse.h>
-#include <picofuse/adc.h>
-#include <picofuse/gpio.h>
-#include <picofuse/led.h>
-#include <picofuse/main.h>
-#include <picofuse/mqtt.h>
-#include <picofuse/serial.h>
-#include <picofuse/stdio.h>
-#include <picofuse/wifi.h>
-
-extern fuse_device_t fuse_wifi; ///< WiFi device
-extern fuse_device_t fuse_mqtt; ///< MQTT device
+#include "gpio.h"
 
 #endif
