@@ -1,60 +1,69 @@
-#include <string.h>
 #include <fuse/fuse.h>
-
-// Private includes
-#include "value.h"
+#include "alloc.h"
+#include "fuse.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // PUBLIC METHODS
 
-inline fuse_value_t *fuse_new_null(fuse_t *fuse)
+/** @brief Register value type
+ *
+ * @param self The fuse instance
+ * @param desc The value descriptor
+ */
+void fuse_register_value_type(fuse_t *self, uint16_t magic, fuse_value_desc_t desc)
 {
-    assert(fuse);
-    return fuse_new_ptr(fuse, NULL);
+    assert(self);
+    assert(magic < FUSE_MAGIC_COUNT);
+    assert(desc.name);
+
+    // We can only register a value descriptor once
+    assert(self->desc[magic].name == 0);
+
+    // Register the value descriptor
+    self->desc[magic] = desc;
 }
 
-fuse_value_t *fuse_new_ptr(fuse_t *fuse, void *ptr) {
-    assert(fuse);
+/** @brief Create a new autoreleased value
+ */
+fuse_value_t *fuse_new_value_ex(fuse_t *self, const uint16_t magic, const void *user_data, const char *file, const int line)
+{
+    assert(self);
+    assert(magic < FUSE_MAGIC_COUNT);
 
-    // Allocate memory for the value
-    fuse_value_t *value = fuse_alloc(fuse, sizeof(fuse_value_t));
-    if (value == NULL)
+    // Allocate memory for the value - retain count is zero
+    return fuse_alloc_ex(self, magic, user_data, file, line);
+}
+
+/** @brief Retain the value and return it.
+ */
+fuse_value_t *fuse_retain(fuse_t *self, fuse_value_t *value)
+{
+    assert(self);
+    assert(value == NULL || fuse_allocator_magic(self->allocator, value) < FUSE_MAGIC_COUNT);
+
+    // Retain value
+    if (value != NULL)
     {
-        return NULL;
+        fuse_allocator_retain(self->allocator, value);
     }
 
-    // Zero all data structures
-    memset(value, 0, sizeof(fuse_value_t));
-
-    // Set the pointer
-    value->ptr = ptr;
-
-    // Return the value
+    // Return value
     return value;
 }
 
-inline bool fuse_equal_null(fuse_value_t *value)
+/** @brief Release a value and destroy it if the reference count reaches 0
+ */
+void fuse_release(fuse_t *self, fuse_value_t *value)
 {
-    assert(value);
-    return value->ptr == NULL;
-}
+    assert(self);
+    assert(value == NULL || fuse_allocator_magic(self->allocator, value) < FUSE_MAGIC_COUNT);
 
-inline void* fuse_ptr(fuse_value_t *value)
-{
-    assert(value);
-    return value->ptr;
-}
-
-const char *fuse_jsonstring(fuse_value_t *value)
-{
-    assert(value);
-    // Simple case where value is NULL
-    if(value->ptr == NULL)
+    // Decrement the reference count
+    if (value != NULL)
     {
-        return "null";
+        if(fuse_allocator_release(self->allocator, value)) {
+            // Indicate we should drain the memory pool
+            self->drain = true;
+        }
     }
-
-    // Other use-cases here
-    assert(false);
-    return NULL;
 }

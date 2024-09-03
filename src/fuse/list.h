@@ -1,18 +1,19 @@
 /** @file list.h
- *  @brief Private function prototypes and structure definitions for linked lists
+ *  @brief Private function prototypes for lists
  */
 #ifndef FUSE_PRIVATE_LIST_H
 #define FUSE_PRIVATE_LIST_H
 
-#include "value.h"
-
-/* @brief Represents an instance of a fuse linked list
+/** @brief Represents a linked list
  */
-struct fuse_list_instance
+struct fuse_list
 {
-    struct fuse_value_instance *head; ///< The first node in the list, or NULL if the list is empty
-    struct fuse_value_instance *tail;  ///< The last node in the list, or NULL if the list is empty
-    size_t count;                 ///< The number of nodes in the list
+    size_t count;           ///< The number of elements in the list
 };
+
+
+/** @brief Register type for list values
+ */
+void fuse_register_value_list(fuse_t *self);
 
 #endif

@@ -3,16 +3,26 @@
  */
 #ifndef FUSE_PRIVATE_FUSE_H
 #define FUSE_PRIVATE_FUSE_H
-
+#include <stdbool.h>
 #include <fuse/fuse.h>
+#include "event.h"
+#include "list.h"
+
+///////////////////////////////////////////////////////////////////////////////
+// TYPES
 
 /* @brief Represents an instance of a fuse application
  */
-struct fuse_instance
+struct fuse_application
 {
-    fuse_pool_t *pool;                 ///< The memory pool for the application
-    fuse_flag_t flags;                 ///< The flags which affect the behaviour of the application
-    int exit_code;                     ///< Exit code of the application
+    struct fuse_allocator *allocator;              ///< The allocator for the application
+    fuse_value_desc_t desc[FUSE_MAGIC_COUNT]; ///< Value descriptors
+    int exit_code;                                 ///< Exit code of the application
+    struct fuse_list* core0; ///< Core 0 event queue
+    struct event_callbacks callbacks0[FUSE_EVENT_COUNT]; ///< Core 0 callbacks
+    struct fuse_list* core1; ///< Core 1 event queue
+    struct event_callbacks callbacks1[FUSE_EVENT_COUNT]; ///< Core 1 callbacks
+    bool drain;                         ///< Drain the memory pool
 };
 
 #endif

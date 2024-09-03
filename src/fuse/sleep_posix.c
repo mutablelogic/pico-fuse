@@ -1,12 +1,10 @@
-
-///////////////////////////////////////////////////////////////////////////////
-// PUBLIC METHODS
-
-#ifdef TARGET_POSIX
-
+#if defined(TARGET_DARWIN) || defined(TARGET_LINUX)
 #include <stdint.h>
 #include <time.h>
 #include <errno.h>
+
+///////////////////////////////////////////////////////////////////////////////
+// PUBLIC METHODS
 
 /*
  * Pause for a certain number of milliseconds

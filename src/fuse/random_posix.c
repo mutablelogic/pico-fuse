@@ -1,16 +1,11 @@
+#if defined(TARGET_DARWIN) || defined(TARGET_LINUX)
 #include <limits.h>
 #include <time.h>
 #include <fuse/fuse.h>
-
-// Private includes
 #include "random.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // PUBLIC METHODS
-
-#ifdef TARGET_POSIX
-#include <stdint.h>
-#include "random.h"
 
 // Seed
 static struct fuse_random_state seed = {0};

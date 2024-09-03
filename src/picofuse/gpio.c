@@ -1,32 +1,119 @@
-#include <fuse/fuse.h>
 #include <picofuse/picofuse.h>
-
-#include <pico/stdlib.h>
 #include <hardware/gpio.h>
-#include <hardware/adc.h>
+#include "gpio.h"
+
+///////////////////////////////////////////////////////////////////////////////
+// DECLARATIONS
+
+static void fuse_gpio_setfunc(uint8_t pin, fuse_gpio_func_t func);
+
+///////////////////////////////////////////////////////////////////////////////
+// GLOBALS
+
+static bool fuse_gpio_init[NUM_BANK0_GPIOS];
+
+///////////////////////////////////////////////////////////////////////////////
+// LIFECYCLE
+
+/** @brief Register value type for gpio
+ */
+void fuse_register_value_gpio(fuse_t *self)
+{
+    assert(self);
+
+    // Register mutex type
+    fuse_value_desc_t fuse_gpio_type = {
+        .size = sizeof(struct gpio_context),
+        .name = "GPIO"
+    };
+    fuse_register_value_type(self, FUSE_MAGIC_GPIO, fuse_gpio_type);
+
+    // Reset the GPIO pins
+    for(size_t i = 0; i < NUM_BANK0_GPIOS; i++) {
+        fuse_gpio_init[i] = false;
+    }
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// PUBLIC METHODS
+
+/** @brief Initialize a GPIO pin with a function
+ *
+ *  @param pin The GPIO pin number
+ *  @param func The function of the GPIO pin
+ */
+fuse_gpio_t *fuse_new_gpio_ex(fuse_t *self, uint8_t pin, fuse_gpio_func_t func, const char *file, const int line) {
+    assert(self);
+    assert(pin < fuse_gpio_count());
+    assert(func < FUSE_GPIO_FUNC_COUNT);
+
+    // If pin alreadt initialized, return
+    if(fuse_gpio_init[pin]) {
+        return NULL;
+    }
+
+    // Create a new GPIO context
+    fuse_gpio_t *ctx = (fuse_gpio_t *)fuse_new_value_ex(self, FUSE_MAGIC_GPIO, 0, file, line);
+    if(ctx == NULL) {
+        return NULL;
+    }
+
+    // Set the GPIO pin
+    ctx->pin = pin;
+
+    // Set the GPIO function
+    fuse_gpio_setfunc(pin, func);
+
+    // Indicate the GPIO pin is initialized
+    fuse_gpio_init[pin] = true;
+
+    // Return the GPIO context
+    return ctx;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // PUBLIC METHODS
 
+/* @brief Return the GPIO cound (GPIO[0]...G~PIO[count-1]) 
+ */
 inline uint8_t fuse_gpio_count()
 {
-#if TARGET == pico
     return NUM_BANK0_GPIOS;
-#else
-    return 0;
-#endif
 }
 
-void fuse_gpio_new(uint8_t pin, picofuse_func_t func)
+/** @brief Set the GPIO pin to be low or high
+ */
+inline void fuse_gpio_set(fuse_gpio_t *pin, bool value) {
+    assert(pin);
+    assert(pin->pin < fuse_gpio_count());
+    gpio_put(pin->pin, value);
+}
+
+/** @brief Get the binary value of a GPIO pin
+ */
+inline bool fuse_gpio_get(fuse_gpio_t *pin, bool value) {
+    assert(pin);
+    assert(pin->pin < fuse_gpio_count());
+    return gpio_get(pin->pin);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// PRIVATE METHODS
+
+static void fuse_gpio_setfunc(uint8_t pin, fuse_gpio_func_t func)
 {
     assert(pin < fuse_gpio_count());
+    assert(func < FUSE_GPIO_FUNC_COUNT);
 
     // Set GPIO pin to SIO
     gpio_init(pin);
 
+<<<<<<< HEAD
+=======
     // If true, adc_init has been called
     static bool adc = false;
 
+>>>>>>> 2278aef4da32cc3a813ebe2a7fc33b28a0c0b093
     // Set function based on function
     switch (func)
     {
@@ -52,7 +139,8 @@ void fuse_gpio_new(uint8_t pin, picofuse_func_t func)
         gpio_set_function(pin, GPIO_FUNC_SPI);
         break;
     case FUSE_GPIO_ADC:
-        fuse_adc_new(pin);
+        // TODO
+        //fuse_adc_new(pin);
         break;
     case FUSE_GPIO_I2C:
         gpio_set_function(pin, FUSE_GPIO_I2C);
@@ -65,6 +153,7 @@ void fuse_gpio_new(uint8_t pin, picofuse_func_t func)
     }
 }
 
+/*
 picofuse_func_t fuse_gpio_func(uint8_t pin) {
     assert(pin < fuse_gpio_count());
 
@@ -88,19 +177,7 @@ void fuse_gpio_destroy(uint8_t pin)
     gpio_deinit(pin);
 }
 
-inline void fuse_gpio_set(uint8_t pin, bool value)
-{
-    assert(pin < fuse_gpio_count());
-    gpio_put(pin, value);
-}
-
-inline bool fuse_gpio_get(uint8_t pin)
-{
-    assert(pin < fuse_gpio_count());
-    return gpio_get(pin);
-}
-
 void fuse_gpio_event_enable(fuse_t *fuse, uint8_t pin, bool rising, bool falling) {
 
 }
-
+*/

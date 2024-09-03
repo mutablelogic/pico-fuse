@@ -15,6 +15,6 @@ void fuse_stdio_init()
 
     // Output to stdio
 #ifdef DEBUG
-    fuse_debugf(NULL, "picofuse_stdio_init\n");
+    fuse_debugf("picofuse_stdio_init\n");
 #endif
 }
