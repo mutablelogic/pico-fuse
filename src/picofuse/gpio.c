@@ -1,16 +1,38 @@
 #include <picofuse/picofuse.h>
 #include <hardware/gpio.h>
+#include <stdio.h>
 #include "gpio.h"
+#include "fuse.h"
+#include "printf.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // DECLARATIONS
 
+/** @brief Set the function of a GPIO pin
+ */
 static void fuse_gpio_setfunc(uint8_t pin, fuse_gpio_func_t func);
+
+/** @brief Callback for interrupt
+ */
+static void fuse_gpio_callback(uint pin, uint32_t events);
+
+/** @brief Initialize a GPIO pin and set the interrupt
+ */
+static bool fuse_gpio_init(fuse_t *self, fuse_value_t *value, const void *user_data);
+
+/** @brief Disable the interrupt on a GPIO pin
+ */
+static void fuse_gpio_destroy(fuse_t *self, fuse_value_t *value);
+
+/** @brief Append a string representation of a GPIO pin
+ */
+static size_t fuse_gpio_cstr(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v);
 
 ///////////////////////////////////////////////////////////////////////////////
 // GLOBALS
 
-static bool fuse_gpio_init[NUM_BANK0_GPIOS];
+static fuse_gpio_t * fuse_gpio_pin[NUM_BANK0_GPIOS];
+static fuse_t* fuse_gpio_instance = NULL;
 
 ///////////////////////////////////////////////////////////////////////////////
 // LIFECYCLE
@@ -21,17 +43,24 @@ void fuse_register_value_gpio(fuse_t *self)
 {
     assert(self);
 
-    // Register mutex type
+    // Register gpio type
     fuse_value_desc_t fuse_gpio_type = {
         .size = sizeof(struct gpio_context),
-        .name = "GPIO"
+        .name = "GPIO",
+        .init = fuse_gpio_init,
+        .destroy = fuse_gpio_destroy,
+        .cstr = fuse_gpio_cstr,
+        .qstr = fuse_gpio_cstr // TODO: we need to implement a qstr function
     };
     fuse_register_value_type(self, FUSE_MAGIC_GPIO, fuse_gpio_type);
 
     // Reset the GPIO pins
     for(size_t i = 0; i < NUM_BANK0_GPIOS; i++) {
-        fuse_gpio_init[i] = false;
+        fuse_gpio_pin[i] = NULL;
     }
+
+    // Set the callback instance
+    fuse_gpio_instance = self;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -47,25 +76,14 @@ fuse_gpio_t *fuse_new_gpio_ex(fuse_t *self, uint8_t pin, fuse_gpio_func_t func, 
     assert(pin < fuse_gpio_count());
     assert(func < FUSE_GPIO_FUNC_COUNT);
 
-    // If pin alreadt initialized, return
-    if(fuse_gpio_init[pin]) {
-        return NULL;
-    }
-
     // Create a new GPIO context
-    fuse_gpio_t *ctx = (fuse_gpio_t *)fuse_new_value_ex(self, FUSE_MAGIC_GPIO, 0, file, line);
+    fuse_gpio_t *ctx = (fuse_gpio_t *)fuse_new_value_ex(self, FUSE_MAGIC_GPIO, (void* )(uintptr_t)pin, file, line);
     if(ctx == NULL) {
         return NULL;
     }
 
-    // Set the GPIO pin
-    ctx->pin = pin;
-
     // Set the GPIO function
     fuse_gpio_setfunc(pin, func);
-
-    // Indicate the GPIO pin is initialized
-    fuse_gpio_init[pin] = true;
 
     // Return the GPIO context
     return ctx;
@@ -74,7 +92,7 @@ fuse_gpio_t *fuse_new_gpio_ex(fuse_t *self, uint8_t pin, fuse_gpio_func_t func, 
 ///////////////////////////////////////////////////////////////////////////////
 // PUBLIC METHODS
 
-/* @brief Return the GPIO cound (GPIO[0]...G~PIO[count-1]) 
+/** @brief Return the GPIO cound (GPIO[0]...GPIO[count-1]) 
  */
 inline uint8_t fuse_gpio_count()
 {
@@ -100,6 +118,52 @@ inline bool fuse_gpio_get(fuse_gpio_t *pin, bool value) {
 ///////////////////////////////////////////////////////////////////////////////
 // PRIVATE METHODS
 
+
+/** @brief Initialize a GPIO pin and set the interrupt
+ */
+static bool fuse_gpio_init(fuse_t *self, fuse_value_t *value, const void *user_data) {
+    assert(self);
+    assert(value);
+    assert(user_data);
+
+    // If pin already initialized, return
+    fuse_gpio_t * ctx = (fuse_gpio_t * )value;
+    size_t pin = (size_t)user_data;
+    if(fuse_gpio_pin[pin] != NULL) {
+        return false;
+    } else {
+        fuse_gpio_pin[pin] = ctx;
+        ctx->pin = pin;
+    }
+
+    // Set up the interrupt for RISE and FALL events
+    gpio_set_irq_enabled_with_callback(pin, GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL, true, &fuse_gpio_callback);
+}
+
+/** @brief Disable the interrupt on a GPIO pin
+ */
+static void fuse_gpio_destroy(fuse_t *self, fuse_value_t *value) {
+    assert(self);
+    assert(value);
+
+    fuse_debugf(self, "GPIO: Destroying %v\n",value);
+
+    fuse_gpio_t * ctx = (fuse_gpio_t * )value;
+    assert(ctx->pin < fuse_gpio_count());
+
+    // TODO
+    // If the pin is set to ADC, then disable it
+    //if(fuse_adc_channel(pin) != FUSE_ADC_INVALID) {
+    //    fuse_adc_destroy(pin);
+    //}
+
+    // Cancel the interrupt
+    gpio_set_irq_enabled_with_callback(ctx->pin, 0xFF, false, NULL);
+    gpio_deinit(ctx->pin);
+}
+
+/** @brief Set the function of a GPIO pin
+ */
 static void fuse_gpio_setfunc(uint8_t pin, fuse_gpio_func_t func)
 {
     assert(pin < fuse_gpio_count());
@@ -108,21 +172,12 @@ static void fuse_gpio_setfunc(uint8_t pin, fuse_gpio_func_t func)
     // Set GPIO pin to SIO
     gpio_init(pin);
 
-<<<<<<< HEAD
-=======
-    // If true, adc_init has been called
-    static bool adc = false;
-
->>>>>>> 2278aef4da32cc3a813ebe2a7fc33b28a0c0b093
     // Set function based on function
     switch (func)
     {
     case FUSE_GPIO_IN:
         gpio_set_dir(pin, GPIO_IN);
         gpio_set_pulls(pin, false, false);
-        break;
-    case FUSE_GPIO_OUT:
-        gpio_set_dir(pin, GPIO_OUT);
         break;
     case FUSE_GPIO_PULLDN:
         gpio_set_dir(pin, GPIO_IN);
@@ -131,6 +186,9 @@ static void fuse_gpio_setfunc(uint8_t pin, fuse_gpio_func_t func)
     case FUSE_GPIO_PULLUP:
         gpio_set_dir(pin, GPIO_IN);
         gpio_set_pulls(pin, true, false);
+        break;
+    case FUSE_GPIO_OUT:
+        gpio_set_dir(pin, GPIO_OUT);
         break;
     case FUSE_GPIO_PWM:
         gpio_set_function(pin, GPIO_FUNC_PWM);
@@ -153,31 +211,26 @@ static void fuse_gpio_setfunc(uint8_t pin, fuse_gpio_func_t func)
     }
 }
 
-/*
-picofuse_func_t fuse_gpio_func(uint8_t pin) {
-    assert(pin < fuse_gpio_count());
+/** @brief Append a string representation of a GPIO pin
+ */
+static size_t fuse_gpio_cstr(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v) {
+    assert(self);
+    assert(buf == NULL || sz > 0);
+    assert(v);
 
-    // Get the GPIO function
-    uint gpio_func = gpio_get_function(pin);
-    switch(gpio_func) {
-        default:
-            assert(false);
+    i = cstrtostr_internal(buf, sz, i, self->desc[FUSE_MAGIC_GPIO].name);
+    i = utostr_internal(buf, sz, i, ((fuse_gpio_t *)v)->pin, 0);
+
+    return i;
+}
+
+/** @brief GPIO interrupt callback - place event on the queues
+ */
+static void fuse_gpio_callback(uint pin, uint32_t events) {
+    fuse_t* self = fuse_gpio_instance;
+    fuse_gpio_t* source = fuse_gpio_pin[pin];
+    if(self && pin) {
+        fuse_event_t* evt = fuse_new_event(self, (fuse_value_t* )source, FUSE_EVENT_GPIO, (void* )events);
+        assert(evt);
     }
 }
-
-void fuse_gpio_destroy(uint8_t pin)
-{
-    assert(pin < fuse_gpio_count());
-
-    // If the pin is set to ADC, then disable it
-    if(fuse_adc_channel(pin) != FUSE_ADC_INVALID) {
-        fuse_adc_destroy(pin);
-    }
-
-    gpio_deinit(pin);
-}
-
-void fuse_gpio_event_enable(fuse_t *fuse, uint8_t pin, bool rising, bool falling) {
-
-}
-*/

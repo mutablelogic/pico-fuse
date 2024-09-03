@@ -13,7 +13,6 @@
 typedef struct fuse_application fuse_t;
 
 #include "assert.h"
-#include "device.h"
 #include "event.h"
 #include "list.h"
 #include "magic.h"
@@ -22,6 +21,7 @@ typedef struct fuse_application fuse_t;
 #include "printf.h"
 #include "random.h"
 #include "sleep.h"
+#include "str.h"
 #include "timer.h"
 #include "value.h"
 

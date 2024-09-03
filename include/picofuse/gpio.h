@@ -27,7 +27,8 @@ typedef enum
 #define fuse_new_gpio(self, pin, func) \
     ((fuse_gpio_t *)fuse_new_gpio_ex((self), (pin), (func), __FILE__, __LINE__))
 #else
-#define fuse_new_gpio((self, pin, func)((fuse_gpio_t *)fuse_new_gpio_ex((self), (pin), (func), 0, 0))
+#define fuse_new_gpio(self, pin, func) \
+    ((fuse_gpio_t *)fuse_new_gpio_ex((self), (pin), (func), 0, 0))
 #endif
 
 /** @brief An opaque event object

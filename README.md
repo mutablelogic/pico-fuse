@@ -76,8 +76,6 @@ Whenever you target a different board, use `make clean` before `make picotool` a
 
 ## References
 
-  * Pico SDK
-    * Repository https://github.com/raspberrypi/pico-sdk
-    * Documentation (in PDF) https://datasheets.raspberrypi.org/pico/raspberry-pi-pico-c-sdk.pdf
-
-
+* Pico SDK
+  * Repository https://github.com/raspberrypi/pico-sdk
+  * Documentation (in PDF) https://datasheets.raspberrypi.org/pico/raspberry-pi-pico-c-sdk.pdf

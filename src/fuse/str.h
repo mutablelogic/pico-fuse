@@ -4,6 +4,8 @@
 #ifndef FUSE_PRIVATE_STRING_H
 #define FUSE_PRIVATE_STRING_H
 
+#include "fuse.h"
+
 /** @brief Register type for string values
  */
 void fuse_register_value_string(fuse_t *self);

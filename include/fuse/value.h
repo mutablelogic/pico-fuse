@@ -8,6 +8,8 @@
 
 #include "fuse.h"
 #include <stdint.h>
+#include <stddef.h>
+#include <stdbool.h>
 
 /** @brief The representation of a fuse value
  */
@@ -68,10 +70,10 @@ fuse_value_t *fuse_new_value_ex(fuse_t *self, const uint16_t magic, const void *
  * This method increments the reference count of the value, to take ownership of the value.
  *
  * @param self The fuse instance
- * @param value The value to retain
+ * @param value The value to retain, which must be a fuse_value_t*
  * @return The retained value, or NULL if the value could not be retained
  */
-fuse_value_t *fuse_retain(fuse_t *self, fuse_value_t *value);
+fuse_value_t *fuse_retain(fuse_t *self, void *value);
 
 /** @brief Release a value and destroy it if the reference count reaches 0
  *
@@ -79,8 +81,8 @@ fuse_value_t *fuse_retain(fuse_t *self, fuse_value_t *value);
  * freed.
  *
  * @param self The fuse instance
- * @param ptr The value to release
+ * @param ptr The value to release, which must be a fuse_value_t*
  */
-void fuse_release(fuse_t *self, fuse_value_t *value);
+void fuse_release(fuse_t *self, void *value);
 
 #endif /* FUSE_VALUE_H */

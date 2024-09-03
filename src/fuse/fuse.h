@@ -3,9 +3,14 @@
  */
 #ifndef FUSE_PRIVATE_FUSE_H
 #define FUSE_PRIVATE_FUSE_H
+
 #include <stdbool.h>
 #include <fuse/fuse.h>
+#include <fuse/magic.h>
+#include <fuse/event.h>
+#include "alloc.h"
 #include "event.h"
+#include "fuse.h"
 #include "list.h"
 
 ///////////////////////////////////////////////////////////////////////////////

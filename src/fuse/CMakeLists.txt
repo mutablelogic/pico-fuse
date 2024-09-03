@@ -4,7 +4,6 @@ add_library(${NAME} STATIC
     alloc_builtin.c
     base64.c
     data.c
-    device.c
     event.c
     ftostr.c
     fuse.c
@@ -20,7 +19,7 @@ add_library(${NAME} STATIC
     random_pico.c
     random_posix.c
     sleep_posix.c
-    string.c
+    str.c
     strtostr.c
     timer_darwin.c
     timer_linux.c

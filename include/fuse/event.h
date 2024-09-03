@@ -6,6 +6,8 @@
 #ifndef FUSE_EVENT_H
 #define FUSE_EVENT_H
 
+#include "value.h"
+
 // Define the event types
 #define FUSE_EVENT_NULL 0x00  ///< NULL event
 #define FUSE_EVENT_TIMER 0x01 ///< Timer event

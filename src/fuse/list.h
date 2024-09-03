@@ -4,6 +4,8 @@
 #ifndef FUSE_PRIVATE_LIST_H
 #define FUSE_PRIVATE_LIST_H
 
+#include <stddef.h>
+
 /** @brief Represents a linked list
  */
 struct fuse_list

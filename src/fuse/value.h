@@ -5,6 +5,7 @@
 #define FUSE_PRIVATE_VALUE_H
 
 #include <fuse/fuse.h>
+#include <stddef.h>
 
 /** @brief Represents a value
  *

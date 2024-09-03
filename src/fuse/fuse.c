@@ -14,7 +14,7 @@
 #include "number.h"
 #include "null.h"
 #include "printf.h"
-#include "string.h"
+#include "str.h"
 #include "timer.h"
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -293,7 +293,7 @@ static void fuse_runloop(fuse_t *self, uint8_t q)
     assert(q < 2);
 
     // Run the loop
-    fuse_debugf(self, "fuse_runloop: core %u (exit_code=%d)\n", q, self->exit_code);
+    fuse_debugf(self, "fuse_runloop: core %u: start\n", q);
     while (!self->exit_code)
     {
         // Pop event from the event queue
@@ -313,7 +313,7 @@ static void fuse_runloop(fuse_t *self, uint8_t q)
             drained = fuse_drain(self, 10);
             if (drained > 0)
             {
-                fuse_debugf(self, "fuse_runloop: drained %lu item(s)\n", drained);
+                fuse_debugf(self, "fuse_runloop: drained %u item(s)\n", drained);
             }
             else
             {

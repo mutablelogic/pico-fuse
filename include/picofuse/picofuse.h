@@ -9,4 +9,10 @@
 #include <fuse/fuse.h>
 #include "gpio.h"
 
+/* @brief Register picofuse types
+ *
+ * @param fuse The fuse application
+ */
+void picofuse_init(fuse_t *fuse);
+
 #endif
