@@ -34,6 +34,7 @@ struct fuse_application
     struct event_callbacks callbacks0[FUSE_EVENT_COUNT]; ///< Core 0 callbacks
     struct fuse_list* core1; ///< Core 1 event queue
     struct event_callbacks callbacks1[FUSE_EVENT_COUNT]; ///< Core 1 callbacks
+    bool drain;                         ///< Drain the memory pool
 };
 
 #endif

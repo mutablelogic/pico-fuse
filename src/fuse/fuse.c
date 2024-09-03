@@ -18,6 +18,11 @@
 #include "timer.h"
 
 ///////////////////////////////////////////////////////////////////////////////
+// DECLARATIONS
+
+static void fuse_runloop(fuse_t *self, uint8_t q);
+
+///////////////////////////////////////////////////////////////////////////////
 // PUBLIC METHODS
 
 fuse_t *fuse_new()
@@ -39,14 +44,14 @@ fuse_t *fuse_new()
     else
     {
         fuse->allocator = allocator;
-        fuse->exit_code = FUSE_EXIT_SUCCESS;
+        fuse->exit_code = 0;
     }
 
     // Retain the application so it isn't autoreleased
     fuse_allocator_retain(allocator, fuse);
 
     // Reset name fields
-    for(size_t i = 0; i < FUSE_MAGIC_COUNT; i++)
+    for (size_t i = 0; i < FUSE_MAGIC_COUNT; i++)
     {
         fuse->desc[i].name = 0;
     }
@@ -69,8 +74,8 @@ fuse_t *fuse_new()
     fuse_register_value_timer(fuse);
     fuse_register_value_list(fuse);
 
-    // Create the event queue for Core 0 
-    fuse->core0 = (struct fuse_list *)fuse_retain(fuse, (fuse_value_t* )fuse_new_list(fuse));
+    // Create the event queue for Core 0
+    fuse->core0 = (struct fuse_list *)fuse_retain(fuse, (fuse_value_t *)fuse_new_list(fuse));
     if (fuse->core0 == NULL)
     {
         fuse_allocator_free(allocator, fuse);
@@ -90,8 +95,8 @@ int fuse_destroy(fuse_t *fuse)
     assert(fuse);
 
     // Release event queues
-    fuse_release(fuse, (fuse_value_t* )fuse->core0);
-    fuse_release(fuse, (fuse_value_t* )fuse->core1);
+    fuse_release(fuse, (fuse_value_t *)fuse->core0);
+    fuse_release(fuse, (fuse_value_t *)fuse->core1);
 
     // Store the exit code
     int exit_code = fuse->exit_code;
@@ -118,7 +123,7 @@ int fuse_destroy(fuse_t *fuse)
             hdr = hdr->next;
             continue;
         }
-        
+
         // Print any memory leaks
         fuse_debugf(fuse, "LEAK: %p %s (%d bytes)", hdr->ptr, fuse->desc[hdr->magic].name, hdr->size);
         if (hdr->file != NULL)
@@ -268,16 +273,56 @@ void fuse_run(fuse_t *self, int (*callback)(fuse_t *))
         return;
     }
 
-    // Run the loop
-    fuse_debugf(self, "fuse_run: entering the run loop\n");
-    while (!self->exit_code)
-    {
-        sleep_ms(100);
-    }
+    // Run the loop until exit_code is set
+    fuse_runloop(self, 0);
 }
 
 inline void fuse_exit(fuse_t *self, int exit_code)
 {
     assert(self);
     self->exit_code = exit_code ? exit_code : FUSE_EXIT_SUCCESS;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// PRIVATE METHODS
+
+static void fuse_runloop(fuse_t *self, uint8_t q)
+{
+    assert(self);
+    assert(q < 2);
+
+    // Run the loop
+    fuse_debugf(self, "fuse_runloop: core %u (exit_code=%d)\n", q, self->exit_code);
+    while (!self->exit_code)
+    {
+        // Pop event from the event queue
+        fuse_event_t *evt = fuse_next_event(self, q);
+        if (evt)
+        {
+            // Call the event callbacks
+            fuse_exec_event(self, q, evt);
+            continue;
+        }
+
+        // Drain up to 10 items on core 0
+        size_t drained = 0;
+        if (q == 0 && self->drain)
+        {
+            // TODO: Only drain occasionally
+            drained = fuse_drain(self, 10);
+            if (drained > 0)
+            {
+                fuse_debugf(self, "fuse_runloop: drained %lu item(s)\n", drained);
+            }
+            else
+            {
+                self->drain = false;
+            }
+        }
+        if (drained == 0)
+        {
+            sleep_ms(50);
+        }
+    }
+    fuse_debugf(self, "fuse_runloop: core %u: exited the run loop (exit_code=%d)\n", q, self->exit_code);
 }

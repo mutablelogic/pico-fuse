@@ -19,16 +19,11 @@ struct event_context
  */
 struct event_callbacks
 {
-    size_t count;
-    fuse_callback_t* callback;
+    fuse_callback_t callback[FUSE_EVENT_CALLBACK_COUNT];
 };
 
 /** @brief Register value type for events
  */
 void fuse_register_value_event(fuse_t *self);
-
-/** @brief Append a quoted string representation of an event
- */
-size_t fuse_qstr_event(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v);
 
 #endif

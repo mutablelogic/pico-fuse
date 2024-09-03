@@ -4,6 +4,18 @@
 #include "fuse.h"
 #include "printf.h"
 
+
+///////////////////////////////////////////////////////////////////////////////
+// DECLARATIONS
+
+/** @brief Return array of callbacks for an event type and core
+ */
+static struct event_callbacks* fuse_get_callbacks(fuse_t *self, uint8_t type, uint8_t q);
+
+/** @brief Append a quoted string representation of an event
+ */
+static size_t fuse_qstr_event(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v);
+
 ///////////////////////////////////////////////////////////////////////////////
 // LIFECYCLE
 
@@ -21,6 +33,12 @@ void fuse_register_value_event(fuse_t *self)
         .qstr = fuse_qstr_event,
     };
     fuse_register_value_type(self, FUSE_MAGIC_EVENT, fuse_event_type);
+
+    for(size_t i = 0; i < FUSE_EVENT_COUNT; i++)
+    {
+        self->callbacks0[i] = (struct event_callbacks){0};
+        self->callbacks1[i] = (struct event_callbacks){0};
+    }
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -94,31 +112,24 @@ bool fuse_register_callback(fuse_t *self, uint8_t type, uint8_t q, fuse_callback
     assert(callback);
 
     // Get the event callbacks
-    struct event_callbacks callbacks;
-    switch (q)
+    struct event_callbacks* callbacks = fuse_get_callbacks(self, type, q);
+    if (callbacks == NULL)
     {
-    case 0:
-        if (self->core0 == NULL)
-        {
-            return false;
-        }
-        callbacks = self->callbacks0[type];
-        break;
-    case 1:
-        if (self->core1 == NULL)
-        {
-            return false;
-        }
-        callbacks = self->callbacks1[type];
-        break;
-    default:
         return false;
     }
 
-    fuse_printf(self, "TODO: Registering callback for event %d on core %d\n", type, q);
+    // Find slot for callback and register it
+    for (size_t i = 0; i < FUSE_EVENT_CALLBACK_COUNT; i++)
+    {
+        if (callbacks->callback[i] == NULL)
+        {
+            callbacks->callback[i] = callback;
+            return true;
+        }
+    }
 
-    // Return success
-    return true;
+    // Return error - no slot available
+    return false;
 }
 
 /** @brief Execute callbacks for an event
@@ -130,36 +141,58 @@ void fuse_exec_event(fuse_t *self, uint8_t q, fuse_event_t *evt)
     assert(evt);
 
     // Get the event callbacks
-    struct event_callbacks callbacks;
-    switch (q)
+    struct event_callbacks* callbacks = fuse_get_callbacks(self, evt->type, q);
+    if (callbacks == NULL)
     {
-    case 0:
-        if (self->core0 == NULL)
-        {
-            return;
-        }
-        callbacks = self->callbacks0[evt->type];
-        break;
-    case 1:
-        if (self->core1 == NULL)
-        {
-            return;
-        }
-        callbacks = self->callbacks1[evt->type];
-        break;
-    default:
         return;
     }
 
-    fuse_printf(self, "TODO: Executing callbacks for event %d on core %d\n", evt->type, q);
+    // Run each callback in turn, until there are no more
+    for (size_t i = 0; i < FUSE_EVENT_CALLBACK_COUNT; i++)
+    {
+        fuse_callback_t callback = callbacks->callback[i];
+        if (callback) {
+            callback(self, evt, evt->user_data);
+        } else {
+            break;
+        }
+    }
 }
 
 //////////////////////////////////////////////////////////////////////////////
 // PRIVATE METHODS
 
+/** @brief Return callbacks for an event type and core
+ */
+static struct event_callbacks* fuse_get_callbacks(fuse_t *self, uint8_t type, uint8_t q)
+{
+    assert(self);
+    assert(type < FUSE_EVENT_COUNT);
+    assert(q < 2);
+
+    // Get the event callbacks
+    switch (q)
+    {
+    case 0:
+        if (self->core0 == NULL)
+        {
+            return NULL;
+        }
+        return &self->callbacks0[type];
+    case 1:
+        if (self->core1 == NULL)
+        {
+            return NULL;
+        }
+        return &self->callbacks1[type];
+    default:
+        return NULL;
+    }
+}
+
 /** @brief Append a quoted string representation of an event
  */
-static inline size_t fuse_qstr_event_type(char *buf, size_t sz, size_t i, uint8_t type)
+static size_t fuse_qstr_event_type(char *buf, size_t sz, size_t i, uint8_t type)
 {
 #ifdef DEBUG
     switch (type)
@@ -179,7 +212,7 @@ static inline size_t fuse_qstr_event_type(char *buf, size_t sz, size_t i, uint8_
 
 /** @brief Append a quoted string representation of an event
  */
-size_t fuse_qstr_event(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v)
+static size_t fuse_qstr_event(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v)
 {
     assert(self);
     assert(buf == NULL || sz > 0);

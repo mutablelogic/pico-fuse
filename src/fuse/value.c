@@ -61,6 +61,9 @@ void fuse_release(fuse_t *self, fuse_value_t *value)
     // Decrement the reference count
     if (value != NULL)
     {
-        fuse_allocator_release(self->allocator, value);
+        if(fuse_allocator_release(self->allocator, value)) {
+            // Indicate we should drain the memory pool
+            self->drain = true;
+        }
     }
 }

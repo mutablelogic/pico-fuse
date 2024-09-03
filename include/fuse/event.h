@@ -12,6 +12,7 @@
 
 // Maximum number of events
 #define FUSE_EVENT_COUNT 0x02 ///< Maximum number of events
+#define FUSE_EVENT_CALLBACK_COUNT 3 ///< Maximum number of callbacks per event
 
 #ifdef DEBUG
 #define fuse_new_event(self, source, type, data) \
