@@ -108,6 +108,12 @@ static void fuse_gpio_setfunc(uint8_t pin, fuse_gpio_func_t func)
     // Set GPIO pin to SIO
     gpio_init(pin);
 
+<<<<<<< HEAD
+=======
+    // If true, adc_init has been called
+    static bool adc = false;
+
+>>>>>>> 2278aef4da32cc3a813ebe2a7fc33b28a0c0b093
     // Set function based on function
     switch (func)
     {

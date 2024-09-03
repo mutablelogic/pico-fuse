@@ -8,7 +8,6 @@
  */
 #ifndef FUSE_RANDOM_H
 #define FUSE_RANDOM_H
-
 #include <stdint.h>
 
 /** @brief Return a random unsigned 32 bit number

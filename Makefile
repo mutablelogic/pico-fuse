@@ -40,6 +40,10 @@ $(SRC_DIR): dependencies mkdir
 	@echo make $(notdir $@)
 	@make -C ${BUILD_DIR}/$@
 
+$(TESTS_DIR): dependencies mkdir
+	@echo make $(notdir $@)
+	@make -C ${BUILD_DIR}/$@
+
 $(EXAMPLES_DIR): dependencies mkdir
 	@echo make $(notdir $@)
 	@make -C ${BUILD_DIR}/$@

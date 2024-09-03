@@ -6,5 +6,3 @@
 [submodule "lib/picotool"]
 	path = lib/picotool
 	url = https://github.com/raspberrypi/picotool.git
-	branch = 2.0.0
-

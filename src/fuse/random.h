@@ -3,7 +3,6 @@
  */
 #ifndef FUSE_PRIVATE_RANDOM_H
 #define FUSE_PRIVATE_RANDOM_H
-
 #include <stdint.h>
 
 struct fuse_random_state {
