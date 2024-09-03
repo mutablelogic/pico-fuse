@@ -9,9 +9,11 @@
 // Define the event types
 #define FUSE_EVENT_NULL 0x00  ///< NULL event
 #define FUSE_EVENT_TIMER 0x01 ///< Timer event
+#define FUSE_EVENT_GPIO 0x02  ///< GPIO input event
+#define FUSE_EVENT_ADC 0x03   ///< ADC samples event
 
 // Maximum number of events
-#define FUSE_EVENT_COUNT 0x02 ///< Maximum number of events
+#define FUSE_EVENT_COUNT 0x04       ///< Maximum number of events
 #define FUSE_EVENT_CALLBACK_COUNT 3 ///< Maximum number of callbacks per event
 
 #ifdef DEBUG

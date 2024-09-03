@@ -4,13 +4,12 @@
 #include "fuse.h"
 #include "printf.h"
 
-
 ///////////////////////////////////////////////////////////////////////////////
 // DECLARATIONS
 
 /** @brief Return array of callbacks for an event type and core
  */
-static struct event_callbacks* fuse_get_callbacks(fuse_t *self, uint8_t type, uint8_t q);
+static struct event_callbacks *fuse_get_callbacks(fuse_t *self, uint8_t type, uint8_t q);
 
 /** @brief Append a quoted string representation of an event
  */
@@ -34,7 +33,7 @@ void fuse_register_value_event(fuse_t *self)
     };
     fuse_register_value_type(self, FUSE_MAGIC_EVENT, fuse_event_type);
 
-    for(size_t i = 0; i < FUSE_EVENT_COUNT; i++)
+    for (size_t i = 0; i < FUSE_EVENT_COUNT; i++)
     {
         self->callbacks0[i] = (struct event_callbacks){0};
         self->callbacks1[i] = (struct event_callbacks){0};
@@ -112,7 +111,7 @@ bool fuse_register_callback(fuse_t *self, uint8_t type, uint8_t q, fuse_callback
     assert(callback);
 
     // Get the event callbacks
-    struct event_callbacks* callbacks = fuse_get_callbacks(self, type, q);
+    struct event_callbacks *callbacks = fuse_get_callbacks(self, type, q);
     if (callbacks == NULL)
     {
         return false;
@@ -141,7 +140,7 @@ void fuse_exec_event(fuse_t *self, uint8_t q, fuse_event_t *evt)
     assert(evt);
 
     // Get the event callbacks
-    struct event_callbacks* callbacks = fuse_get_callbacks(self, evt->type, q);
+    struct event_callbacks *callbacks = fuse_get_callbacks(self, evt->type, q);
     if (callbacks == NULL)
     {
         return;
@@ -151,9 +150,12 @@ void fuse_exec_event(fuse_t *self, uint8_t q, fuse_event_t *evt)
     for (size_t i = 0; i < FUSE_EVENT_CALLBACK_COUNT; i++)
     {
         fuse_callback_t callback = callbacks->callback[i];
-        if (callback) {
+        if (callback)
+        {
             callback(self, evt, evt->user_data);
-        } else {
+        }
+        else
+        {
             break;
         }
     }
@@ -164,7 +166,7 @@ void fuse_exec_event(fuse_t *self, uint8_t q, fuse_event_t *evt)
 
 /** @brief Return callbacks for an event type and core
  */
-static struct event_callbacks* fuse_get_callbacks(fuse_t *self, uint8_t type, uint8_t q)
+static struct event_callbacks *fuse_get_callbacks(fuse_t *self, uint8_t type, uint8_t q)
 {
     assert(self);
     assert(type < FUSE_EVENT_COUNT);
@@ -201,6 +203,10 @@ static size_t fuse_qstr_event_type(char *buf, size_t sz, size_t i, uint8_t type)
         return qstrtostr_internal(buf, sz, i, "NULL");
     case FUSE_EVENT_TIMER:
         return qstrtostr_internal(buf, sz, i, "TIMER");
+    case FUSE_EVENT_GPIO:
+        return qstrtostr_internal(buf, sz, i, "GPIO");
+    case FUSE_EVENT_ADC:
+        return qstrtostr_internal(buf, sz, i, "ADC");
     default:
         assert(false);
         return i;
