@@ -1,7 +1,13 @@
-#include <picofuse/picofuse.h>
+#include <fuse/fuse.h>
 
-int run(fuse_t* fuse);
+int run(fuse_t *fuse);
 
-void main() {
-    fuse_main(run);
+int main()
+{
+    fuse_t *fuse = fuse_new();
+    assert(fuse);
+    fuse_run(fuse, run);
+
+    // Destroy the applicatiom, return exit code
+    return fuse_destroy(fuse);
 }

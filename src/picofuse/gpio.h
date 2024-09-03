@@ -6,6 +6,13 @@
 
 #include <fuse/fuse.h>
 
+/** @brief GPIO context
+ */
+struct gpio_context
+{
+    uint8_t pin;
+};
+
 /** @brief Register value type for gpio pins
  */
 void fuse_register_value_gpio(fuse_t *self);

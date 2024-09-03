@@ -56,10 +56,11 @@ fuse_t *fuse_new()
         fuse->desc[i].name = 0;
     }
 
-    fuse->desc[FUSE_MAGIC_APP] = (struct fuse_value_desc){
-        .size = 0,
+    fuse_value_desc_t app = {
+        .size = sizeof(fuse_t),
         .name = "APP",
     };
+    fuse->desc[FUSE_MAGIC_APP] = app;
 
     // Register types
     fuse_register_value_null(fuse);
