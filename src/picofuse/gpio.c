@@ -36,8 +36,9 @@ void fuse_register_value_gpio(fuse_t *self)
     fuse_value_desc_t fuse_gpio_type = {
         .size = sizeof(struct gpio_context),
         .name = "GPIO",
+        .destroy = NULL, // TODO: We meed to have a destroy function
         .cstr = fuse_gpio_cstr,
-        .qstr = fuse_gpio_cstr
+        .qstr = fuse_gpio_cstr // TODO: we need to implement a qstr function
     };
     fuse_register_value_type(self, FUSE_MAGIC_GPIO, fuse_gpio_type);
 
@@ -69,7 +70,7 @@ fuse_gpio_t *fuse_new_gpio_ex(fuse_t *self, uint8_t pin, fuse_gpio_func_t func, 
     }
 
     // Create a new GPIO context
-    fuse_gpio_t *ctx = (fuse_gpio_t *)fuse_new_value_ex(self, FUSE_MAGIC_GPIO, 0, file, line);
+    fuse_gpio_t *ctx = (fuse_gpio_t *)fuse_new_value_ex(self, FUSE_MAGIC_GPIO, (void* )pin, file, line);
     if(ctx == NULL) {
         return NULL;
     }
@@ -77,14 +78,14 @@ fuse_gpio_t *fuse_new_gpio_ex(fuse_t *self, uint8_t pin, fuse_gpio_func_t func, 
     // Set the GPIO pin
     ctx->pin = pin;
 
-    // Set the GPIO function
-    fuse_gpio_setfunc(pin, func);
-
     // Indicate the GPIO pin is initialized
     fuse_gpio_pin[pin] = ctx;
 
-    // Set up the interrupt
+    // Set up the interrupt for RISE and FALL events
     gpio_set_irq_enabled_with_callback(pin, GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL, true, &fuse_gpio_callback);
+
+    // Set the GPIO function
+    fuse_gpio_setfunc(pin, func);
 
     // Return the GPIO context
     return ctx;
@@ -93,7 +94,7 @@ fuse_gpio_t *fuse_new_gpio_ex(fuse_t *self, uint8_t pin, fuse_gpio_func_t func, 
 ///////////////////////////////////////////////////////////////////////////////
 // PUBLIC METHODS
 
-/* @brief Return the GPIO cound (GPIO[0]...G~PIO[count-1]) 
+/** @brief Return the GPIO cound (GPIO[0]...GPIO[count-1]) 
  */
 inline uint8_t fuse_gpio_count()
 {
