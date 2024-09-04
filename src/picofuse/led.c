@@ -81,7 +81,7 @@ void fuse_led_set(fuse_led_t *pin, bool value)
         fuse_gpio_set(pin->pin, value);
     }
 #ifdef PICO_CYW43_SUPPORTED
-    if (pin->cyw43_pin)
+    if (pin->cyw43_pin >= 0)
     {
         cyw43_arch_gpio_put(pin->cyw43_pin, value ? 1 : 0);
     }
@@ -100,7 +100,7 @@ bool fuse_led_get(fuse_led_t *pin)
         return fuse_gpio_get(pin->pin);
     }
 #ifdef PICO_CYW43_SUPPORTED
-    if (pin->cyw43_pin)
+    if (pin->cyw43_pin >= 0)
     {
         return cyw43_arch_gpio_get(pin->cyw43_pin);
     }
@@ -136,10 +136,11 @@ static bool fuse_led_init(fuse_t *self, fuse_value_t *value, const void *user_da
     {
         ctx->pin = NULL;
     }
+
 #if defined(CYW43_WL_GPIO_LED_PIN)
     ctx->cyw43_pin = CYW43_WL_GPIO_LED_PIN;
 #else
-    ctx->cyw43_pin = 0;
+    ctx->cyw43_pin = -1;
 #endif
 
     // Return success

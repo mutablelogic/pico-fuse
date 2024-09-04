@@ -12,7 +12,7 @@
 struct led_context
 {
     struct gpio_context *pin;
-    unsigned int cyw43_pin;
+    int cyw43_pin;
 };
 
 /** @brief Register value type for LED
