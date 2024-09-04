@@ -63,6 +63,6 @@ void fuse_gpio_set(fuse_gpio_t *pin, bool value);
  *  @param pin The GPIO pin number
  *  @return The binary value of the GPIO pin, assuming the pin is an input or output pin
  */
-bool fuse_gpio_get(fuse_gpio_t *pin, bool value);
+bool fuse_gpio_get(fuse_gpio_t *pin);
 
 #endif

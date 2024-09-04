@@ -2,16 +2,34 @@
 
 #define LED_DELAY_MS 250
 
-int run(fuse_t* fuse) {
-    fuse_led_new();
+/* @brief LED Callback
+ */
+void led_callback(fuse_t *self, fuse_event_t *evt, void *user_data)
+{
+    assert(self);
+    assert(evt);
 
-    while (true) {
-        fuse_led_set(1);
-        sleep_ms(LED_DELAY_MS);
-        fuse_led_set(0);
-        sleep_ms(LED_DELAY_MS);
-    }
+    // LED is the user_data field
+    fuse_led_t *led = (fuse_led_t *)user_data;
 
-    fuse_led_destroy();
+    // Blink the LED
+    fuse_led_set(led, !fuse_led_get(led));
+}
+
+int run(fuse_t *self)
+{
+    // Initialize picofuse
+    picofuse_init(self);
+
+    // LED output
+    fuse_led_t *led = (fuse_led_t *)fuse_retain(self, fuse_new_led(self));
+    assert(led);
+
+    // Register timer callback on core 0
+    assert(fuse_register_callback(self, FUSE_EVENT_TIMER, 0, led_callback));
+
+    // Schedule timer to run every second
+    assert(fuse_timer_schedule(self, LED_DELAY_MS, true, led));
+
     return 0;
 }

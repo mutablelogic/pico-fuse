@@ -8,6 +8,7 @@
 
 #include <fuse/fuse.h>
 #include "gpio.h"
+#include "led.h"
 
 /* @brief Register picofuse types
  *
