@@ -1,8 +1,7 @@
 #include <picofuse/picofuse.h>
 #include <hardware/spi.h>
-#include <stdint.h>
-#include "gpio.h"
 #include "fuse.h"
+#include "gpio.h"
 #include "printf.h"
 #include "spi.h"
 
