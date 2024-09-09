@@ -24,6 +24,12 @@ static size_t fuse_spi_qstr(fuse_t *self, char *buf, size_t sz, size_t i, fuse_v
  */
 static spi_inst_t * fuse_spi_gpio_to_instance(fuse_spi_data_t *data);
 
+/** Drive CS
+ * @param spi SPI context
+ * @param select true to select (drive low), false to deselect (drive high)
+ */
+static void fuse_spi_cs(fuse_spi_t *spi, bool select);
+
 ///////////////////////////////////////////////////////////////////////////////
 // LIFECYCLE
 
@@ -108,14 +114,19 @@ static bool fuse_spi_init(fuse_t *self, fuse_value_t *value, const void *user_da
         fuse_debugf(self, "fuse_spi_init: spi_init failed with baudrate %d\n",data->baudrate);
         return false;
     } else if (baudrate != data->baudrate) {
-        fuse_debugf(self, "fuse_spi_init: spi_init set different baudrate (axtual %d, expected %d)\n", baudrate, data->baudrate);
+        fuse_debugf(self, "fuse_spi_init: spi_init set different baudrate (expected %d, actual %d)\n", data->baudrate, baudrate);
     }
 
     // Retain the GPIO pins
-    assert(fuse_retain(self, data->cs));
-    assert(fuse_retain(self, data->ck));
-    assert(fuse_retain(self, data->tx));
-    assert(fuse_retain(self, data->rx));
+    assert(fuse_retain(self, spi->cs));
+    assert(fuse_retain(self, spi->ck));
+    assert(fuse_retain(self, spi->tx));
+    assert(fuse_retain(self, spi->rx));
+
+    // Chip select is active-low, so we'll initialise it to a driven-high state
+    if(spi->cs) {
+        fuse_gpio_set(spi->cs, true);
+    }
 
     // Return success
     return true;
@@ -146,12 +157,59 @@ static size_t fuse_spi_qstr(fuse_t *self, char *buf, size_t sz, size_t i, fuse_v
     assert(buf == NULL || sz > 0);
     assert(v);
 
-    // TODO
-    i = cstrtostr_internal(buf, sz, i, self->desc[FUSE_MAGIC_SPI].name);
+    
+    // Add prefix
+    i = chtostr_internal(buf, sz, i, '{');
+
+    // Add instance number
+    fuse_spi_t *spi = (fuse_spi_t *)v;
+    i = qstrtostr_internal(buf, sz, i, "instance");
+    i = chtostr_internal(buf, sz, i, ':');
+    i = utostr_internal(buf, sz, i, spi_get_index(spi->inst), 0);
+    i = chtostr_internal(buf, sz, i, ',');
+
+    // Add CS
+    if (spi->cs) {
+        i = qstrtostr_internal(buf, sz, i, "cs");
+        i = chtostr_internal(buf, sz, i, ':');
+        i = vtostr_internal(self, buf, sz, i, (fuse_value_t *)spi->cs, true);
+        i = chtostr_internal(buf, sz, i, ',');
+    }
+
+    // Add CK
+    if (spi->ck) {
+        i = qstrtostr_internal(buf, sz, i, "ck");
+        i = chtostr_internal(buf, sz, i, ':');
+        i = vtostr_internal(self, buf, sz, i, (fuse_value_t *)spi->ck, true);
+        i = chtostr_internal(buf, sz, i, ',');
+    }
+
+    // Add TX
+    if (spi->tx) {
+        i = qstrtostr_internal(buf, sz, i, "tx");
+        i = chtostr_internal(buf, sz, i, ':');
+        i = vtostr_internal(self, buf, sz, i, (fuse_value_t *)spi->tx, true);
+        i = chtostr_internal(buf, sz, i, ',');
+    }
+
+    // Add RX
+    if (spi->rx) {
+        i = qstrtostr_internal(buf, sz, i, "rx");
+        i = chtostr_internal(buf, sz, i, ':');
+        i = vtostr_internal(self, buf, sz, i, (fuse_value_t *)spi->rx, true);
+        i = chtostr_internal(buf, sz, i, ',');
+    }
+
+    // Add Baudrate
+    i = qstrtostr_internal(buf, sz, i, "baudrate");
+    i = chtostr_internal(buf, sz, i, ':');
+    i = utostr_internal(buf, sz, i, (uint64_t)spi_get_baudrate(spi->inst), 0);
+
+    // Add suffix
+    i = chtostr_internal(buf, sz, i, '}');
 
     return i;
 }
-
 
 /** @brief Return SPI instance from GPIO pins, or NULL if invalid pin combination
  */
@@ -165,11 +223,11 @@ static spi_inst_t * fuse_spi_gpio_to_instance(fuse_spi_data_t *data) {
     // TX pin  - SPI0[  3,  7, 19     ] SPI1[ 11, 15, 27 ]
 
     // RX pin
-    switch (data->tx) {
+    switch (data->rx) {
         case 0:
         case 4:
         case 16:
-        case 20:
+        case 20:      
             n = 0;
             break;
         case 8:
@@ -254,6 +312,15 @@ static spi_inst_t * fuse_spi_gpio_to_instance(fuse_spi_data_t *data) {
     }
 }
 
+static inline void fuse_spi_cs(fuse_spi_t *spi, bool select) {
+    assert(spi);
+    if (spi->cs) {
+        asm volatile("nop \n nop \n nop");
+        fuse_gpio_set(spi->cs, !select);
+        asm volatile("nop \n nop \n nop");
+    }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // PUBLIC METHODS
 
@@ -267,6 +334,11 @@ fuse_spi_t *fuse_new_spi_ex(fuse_t *self, fuse_spi_data_t data, const char *file
 /** @brief Write a data block
  */
 bool fuse_spi_write(fuse_t *self, fuse_spi_t *spi, void* data, size_t sz, bool blocking) {
+    assert(self);
+    assert(spi);
+    assert(data);
+    assert(sz > 0);
+
     // TODO
     return false;
 }
@@ -274,6 +346,11 @@ bool fuse_spi_write(fuse_t *self, fuse_spi_t *spi, void* data, size_t sz, bool b
 /** @brief Read a data block
  */
 bool fuse_spi_read(fuse_t *self, fuse_spi_t *spi, void* data, size_t sz, bool blocking) {
+    assert(self);
+    assert(spi);
+    assert(data);
+    assert(sz > 0);
+
     // TODO
     return false;
 }
