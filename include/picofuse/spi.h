@@ -25,7 +25,7 @@ typedef struct spi_context fuse_spi_t;
 typedef struct 
 {
     uint8_t cs; ///< Chip select GPIO. Set to zero for no CS pin. Assumes active low.
-    uint8_t sck; ///< Clock GPIO
+    uint8_t ck; ///< Clock GPIO
     uint8_t tx; ///< Transmit GPIO
     uint8_t rx; ///< Receive GPIO
     uint32_t baudrate; ///< Requested baudrate
@@ -41,24 +41,30 @@ fuse_spi_t *fuse_new_spi_ex(fuse_t *self,fuse_spi_data_t data, const char *file,
 
 /** @brief Write a data block
  *
- * Write and wait for the SPI interface to complete the transfer.
+ * Write data to an SPI slave device. If the blocking value is set to true, then the function will wait for the 
+ * data to be written. Otherwise, DMA transfer is used and an event FUSE_EVENT_SPI_TX is generated when the 
+ * transfer is complete.
  *
+ * @param self The fuse application
  * @param spi The spi instance
  * @param data The data to write
  * @param sz The number of bytes to write
+ * @param blocking True if the write should be blocking
  * @return True if successful
  */
-bool fuse_spi_write(fuse_spi_t *spi, void* data, size_t sz);
+bool fuse_spi_write(fuse_t *self, fuse_spi_t *spi, void* data, size_t sz, bool blocking);
 
 /** @brief Read a data block
  *
- * Wait for the SPI interface to read data.
+ * Read data from an SPI slave device. If the blocking value is set to true, then the function will wait for the 
+ * data to be read. Otherwise, DMA transfer is used and an event FUSE_EVENT_SPI_RX is generated when the 
+ * transfer is complete.
  *
  * @param spi The spi instance
  * @param data The data to read
  * @param sz The number of bytes to read
  * @return True if successful
  */
-bool fuse_spi_read(fuse_spi_t *spi, void* data, size_t sz);
+bool fuse_spi_read(fuse_t *self, fuse_spi_t *spi, void* data, size_t sz, bool blocking);
 
 #endif

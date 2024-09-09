@@ -13,9 +13,11 @@
 #define FUSE_EVENT_TIMER 0x01 ///< Timer event
 #define FUSE_EVENT_GPIO 0x02  ///< GPIO input event
 #define FUSE_EVENT_ADC 0x03   ///< ADC samples event
+#define FUSE_EVENT_SPI_TX 0x04 ///< SPI transmit event
+#define FUSE_EVENT_SPI_RX 0x05 ///< SPI receive event
 
 // Maximum number of events
-#define FUSE_EVENT_COUNT 0x04       ///< Maximum number of events
+#define FUSE_EVENT_COUNT 0x06       ///< Maximum number of events
 #define FUSE_EVENT_CALLBACK_COUNT 3 ///< Maximum number of callbacks per event
 
 #ifdef DEBUG

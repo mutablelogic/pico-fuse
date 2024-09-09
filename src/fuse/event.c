@@ -207,6 +207,10 @@ static size_t fuse_qstr_event_type(char *buf, size_t sz, size_t i, uint8_t type)
         return qstrtostr_internal(buf, sz, i, "GPIO");
     case FUSE_EVENT_ADC:
         return qstrtostr_internal(buf, sz, i, "ADC");
+    case FUSE_EVENT_SPI_TX:
+        return qstrtostr_internal(buf, sz, i, "SPI_TX");
+    case FUSE_EVENT_SPI_RX:
+        return qstrtostr_internal(buf, sz, i, "SPI_RX");    
     default:
         assert(false);
         return i;
