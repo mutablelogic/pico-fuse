@@ -128,6 +128,9 @@ static bool fuse_spi_init(fuse_t *self, fuse_value_t *value, const void *user_da
         fuse_gpio_set(spi->cs, true);
     }
 
+    // Set pause
+    spi->xfr_delayms = data->xfr_delayms;
+
     // Return success
     return true;
 }
@@ -197,6 +200,14 @@ static size_t fuse_spi_qstr(fuse_t *self, char *buf, size_t sz, size_t i, fuse_v
         i = qstrtostr_internal(buf, sz, i, "rx");
         i = chtostr_internal(buf, sz, i, ':');
         i = vtostr_internal(self, buf, sz, i, (fuse_value_t *)spi->rx, true);
+        i = chtostr_internal(buf, sz, i, ',');
+    }
+
+    // Add xfr_delayms
+    if (spi->xfr_delayms) {
+        i = qstrtostr_internal(buf, sz, i, "xfr_delayms");
+        i = chtostr_internal(buf, sz, i, ':');
+        i = utostr_internal(buf, sz, i, (uint64_t)spi->xfr_delayms, 0);
         i = chtostr_internal(buf, sz, i, ',');
     }
 
@@ -334,23 +345,72 @@ fuse_spi_t *fuse_new_spi_ex(fuse_t *self, fuse_spi_data_t data, const char *file
 /** @brief Write a data block
  */
 bool fuse_spi_write(fuse_t *self, fuse_spi_t *spi, void* data, size_t sz, bool blocking) {
-    assert(self);
-    assert(spi);
-    assert(data);
-    assert(sz > 0);
-
-    // TODO
-    return false;
+     return fuse_spi_xfr(self, spi, data, 0, sz, blocking);
 }
 
 /** @brief Read a data block
  */
 bool fuse_spi_read(fuse_t *self, fuse_spi_t *spi, void* data, size_t sz, bool blocking) {
+    return fuse_spi_xfr(self, spi, data, sz, 0, blocking);
+}
+
+/** @brief Transfer data to and from an SPI slave device
+ */
+bool fuse_spi_xfr(fuse_t *self, fuse_spi_t *spi, void* data, size_t wsz, size_t rsz, bool blocking) {
     assert(self);
     assert(spi);
     assert(data);
-    assert(sz > 0);
+    assert(wsz > 0 || rsz > 0);
 
+    // Blocking
     // TODO
-    return false;
+    if (!blocking) {
+        fuse_debugf(self,"fuse_spi_tx: non-blocking transfers not yet supported\n");
+        return false;
+    }
+
+    // Activate CS
+    fuse_spi_cs(spi, true);
+
+    // Write
+    bool result = true;
+    if (wsz > 0) {
+        size_t written = spi_write_blocking(spi->inst,data,wsz);
+        // Debugging
+        if (written != wsz) {
+            result = false;
+#ifdef DEBUG
+            fuse_debugf(self,"fuse_spi_tx: written %u bytes, expected %u\n",written,wsz);
+#endif        
+        }
+    }
+
+    // Pause
+    if (wsz && spi->xfr_delayms) {
+        sleep_ms(spi->xfr_delayms);
+    }
+
+    // Read
+    if (rsz > 0) {
+        size_t read = spi_read_blocking(spi->inst,0,data,rsz);
+
+        // Debugging
+        if (read != rsz) {
+            result = false;
+#ifdef DEBUG
+            fuse_debugf(self,"fuse_spi_tx: read %u bytes, expected %u\n",read,rsz);
+#endif        
+        }
+    }    
+
+    // Deactivate CS
+    fuse_spi_cs(spi, false);
+
+    // Sleep
+    if (rsz && spi->xfr_delayms) {
+        sleep_ms(spi->xfr_delayms);
+    }
+
+    // Return success
+    return result;    
 }

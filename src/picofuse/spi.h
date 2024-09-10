@@ -16,6 +16,7 @@ struct spi_context
     fuse_gpio_t* tx; ///< Transmit GPIO
     fuse_gpio_t* rx; ///< Receive GPIO
     spi_inst_t *inst; ///< SPI instance
+        uint16_t xfr_delayms; ///< Pause after a write or read in milliseconds
 };
 
 /** @brief Register type for SPI
