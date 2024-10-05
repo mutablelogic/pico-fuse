@@ -57,6 +57,16 @@ uint8_t bme280_read_chip_id(fuse_t* self, fuse_bme280_t* bme280);
  */
 void bme280_reset(fuse_t* self, fuse_bme280_t* bme280);
 
+
+/** @brief Read the BME280 device status
+ * 
+ * @param self The fuse application
+ * @param bme280 The BME280 instance
+ * @param measuring Pointer to the measuring status, or NULL
+ * @param updating Pointer to the updating status, or NULL
+ */
+void bme280_read_status(fuse_t* self, fuse_bme280_t* bme280, bool* measuring, bool* updating);
+
 /** @brief Initialise the BME280 compensation parameters
  * 
  * @param self The fuse application

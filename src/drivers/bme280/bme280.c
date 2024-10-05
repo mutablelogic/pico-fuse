@@ -56,10 +56,14 @@ fuse_bme280_t *fuse_new_bme280_ex(fuse_t *self, fuse_spi_t* spi, const char *fil
     return ctx;
 }
 
-
-/** @brief Read the temperature, pressure and humidity from the BME280
+/** @brief Read the BME280 data
+ * 
+ * Measure the temperature, pressure and humidity, and emit an event with the measurements
+ * 
+ * @param self The fuse application
+ * @param bme280 The BME280 instance
  */
-void fuse_bme280_read(fuse_t* self, fuse_bme280_t* bme280)
+void fuse_bme280_read(fuse_t *self, fuse_bme280_t *bme280)
 {
     assert(self);
     assert(bme280);
@@ -67,19 +71,26 @@ void fuse_bme280_read(fuse_t* self, fuse_bme280_t* bme280)
     // Read the temperature, pressure and humidity
     int32_t temperature, pressure, humidity;
     bme280_read_raw(self, bme280, &temperature, &pressure, &humidity);
-    fuse_debugf(self, "fuse_bme280_read: T=%X P=%X H=%X\n", temperature, pressure, humidity);
 
+    // Create measurement
+    static fuse_bme280_measurement_t meas;
     int32_t fine; 
     int32_t tempC = bme280_compensate_temperature(bme280, temperature, &fine);
-    fuse_debugf(self, "fuse_bme280_read: T=%d\n", tempC);
+    meas.temperature = tempC / 100.0;
+    meas.pressure = 0;
+    meas.humidity = 0;
     if (pressure != 0x80000) {
         uint32_t pressureP = bme280_compensate_pressure(bme280, pressure, fine);
-        fuse_debugf(self, "fuse_bme280_read: P=%d\n",pressureP);
+        meas.pressure = pressureP;
     }
     if (humidity != 0x8000) {
         uint32_t humidityH = bme280_compensate_humidity(bme280, humidity, fine);
-        fuse_debugf(self, "fuse_bme280_read: H=%d\n",humidityH / 1024);
+        meas.humidity = humidityH / 1024.0;
     }
+
+    // Emit the event
+    fuse_event_t *evt = fuse_new_event(self, (fuse_value_t *)bme280, FUSE_EVENT_BME280, &meas);
+    assert(evt);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -124,7 +135,6 @@ static void fuse_bme280_destroy(fuse_t *self, fuse_value_t *value)
     // Release the SPI
     fuse_release(self, ((fuse_bme280_t *)value)->spi);
 }
-
 
 /** @brief Append a JSON representation of the BME driver
  */

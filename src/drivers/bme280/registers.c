@@ -5,6 +5,8 @@
 #define READ_BIT                                  0x80
 #define WRITE_MASK                                0x7F
 #define MODE_MASK                                 0x03
+#define MEASURING_BIT                             0x08
+#define UPDATING_BIT                              0x01
 
 /* Register Addresses */
 #define BME280_CHIP_ID_ADDR                       0xD0
@@ -13,6 +15,7 @@
 #define BME280_HUMIDITY_CALIB_DATA_ADDR           0xE1
 #define BME280_PWR_CTRL_ADDR                      0xF4
 #define BME280_CTRL_HUM_ADDR                      0xF2
+#define BME280_STATUS_ADDR                        0xF3
 #define BME280_CTRL_MEAS_ADDR                     0xF4
 #define BME280_CONFIG_ADDR                        0xF5
 #define BME280_DATA_ADDR                          0xF7
@@ -62,6 +65,24 @@ uint8_t bme280_read_chip_id(fuse_t* self, fuse_bme280_t* bme280) {
     return id;
 }
 
+/** @brief Read the BME280 device status
+ */
+void bme280_read_status(fuse_t* self, fuse_bme280_t* bme280, bool* measuring, bool* updating) {
+    assert(self);
+    assert(bme280);
+    assert(bme280->spi);
+
+    uint8_t status;
+    bme280_read_register(self, bme280->spi, BME280_STATUS_ADDR, &status, sizeof(uint8_t));
+
+    if(measuring) {
+        *measuring = (status & MEASURING_BIT) ? true : false;
+    }
+    if(updating) {
+        *updating = (status & UPDATING_BIT) ? true : false;
+    }
+}
+
 /** @brief Reset the BME280
  * 
  * @param self The fuse application
@@ -72,13 +93,22 @@ void bme280_reset(fuse_t* self, fuse_bme280_t* bme280) {
     assert(bme280);
     assert(bme280->spi);
 
+    // Soft reset
     bme280_write_register(self, bme280->spi, BME280_RESET_ADDR, 0xB6);
+
+    // Wait for 2ms for the reset to complete
+    bool updating;
+    uint8_t n = 3;
+    do {
+        sleep_ms(2);
+        bme280_read_status(self, bme280, NULL, &updating);
+    } while(n-- && updating);
 }
 
 /** @brief Convert oversampling value
  * 
  */
-inline uint8_t bme280_convert_osrs(uint8_t osrs) {
+inline uint8_t bme280_convert_osrs_to(uint8_t osrs) {
     switch (osrs) {
         case 0:
             return 0;
@@ -118,10 +148,10 @@ void bme280_write_osrs(fuse_t* self, fuse_bme280_t* bme280, uint8_t osrs_t, uint
     assert(mode == 0 || mode == 1 || mode == 2);
 
     // Write the humidity oversampling value
-    bme280_write_register(self, bme280->spi, BME280_CTRL_HUM_ADDR, bme280_convert_osrs(osrs_h));
+    bme280_write_register(self, bme280->spi, BME280_CTRL_HUM_ADDR, bme280_convert_osrs_to(osrs_h));
 
     // Write the temperature and pressure oversampling values, and apply the humidity oversampling value
-    bme280_write_register(self, bme280->spi, BME280_CTRL_MEAS_ADDR, (bme280_convert_osrs(osrs_t) << 5) | (bme280_convert_osrs(osrs_p) << 2) | (mode & MODE_MASK));
+    bme280_write_register(self, bme280->spi, BME280_CTRL_MEAS_ADDR, (bme280_convert_osrs_to(osrs_t) << 5) | (bme280_convert_osrs_to(osrs_p) << 2) | (mode & MODE_MASK));
 }
 
 /** @brief Read measurement mode
