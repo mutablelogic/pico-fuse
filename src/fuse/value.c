@@ -5,6 +5,22 @@
 ///////////////////////////////////////////////////////////////////////////////
 // PUBLIC METHODS
 
+
+/** @brief Determine if a value type is registered
+ *
+ * @param self The fuse instance
+ * @param magic The value type
+ * @return true if the value type is registered
+ */
+inline bool fuse_is_registered_value(fuse_t *self, uint16_t magic)
+{
+    assert(self);
+    assert(magic < FUSE_MAGIC_COUNT);
+
+    // We can only register a value descriptor once
+    return (self->desc[magic].name == 0) ? false : true;
+}
+
 /** @brief Register value type
  *
  * @param self The fuse instance

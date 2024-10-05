@@ -34,6 +34,14 @@ typedef struct {
  */
 void fuse_register_value_type(fuse_t *self, uint16_t magic, fuse_value_desc_t type);
 
+/** @brief Determine if a value type is registered
+ *
+ * @param self The fuse instance
+ * @param magic The value type
+ * @return true if the value type is registered
+ */
+bool fuse_is_registered_value(fuse_t *self, uint16_t magic);
+
 #ifdef DEBUG
 #define fuse_new_null(self) \
     (fuse_new_value_ex((self), (FUSE_MAGIC_NULL), (0), __FILE__, __LINE__))

@@ -36,9 +36,10 @@
 #define FUSE_MAGIC_UART 0x1A  ///< On-board UART
 #define FUSE_MAGIC_WIFI 0x1B  ///< Pico W Wifi
 #define FUSE_MAGIC_MQTT 0x1C  ///< Pico W MQTT
+#define FUSE_MAGIC_BME280 0x1D ///< BME280 temperature, humidity, and pressure sensor
 
 // Maximum number of magic numbers
-#define FUSE_MAGIC_COUNT 0x1D ///< Maximum number of magic numbers
+#define FUSE_MAGIC_COUNT 0x1E ///< Maximum number of magic numbers
 
 // Define exit codes
 #define FUSE_EXIT_SUCCESS 1     ///< Successful completion

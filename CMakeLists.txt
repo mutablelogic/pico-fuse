@@ -33,6 +33,7 @@ add_subdirectory(src/fuse)
 if(TARGET_OS STREQUAL "pico")
     pico_sdk_init()
     add_subdirectory(src/picofuse)
+    add_subdirectory(src/drivers/bme280)
 endif()
 
 # Tests

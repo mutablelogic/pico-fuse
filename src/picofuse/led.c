@@ -67,8 +67,6 @@ fuse_led_t *fuse_new_led_ex(fuse_t *self, const char *file, const int line)
     return ctx;
 }
 
-#include <stdio.h>
-
 /** @brief Set the LED binary value
  */
 void fuse_led_set(fuse_led_t *pin, bool value)

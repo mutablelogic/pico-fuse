@@ -20,7 +20,7 @@ pico_add_extra_outputs(${NAME})
 
 ##############################################################################
 
-set(NAME "bme280")
+set(NAME "bme280_example")
 
 add_executable(${NAME}
     common/main.c
@@ -29,7 +29,10 @@ add_executable(${NAME}
 target_include_directories(${NAME} PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/../include
 )
-target_link_libraries(${NAME} picofuse)
+target_link_libraries(${NAME} 
+    picofuse
+    bme280
+)
 
 # enable usb output, disable uart output
 pico_enable_stdio_usb(${NAME} 1)
