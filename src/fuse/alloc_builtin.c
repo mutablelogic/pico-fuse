@@ -43,6 +43,8 @@ struct fuse_allocator *fuse_allocator_builtin_new()
     allocator->release = fuse_allocator_builtin_release;
     allocator->headptr = fuse_allocator_builtin_headptr;
     allocator->tailptr = fuse_allocator_builtin_tailptr;
+    allocator->cur = sizeof(struct fuse_allocator);
+    allocator->max = allocator->cur;
 
     // Return the allocator
     return allocator;
@@ -60,6 +62,13 @@ void *fuse_allocator_builtin_malloc(struct fuse_allocator *ctx, size_t size, uin
     if (block == NULL)
     {
         return NULL;
+    }
+
+    // Set stats
+    ctx->cur += size;
+    if (ctx->cur > ctx->max)
+    {
+        ctx->max = ctx->cur;
     }
 
     // Zero all data structures
@@ -114,6 +123,9 @@ void fuse_allocator_builtin_free(struct fuse_allocator *ctx, void *ptr)
     {
         ctx->tail = block->prev;
     }
+
+    // Set stats
+    ctx->cur -= block->size;
 
     // Free the memory block
     free(block);

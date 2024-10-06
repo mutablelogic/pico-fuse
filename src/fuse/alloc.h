@@ -42,6 +42,8 @@ struct fuse_allocator
 
     struct fuse_allocator_header *head; ///< The head of the list of memory blocks
     struct fuse_allocator_header *tail; ///< The tail of the list of memory blocks
+    size_t cur;                       ///< The total number of bytes allocated
+    size_t max;                       ///< The max number of bytes allocated
 };
 
 /** @brief Allocate memory from the allocator

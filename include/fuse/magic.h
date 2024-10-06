@@ -37,9 +37,10 @@
 #define FUSE_MAGIC_WIFI 0x1B  ///< Pico W Wifi
 #define FUSE_MAGIC_MQTT 0x1C  ///< Pico W MQTT
 #define FUSE_MAGIC_BME280 0x1D ///< BME280 temperature, humidity, and pressure sensor
+#define FUSE_MAGIC_UC8151 0x1E ///< UC8151 e-ink display driver
 
 // Maximum number of magic numbers
-#define FUSE_MAGIC_COUNT 0x1E ///< Maximum number of magic numbers
+#define FUSE_MAGIC_COUNT 0x1F ///< Maximum number of magic numbers
 
 // Define exit codes
 #define FUSE_EXIT_SUCCESS 1     ///< Successful completion

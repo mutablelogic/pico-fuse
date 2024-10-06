@@ -105,4 +105,14 @@ void fuse_exit(fuse_t *self, const int exit_code);
  */
 size_t fuse_drain(fuse_t *self, size_t cap);
 
+/** @brief Return the memory statistics
+ *
+ * This method empties auto-releaaed values (with a zero retain count).
+ *
+ * @param self The fuse instance
+ * @param cur Pointer to the currently allocated number of bytes (or NULL)
+ * @param max Pointer to the maximum allocated number of bytes (or NULL)
+ */
+void fuse_memstats(fuse_t *self, size_t *cur, size_t* max);
+
 #endif

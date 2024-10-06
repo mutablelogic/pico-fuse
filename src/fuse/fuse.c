@@ -289,6 +289,20 @@ inline void fuse_exit(fuse_t *self, int exit_code)
     self->exit_code = exit_code ? exit_code : FUSE_EXIT_SUCCESS;
 }
 
+
+/** @brief Return the memory statistics
+ */
+void fuse_memstats(fuse_t *self, size_t *cur, size_t* max) {
+    assert(self);
+
+    if (cur) {
+        *cur = self->allocator->cur;
+    }
+    if (max) {
+        *max = self->allocator->max;
+    }
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // PRIVATE METHODS
 
