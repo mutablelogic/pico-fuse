@@ -50,8 +50,8 @@ int run(fuse_t *self)
     // Register a callback on core 0 for the measured data
     assert(fuse_register_callback(self, FUSE_EVENT_BME280, 0, bme280_callback));
 
-    // Read measurements once per minute
-    fuse_bme280_read(self, bme280, 60 * 1000);
+    // Read measurements once per second
+    fuse_bme280_read(self, bme280, 1000);
 
     return 0;
 }
