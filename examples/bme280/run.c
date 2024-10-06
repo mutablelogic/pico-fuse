@@ -47,10 +47,11 @@ int run(fuse_t *self)
     // Print driver details
     fuse_printf(self, "bme280 initialized: %v\n", bme280);
 
-    // Register a callback on core 0
+    // Register a callback on core 0 for the measured data
     assert(fuse_register_callback(self, FUSE_EVENT_BME280, 0, bme280_callback));
 
-    fuse_bme280_read(self, bme280);
+    // Read measurements once per minute
+    fuse_bme280_read(self, bme280, 60 * 1000);
 
     return 0;
 }

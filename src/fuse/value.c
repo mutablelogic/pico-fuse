@@ -84,3 +84,28 @@ void fuse_release(fuse_t *self, void *value)
         }
     }
 }
+
+
+/** @brief Check type of a value
+ *
+ * This method returns the value type, or 0 if the value is not
+ * a valid value or a NULL value.
+ *
+ * @param self The fuse instance
+ * @param value The value
+ * @return The magic number of the value
+ */
+uint16_t fuse_value_type(fuse_t *self, void *value) {
+    assert(self);
+
+    // If value is NULL, then return NULL
+    if (value == NULL) {
+        return FUSE_MAGIC_NULL;
+    }
+
+    // TODO: We should check that this is a valid pointer value in the allocator pool
+    // or else we could get a segfault - so return NULL
+
+    // Get the magic number
+    return fuse_allocator_magic(self->allocator, (fuse_value_t *)value);
+}

@@ -93,4 +93,15 @@ fuse_value_t *fuse_retain(fuse_t *self, void *value);
  */
 void fuse_release(fuse_t *self, void *value);
 
+/** @brief Check type of a value
+ *
+ * This method returns the value type, or 0 if the value is not
+ * a valid value or a NULL value.
+ *
+ * @param self The fuse instance
+ * @param value The value
+ * @return The magic number of the value
+ */
+uint16_t fuse_value_type(fuse_t *self, void *value);
+
 #endif /* FUSE_VALUE_H */
