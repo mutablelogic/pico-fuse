@@ -143,10 +143,6 @@ static bool fuse_gpio_init(fuse_t *self, fuse_value_t *value, const void *user_d
         ctx->pin = pin;
     }
 
-    // Set up the interrupt for RISE and FALL events
-    // TODO: Only if this is an input pin
-    gpio_set_irq_enabled_with_callback(pin, GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL, true, &fuse_gpio_callback);
-
     // Return success
     return true;
 }
@@ -183,12 +179,19 @@ static void fuse_gpio_setfunc(uint8_t pin, fuse_gpio_func_t func)
     // Set GPIO pin to SIO
     gpio_init(pin);
 
+    // Cancel the interrupt
+    if (func != FUSE_GPIO_IN)
+    {
+        gpio_set_irq_enabled_with_callback(pin, 0xFF, false, NULL);
+    }
+
     // Set function based on function
     switch (func)
     {
     case FUSE_GPIO_IN:
         gpio_set_dir(pin, GPIO_IN);
         gpio_set_pulls(pin, false, false);
+        gpio_set_irq_enabled_with_callback(pin, GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL, true, &fuse_gpio_callback);
         break;
     case FUSE_GPIO_PULLDN:
         gpio_set_dir(pin, GPIO_IN);

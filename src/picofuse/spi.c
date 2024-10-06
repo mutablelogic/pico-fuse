@@ -118,10 +118,10 @@ static bool fuse_spi_init(fuse_t *self, fuse_value_t *value, const void *user_da
     }
 
     // Retain the GPIO pins
-    assert(fuse_retain(self, spi->cs));
-    assert(fuse_retain(self, spi->ck));
-    assert(fuse_retain(self, spi->tx));
-    assert(fuse_retain(self, spi->rx));
+    fuse_retain(self, spi->cs);
+    fuse_retain(self, spi->ck);
+    fuse_retain(self, spi->tx);
+    fuse_retain(self, spi->rx);
 
     // Chip select is active-low, so we'll initialise it to a driven-high state
     if(spi->cs) {

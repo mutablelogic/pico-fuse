@@ -66,7 +66,6 @@ fuse_bme280_measurement_t* fuse_bme280_measure(fuse_t *self, fuse_bme280_t *bme2
 
     // Read the raw temperature, pressure and humidity values
     int32_t temperature, pressure, humidity;
-    fuse_debugf(self, "fuse_bme280_measure: %v\n", bme280);
     if (bme280_read_raw(self, bme280, &temperature, &pressure, &humidity) == false)
     {
         return NULL;
