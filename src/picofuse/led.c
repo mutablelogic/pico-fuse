@@ -20,7 +20,7 @@ static void fuse_led_destroy(fuse_t *self, fuse_value_t *value);
 
 /** @brief Append a string representation of the LED
  */
-static size_t fuse_led_qstr(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v);
+static size_t fuse_led_str(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v, bool json);
 
 ///////////////////////////////////////////////////////////////////////////////
 // LIFECYCLE
@@ -37,8 +37,7 @@ void fuse_register_value_led(fuse_t *self)
         .name = "LED",
         .init = fuse_led_init,
         .destroy = fuse_led_destroy,
-        .cstr = fuse_led_qstr,
-        .qstr = fuse_led_qstr // TODO: we need to implement a cstr function
+        .str = fuse_led_str
     };
     fuse_register_value_type(self, FUSE_MAGIC_LED, fuse_led_type);
 }
@@ -158,7 +157,7 @@ static void fuse_led_destroy(fuse_t *self, fuse_value_t *value)
 
 /** @brief Append a string representation of the LED
  */
-static size_t fuse_led_qstr(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v)
+static size_t fuse_led_str(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v, bool json)
 {
     assert(self);
     assert(buf == NULL || sz > 0);

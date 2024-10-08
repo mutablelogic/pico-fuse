@@ -16,9 +16,9 @@ static bool fuse_spi_init(fuse_t *self, fuse_value_t *value, const void *user_da
  */
 static void fuse_spi_destroy(fuse_t *self, fuse_value_t *value);
 
-/** @brief Append a JSON representation of an SPI interface
+/** @brief Append a string representation of an SPI interface
  */
-static size_t fuse_spi_qstr(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v);
+static size_t fuse_spi_str(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v, bool json);
 
 /** @brief Return SPI instance from GPIO pins, or NULL if invalid pin combination
  */
@@ -45,8 +45,7 @@ void fuse_register_value_spi(fuse_t *self)
         .name = "SPI",
         .init = fuse_spi_init,
         .destroy = fuse_spi_destroy,
-        .cstr = fuse_spi_qstr,
-        .qstr = fuse_spi_qstr 
+        .str = fuse_spi_str,
     };
     fuse_register_value_type(self, FUSE_MAGIC_SPI, fuse_spi_type);
 }
@@ -155,11 +154,10 @@ static void fuse_spi_destroy(fuse_t *self, fuse_value_t *value) {
 
 /** @brief Append a JSON representation of an SPI interface
  */
-static size_t fuse_spi_qstr(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v) {
+static size_t fuse_spi_str(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v, bool json) {
     assert(self);
     assert(buf == NULL || sz > 0);
     assert(v);
-
     
     // Add prefix
     i = chtostr_internal(buf, sz, i, '{');

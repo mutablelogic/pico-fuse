@@ -8,8 +8,7 @@
 // DECLARATIONS
 
 static bool fuse_init_cstr(fuse_t *self, fuse_value_t *value, const void *user_data);
-static size_t fuse_cstr_cstr(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v);
-static size_t fuse_qstr_cstr(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v);
+static size_t fuse_str_cstr(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v, bool json);
 
 ///////////////////////////////////////////////////////////////////////////////
 // LIFECYCLE
@@ -25,8 +24,7 @@ void fuse_register_value_string(fuse_t *self)
         .size = sizeof(const char *),
         .name = "CSTR",
         .init = fuse_init_cstr,
-        .cstr = fuse_cstr_cstr,
-        .qstr = fuse_qstr_cstr,
+        .str = fuse_str_cstr,
     };
     fuse_register_value_type(self, FUSE_MAGIC_CSTR, fuse_cstr_type);
 }
@@ -50,24 +48,16 @@ static inline bool fuse_init_cstr(fuse_t *self, fuse_value_t *value, const void 
 
 /* @brief Output a pointer to a null-terminated string as a cstr
  */
-static inline size_t fuse_cstr_cstr(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v)
+static inline size_t fuse_str_cstr(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v, bool json)
 {
     assert(self);
     assert(v);
     assert(fuse_allocator_magic(self->allocator, v) == FUSE_MAGIC_CSTR);
 
     const char *vp = *(const char **)v;
-    return cstrtostr_internal(buf, sz, i, vp);
-}
-
-/* @brief Output a pointer to a null-terminated string as a quoted cstr
- */
-static inline size_t fuse_qstr_cstr(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v)
-{
-    assert(self);
-    assert(v);
-    assert(fuse_allocator_magic(self->allocator, v) == FUSE_MAGIC_CSTR);
-
-    const char *vp = *(const char **)v;
-    return qstrtostr_internal(buf, sz, i, vp);
+    if (json) {
+        return qstrtostr_internal(buf, sz, i, vp);
+    } else {
+        return cstrtostr_internal(buf, sz, i, vp);
+    }
 }

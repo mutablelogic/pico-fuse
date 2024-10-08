@@ -1,6 +1,11 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <fuse/fuse.h>
+
+#if defined(TARGET_PICO)
+#include <pico/stdio.h>
+#endif
+
 #include "fuse.h"
 #include "printf.h"
 
@@ -182,8 +187,13 @@ size_t fuse_vprintf(fuse_t *self, const char *format, va_list va)
     if (n < (sz - 1))
     {
         // Happy path - write the string to stdout
+#if defined(TARGET_PICO)
+        stdio_put_string(buffer, n, false, true);
+        stdio_flush();
+#else
         // TODO: Don't print the terminating \n
         puts(buffer);
+#endif
     }
     else
     {
@@ -198,8 +208,13 @@ size_t fuse_vprintf(fuse_t *self, const char *format, va_list va)
         fuse_vsprintf(self, tmp, n + 1, format, va2);
 
         // Write the string to stdout
+#if defined(TARGET_PICO)
+        stdio_put_string(tmp, n, false, true);
+        stdio_flush();
+#else
         // TODO: Don't print the terminating \n
         puts(tmp);
+#endif
 
         // Free the memory
         fuse_free(self, tmp);
@@ -236,13 +251,14 @@ size_t fuse_printf(fuse_t *self, const char *format, ...)
 
 /** @brief Prints formatted debugging messages in debug mode
  */
-size_t fuse_debugf(fuse_t *self, const char *format, ...) {
+size_t fuse_debugf(fuse_t *self, const char *format, ...)
+{
 #ifndef DEBUG
     return 0;
 #else
     va_list va;
     va_start(va, format);
-    const size_t n = fuse_vprintf(self,format, va);
+    const size_t n = fuse_vprintf(self, format, va);
     va_end(va);
     return n;
 #endif

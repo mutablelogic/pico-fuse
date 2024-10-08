@@ -8,7 +8,7 @@
 static void fuse_uc8151_register(fuse_t *self);
 static bool fuse_uc8151_init(fuse_t *self, fuse_value_t *value, const void *user_data);
 static void fuse_uc8151_destroy(fuse_t *self, fuse_value_t *value);
-static size_t fuse_uc8151_qstr(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v);
+static size_t fuse_uc8151_str(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v, bool json);
 
 ///////////////////////////////////////////////////////////////////////////////
 // LIFECYCLE
@@ -25,8 +25,7 @@ static void fuse_uc8151_register(fuse_t *self)
         .name = "UC8151",
         .init = fuse_uc8151_init,
         .destroy = fuse_uc8151_destroy,
-        .cstr = fuse_uc8151_qstr,
-        .qstr = fuse_uc8151_qstr
+        .str = fuse_uc8151_str
     };
     fuse_register_value_type(self, FUSE_MAGIC_UC8151, fuse_uc8151_type);
 }
@@ -75,7 +74,7 @@ static void fuse_uc8151_destroy(fuse_t *self, fuse_value_t *value)
 
 /** @brief Append a JSON representation of the UC8151 instance
  */
-static size_t fuse_bme280_qstr(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v)
+static size_t fuse_bme280_str(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v, bool json)
 {
     assert(self);
     assert(buf == NULL || sz > 0);

@@ -25,7 +25,7 @@ static void fuse_gpio_destroy(fuse_t *self, fuse_value_t *value);
 
 /** @brief Append a string representation of a GPIO pin
  */
-static size_t fuse_gpio_cstr(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v);
+static size_t fuse_gpio_str(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v, bool json);
 
 ///////////////////////////////////////////////////////////////////////////////
 // GLOBALS
@@ -48,8 +48,7 @@ void fuse_register_value_gpio(fuse_t *self)
         .name = "GPIO",
         .init = fuse_gpio_init,
         .destroy = fuse_gpio_destroy,
-        .cstr = fuse_gpio_cstr,
-        .qstr = fuse_gpio_cstr // TODO: we need to implement a qstr function
+        .str = fuse_gpio_str,
     };
     fuse_register_value_type(self, FUSE_MAGIC_GPIO, fuse_gpio_type);
 
@@ -226,14 +225,24 @@ static void fuse_gpio_setfunc(uint8_t pin, fuse_gpio_func_t func)
 
 /** @brief Append a string representation of a GPIO pin
  */
-static size_t fuse_gpio_cstr(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v)
+static size_t fuse_gpio_str(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v, bool json)
 {
     assert(self);
     assert(buf == NULL || sz > 0);
     assert(v);
 
+    if(json) {
+        // Add prefix
+        i = chtostr_internal(buf, sz, i, '"');
+    }
+
     i = cstrtostr_internal(buf, sz, i, self->desc[FUSE_MAGIC_GPIO].name);
     i = utostr_internal(buf, sz, i, ((fuse_gpio_t *)v)->pin, 0);
+
+    if(json) {
+        // Add suffix
+        i = chtostr_internal(buf, sz, i, '"');
+    }
 
     return i;
 }

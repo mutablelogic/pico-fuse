@@ -115,11 +115,7 @@ void TEST_005()
 }
 
 int main()
-{
-#ifdef TARGET_PICO
-    fuse_stdio_init();
-#endif
-        
+{    
     TEST_001();
     TEST_002();
     TEST_003();

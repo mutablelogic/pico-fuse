@@ -9,7 +9,7 @@
 
 static bool fuse_init_list(fuse_t *self, fuse_value_t *list, const void *user_data);
 static void fuse_destroy_list(fuse_t *self, fuse_value_t *list);
-static size_t fuse_qstr_list(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *list);
+static size_t fuse_str_list(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *list, bool json);
 
 ////////////////////////////////////////////////////////////////////////////////
 // LIFECYCLE
@@ -25,8 +25,7 @@ void fuse_register_value_list(fuse_t *self)
         .name = "LIST",
         .init = fuse_init_list,
         .destroy = fuse_destroy_list,
-        .cstr = fuse_qstr_list,
-        .qstr = fuse_qstr_list,
+        .str = fuse_str_list,
     };
 
     fuse_register_value_type(self, FUSE_MAGIC_LIST, fuse_list_type);
@@ -116,7 +115,7 @@ static inline void fuse_set_tail(fuse_t *self, fuse_value_t *list, fuse_value_t 
     *ptr = elem;
 }
 
-static size_t fuse_qstr_list(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *list)
+static size_t fuse_str_list(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *list, bool json)
 {
     assert(self);
     assert(buf == NULL || sz > 0);

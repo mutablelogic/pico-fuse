@@ -7,12 +7,11 @@
 #define PICOFUSE_H
 
 #include <fuse/fuse.h>
-#include "bme280.h"
 #include "gpio.h"
 #include "led.h"
 #include "spi.h"
-
-
+#include "drivers/bme280.h"
+#include "drivers/uc8151.h"
 
 /* @brief Register picofuse types
  *

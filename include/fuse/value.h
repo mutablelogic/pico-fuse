@@ -17,13 +17,13 @@ typedef struct fuse_value fuse_value_t;
 
 /** @brief The representation of a fuse value descriptor
  */
-typedef struct {
-    size_t size;
-    const char *name;
-    bool (*init)(struct fuse_application *self, fuse_value_t *value, const void *user_data);
-    void (*destroy)(struct fuse_application *self, fuse_value_t *value);
-    size_t (*cstr)(struct fuse_application *self, char *buf, size_t sz, size_t i, fuse_value_t *v);
-    size_t (*qstr)(struct fuse_application *self, char *buf, size_t sz, size_t i, fuse_value_t *v);
+typedef struct
+{
+    size_t size;                                                                                              ///< The size of the value
+    const char *name;                                                                                         ///< The name of the value
+    bool (*init)(struct fuse_application *self, fuse_value_t *value, const void *user_data);                  ///< Initialize the value
+    void (*destroy)(struct fuse_application *self, fuse_value_t *value);                                      ///< Destroy the value
+    size_t (*str)(struct fuse_application *self, char *buf, size_t sz, size_t i, fuse_value_t *v, bool json); ///< Convert the value to a string
 } fuse_value_desc_t;
 
 /** @brief Register value type

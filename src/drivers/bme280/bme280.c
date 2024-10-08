@@ -7,7 +7,7 @@
 
 static bool fuse_bme280_init(fuse_t *self, fuse_value_t *value, const void *user_data);
 static void fuse_bme280_destroy(fuse_t *self, fuse_value_t *value);
-static size_t fuse_bme280_qstr(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v);
+static size_t fuse_bme280_str(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v, bool json);
 static void fuse_bme280_timer_callback(fuse_t *self, fuse_event_t *evt, void *user_data);
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -25,8 +25,8 @@ void fuse_register_bme280(fuse_t *self)
         .name = "BME280",
         .init = fuse_bme280_init,
         .destroy = fuse_bme280_destroy,
-        .cstr = fuse_bme280_qstr,
-        .qstr = fuse_bme280_qstr};
+        .str = fuse_bme280_str
+    };
     fuse_register_value_type(self, FUSE_MAGIC_BME280, fuse_bme280_type);
 }
 
@@ -244,7 +244,7 @@ static void fuse_bme280_timer_callback(fuse_t *self, fuse_event_t *evt, void *us
 
 /** @brief Append a JSON representation of the BME driver
  */
-static size_t fuse_bme280_qstr(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v)
+static size_t fuse_bme280_str(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v, bool json)
 {
     assert(self);
     assert(buf == NULL || sz > 0);

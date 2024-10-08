@@ -3,8 +3,7 @@
  */
 #ifndef PICOFUSE_BME280_H
 #define PICOFUSE_BME280_H
-
-#include "spi.h"
+#include <picofuse/spi.h>
 
 #ifdef DEBUG
 #define fuse_new_bme280(self, spi) \

@@ -38,8 +38,8 @@ void fuse_register_value_timer(fuse_t *self)
         .name = "TIME",
         .init = timer_init,
         .destroy = timer_destroy,
-        .cstr = fuse_qstr_timer,
-        .qstr = fuse_qstr_timer};
+        .str = fuse_str_timer,
+    };
     fuse_register_value_type(self, FUSE_MAGIC_TIMER, fuse_timer_type);
 
     // Get alarm pool
@@ -133,7 +133,7 @@ static bool fuse_timer_callback(repeating_timer_t *rt)
 
 /** @brief Append a quoted string representation of a timer
  */
-size_t fuse_qstr_timer(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v)
+size_t fuse_str_timer(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v, bool json)
 {
     assert(self);
     assert(buf == NULL || sz > 0);
