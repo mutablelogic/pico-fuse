@@ -32,7 +32,7 @@ static void fuse_uc8151_register(fuse_t *self)
 
 /** @brief Create a new UC8151 driver with SPI interface
  */
-fuse_bme280_t *fuse_new_uc8151_ex(fuse_t *self, fuse_spi_t *spi, const char *file, const int line)
+fuse_uc8151_t *fuse_new_uc8151_ex(fuse_t *self, fuse_spi_t *spi, const char *file, const int line)
 {
     assert(self);
     assert(spi);
@@ -74,7 +74,7 @@ static void fuse_uc8151_destroy(fuse_t *self, fuse_value_t *value)
 
 /** @brief Append a JSON representation of the UC8151 instance
  */
-static size_t fuse_bme280_str(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v, bool json)
+static size_t fuse_uc8151_str(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v, bool json)
 {
     assert(self);
     assert(buf == NULL || sz > 0);
