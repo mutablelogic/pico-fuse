@@ -29,3 +29,6 @@ if(${TARGET_OS} STREQUAL "pico")
         target_compile_definitions(${NAME} PRIVATE PICO_CYW43_SUPPORTED=1)
     endif()
 endif()
+
+add_subdirectory(drivers/bme280)
+add_subdirectory(drivers/uc8151)

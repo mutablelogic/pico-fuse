@@ -1,6 +1,5 @@
-#include <picofuse/picofuse.h>
 #include "bme280.h"
-#include "printf.h"
+#include "../../../fuse/printf.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // DECLARATIONS

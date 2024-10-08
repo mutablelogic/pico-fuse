@@ -1,6 +1,5 @@
-#include <picofuse/picofuse.h>
 #include "uc8151.h"
-#include "printf.h"
+#include "../../../fuse/printf.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // DECLARATIONS
@@ -32,10 +31,9 @@ static void fuse_uc8151_register(fuse_t *self)
 
 /** @brief Create a new UC8151 driver with SPI interface
  */
-fuse_uc8151_t *fuse_new_uc8151_ex(fuse_t *self, fuse_spi_t *spi, const char *file, const int line)
+fuse_uc8151_t *fuse_new_uc8151_ex(fuse_t *self,fuse_uc8151_config_t config, const char *file, const int line)
 {
     assert(self);
-    assert(spi);
 
     // Register type
     if (!fuse_is_registered_value(self, FUSE_MAGIC_UC8151))
@@ -44,7 +42,7 @@ fuse_uc8151_t *fuse_new_uc8151_ex(fuse_t *self, fuse_spi_t *spi, const char *fil
     }
 
     // Return a new UC8151 context
-    return (fuse_uc8151_t *)fuse_new_value_ex(self, FUSE_MAGIC_UC8151, spi, file, line);
+    return (fuse_uc8151_t *)fuse_new_value_ex(self, FUSE_MAGIC_UC8151, &config, file, line);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
