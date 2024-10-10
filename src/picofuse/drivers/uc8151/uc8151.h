@@ -44,7 +44,6 @@ bool fuse_uc8151_read(fuse_t *self, fuse_uc8151_t *ctx, uint8_t reg, uint8_t *da
  */
 bool fuse_uc8151_write(fuse_t *self, fuse_uc8151_t *ctx, uint8_t reg, uint8_t *data, size_t sz);
 
-
 /** @brief Reset the UC8151 and wait for it to become ready
  * 
  * @param self The fuse instance
@@ -52,7 +51,6 @@ bool fuse_uc8151_write(fuse_t *self, fuse_uc8151_t *ctx, uint8_t reg, uint8_t *d
  * @return true if successful, false if reset is not implemented or there is a busy timeout
  */
 bool fuse_uc8151_reset(fuse_t *self, fuse_uc8151_t *ctx);
-
 
 /** @brief Wait for the UC8151 busy pin to indicate an action has been completed
  * 
@@ -62,6 +60,15 @@ bool fuse_uc8151_reset(fuse_t *self, fuse_uc8151_t *ctx);
  * @return true if an action has been completed, false if busy is not implemented or there is a timeout
  */
 bool fuse_uc8151_busywait(fuse_t *self, fuse_uc8151_t *ctx, uint16_t timeout);
+
+/** @brief Power on/off (PON/POF)
+ * 
+ * @param self The fuse instance
+ * @param ctx The UC8151 context
+ * @param on Power on (true) or off (false)
+ * @return true if successful
+ */
+bool fuse_uc8151_power(fuse_t *self, fuse_uc8151_t *ctx, bool on);
 
 /** @brief Read LUT_REV from the UC8151
  * 
