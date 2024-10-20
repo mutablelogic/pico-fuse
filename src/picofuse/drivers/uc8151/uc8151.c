@@ -125,6 +125,12 @@ static bool fuse_uc8151_init(fuse_t *self, fuse_value_t *value, const void *user
         return false;
     }
 
+    // Power on
+    if(!fuse_uc8151_power(self, ctx, true)) {
+        fuse_debugf(self, "fuse_uc8151_init: cannot power on UC8151\n");
+        return false;
+    }
+
     // Read the revision
     uint8_t rev = fuse_uc8151_read_revision(self, ctx);
     fuse_debugf(self, "fuse_uc8151_init: revision %d\n", rev);
@@ -132,6 +138,12 @@ static bool fuse_uc8151_init(fuse_t *self, fuse_value_t *value, const void *user
     // Refresh the display
     if(!fuse_uc8151_refresh(self, ctx)) {
         fuse_debugf(self, "fuse_uc8151_init: cannot refresh UC8151\n");
+        return false;
+    }
+
+    // Power off
+    if(!fuse_uc8151_power(self, ctx, false)) {
+        fuse_debugf(self, "fuse_uc8151_init: cannot power off UC8151\n");
         return false;
     }
 
