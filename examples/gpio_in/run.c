@@ -14,9 +14,6 @@ void gpio_callback(fuse_t *self, fuse_event_t *evt, void *user_data)
 
 int run(fuse_t *self)
 {
-    // Initialize picofuse
-    picofuse_init(self);
-
     // GPIO inputs
     assert(fuse_retain(self, fuse_new_gpio(self, 23, FUSE_GPIO_IN)));
     assert(fuse_retain(self, fuse_new_gpio(self, 12, FUSE_GPIO_PULLUP)));

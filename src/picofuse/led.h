@@ -15,8 +15,4 @@ struct led_context
     int cyw43_pin;
 };
 
-/** @brief Register value type for LED
- */
-void fuse_register_value_led(fuse_t *self);
-
 #endif

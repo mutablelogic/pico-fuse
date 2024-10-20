@@ -2,7 +2,7 @@ set(NAME "picofuse")
 add_library(${NAME} STATIC
     gpio.c
     led.c
-    picofuse.c
+    pwm.c
     spi.c
 )
 
@@ -17,7 +17,8 @@ target_link_libraries(${NAME}
 
 if(${TARGET_OS} STREQUAL "pico")
     target_link_libraries(${NAME}
-        hardware_adc        
+        hardware_adc
+        hardware_pwm        
         hardware_spi
         pico_stdlib
     )

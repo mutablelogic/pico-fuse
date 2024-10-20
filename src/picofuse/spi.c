@@ -337,6 +337,13 @@ static inline void fuse_spi_cs(fuse_spi_t *spi, bool select) {
  */
 fuse_spi_t *fuse_new_spi_ex(fuse_t *self, fuse_spi_data_t data, const char *file, const int line) {
     assert(self);
+
+    // Register type
+    if (!fuse_is_registered_value(self, FUSE_MAGIC_SPI))
+    {
+        fuse_register_value_spi(self);
+    }
+
     return (fuse_spi_t *)fuse_new_value_ex(self, FUSE_MAGIC_SPI, &data, file, line);
 }
 

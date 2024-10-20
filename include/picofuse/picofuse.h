@@ -9,6 +9,7 @@
 #include <fuse/fuse.h>
 #include "gpio.h"
 #include "led.h"
+#include "pwm.h"
 #include "spi.h"
 #include "drivers/bme280.h"
 #include "drivers/uc8151.h"

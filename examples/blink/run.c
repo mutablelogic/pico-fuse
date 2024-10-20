@@ -18,9 +18,6 @@ void led_callback(fuse_t *self, fuse_event_t *evt, void *user_data)
 
 int run(fuse_t *self)
 {
-    // Initialize picofuse
-    picofuse_init(self);
-
     // LED output
     fuse_led_t *led = (fuse_led_t *)fuse_retain(self, fuse_new_led(self));
     assert(led);

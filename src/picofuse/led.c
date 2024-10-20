@@ -51,6 +51,12 @@ fuse_led_t *fuse_new_led_ex(fuse_t *self, const char *file, const int line)
 {
     assert(self);
 
+    // Register type
+    if (!fuse_is_registered_value(self, FUSE_MAGIC_LED))
+    {
+        fuse_register_value_led(self);
+    }
+
     // Create a new LED context
 #if defined(PICO_DEFAULT_LED_PIN)
     fuse_led_t *ctx = (fuse_led_t *)fuse_new_value_ex(self, FUSE_MAGIC_LED, (void *)PICO_DEFAULT_LED_PIN, file, line);

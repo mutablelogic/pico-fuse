@@ -19,8 +19,4 @@ struct spi_context
         uint16_t xfr_delayms; ///< Pause after a write or read in milliseconds
 };
 
-/** @brief Register type for SPI
- */
-void fuse_register_value_spi(fuse_t *self);
-
 #endif

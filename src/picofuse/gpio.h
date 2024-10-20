@@ -14,11 +14,6 @@ struct gpio_context
     uint8_t pin;
 };
 
-/** @brief Register value type for gpio pins
- */
-void fuse_register_value_gpio(fuse_t *self);
-
-
 /** @brief Initialize a GPIO pin with a function
  *
  *  @param pin The GPIO pin number

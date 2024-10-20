@@ -12,7 +12,19 @@ size_t vtostr_internal(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_
 {
     assert(self);
     assert(buf == NULL || sz > 0);
-    assert(v);
+
+    // If NULL then use null
+    if (v == NULL)
+    {
+        if (quoted)
+        {
+            return cstrtostr_internal(buf, sz, i, FUSE_PRINTF_NULL_JSON);
+        }
+        else
+        {
+            return cstrtostr_internal(buf, sz, i, NULL);
+        }
+    }
 
     int16_t magic = fuse_allocator_magic(self->allocator, v);
     assert(magic < FUSE_MAGIC_COUNT);

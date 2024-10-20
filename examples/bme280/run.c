@@ -46,9 +46,6 @@ void stats_callback(fuse_t *self, fuse_event_t *evt, void* user_data)
 
 int run(fuse_t *self)
 {
-    // Initialize picofuse
-    picofuse_init(self);
-
     // Create an SPI interface
     fuse_spi_data_t config = {
         .cs = GPIO_SPI_CS,

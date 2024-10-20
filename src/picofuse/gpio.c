@@ -76,6 +76,12 @@ fuse_gpio_t *fuse_new_gpio_ex(fuse_t *self, uint8_t pin, fuse_gpio_func_t func, 
     assert(pin < fuse_gpio_count());
     assert(func < FUSE_GPIO_FUNC_COUNT);
 
+    // Register type
+    if (!fuse_is_registered_value(self, FUSE_MAGIC_GPIO))
+    {
+        fuse_register_value_gpio(self);
+    }
+
     // Create a new GPIO context
     fuse_gpio_t *ctx = (fuse_gpio_t *)fuse_new_value_ex(self, FUSE_MAGIC_GPIO, (void *)(uintptr_t)pin, file, line);
     if (ctx == NULL)
