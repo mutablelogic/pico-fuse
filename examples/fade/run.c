@@ -8,26 +8,44 @@ void pwm_callback(fuse_t *self, fuse_event_t *evt, void *user_data)
     assert(self);
     assert(evt);
 
-    // Print the event
-    fuse_printf(self, "Event: evt=%v\n", evt);
+    static int fade = 0;
+    static bool going_up = true;
+
+    if (going_up)
+    {
+        ++fade;
+        if (fade > 255)
+        {
+            fade = 255;
+            going_up = false;
+        }
+    }
+    else
+    {
+        --fade;
+        if (fade < 1)
+        {
+            fade = 1;
+            going_up = true;
+        }
+    }
+
+    fuse_pwm_set_duty_cycle_b(self, (fuse_pwm_t *)user_data, fade);
 }
 
 int run(fuse_t *self)
 {
-    // Assumes the LED is on GPIO 25
-    // Blink every 1 second
     fuse_pwm_config_t config = {
-        .a = PICO_DEFAULT_LED_PIN,
-        .freq = 16
+        .b = PICO_DEFAULT_LED_PIN,
+        .freq = 256 * 1000,
     };
 
     // PWM
-    fuse_debugf(self, "Create pwm\n");
     fuse_pwm_t *pwm = (fuse_pwm_t *)fuse_retain(self, fuse_new_pwm(self, config));
     assert(pwm);
 
     // Register a callback on Core 0
-    assert(fuse_register_callback(self, FUSE_EVENT_PWM, 0, pwm_callback));
+    fuse_register_callback(self, FUSE_EVENT_PWM, 0, pwm_callback);
 
     fuse_debugf(self, "PWM: %v\n", pwm);
 

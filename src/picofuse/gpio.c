@@ -174,6 +174,8 @@ static void fuse_gpio_destroy(fuse_t *self, fuse_value_t *value)
     gpio_deinit(ctx->pin);
 }
 
+#include <stdio.h>
+
 /** @brief Set the function of a GPIO pin
  */
 static void fuse_gpio_setfunc(uint8_t pin, fuse_gpio_func_t func)
@@ -210,6 +212,7 @@ static void fuse_gpio_setfunc(uint8_t pin, fuse_gpio_func_t func)
         gpio_set_dir(pin, GPIO_OUT);
         break;
     case FUSE_GPIO_PWM:
+        printf("Setting GPIO %d to PWM\n", pin);
         gpio_set_function(pin, GPIO_FUNC_PWM);
         break;
     case FUSE_GPIO_SPI:

@@ -332,7 +332,7 @@ static void fuse_runloop(fuse_t *self, uint8_t q)
             drained = fuse_drain(self, 10);
             if (drained > 0)
             {
-                fuse_debugf(self, "fuse_runloop: drained %u item(s)\n", drained);
+                //fuse_debugf(self, "fuse_runloop: drained %u item(s)\n", drained);
             }
             else
             {

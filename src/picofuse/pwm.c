@@ -85,37 +85,59 @@ static bool fuse_pwm_init(fuse_t *self, fuse_value_t *value, const void *user_da
     // Check parameters
     fuse_pwm_t *pwm = (fuse_pwm_t *)value;
     fuse_pwm_config_t *data = (fuse_pwm_config_t *)user_data;
-    assert(data->a < fuse_gpio_count());
+    assert(data->a == 0 || data->a < fuse_gpio_count());
     assert(data->b == 0 || data->b < fuse_gpio_count());
 
     // Get PWM number for GPIO pins
-    uint8_t slice = pwm_gpio_to_slice_num(data->a);
+    uint8_t slice_a = 0xFF;
+    uint8_t slice_b = 0xFF;
+    if (data->a != 0)
+    {
+        slice_a = pwm_gpio_to_slice_num(data->a);
+    }
     if (data->b != 0)
     {
-        if (pwm_gpio_to_slice_num(data->b) != slice)
+        slice_b = pwm_gpio_to_slice_num(data->b);
+        if (slice_a != 0xFF && slice_a != slice_b)
         {
             fuse_debugf(self, "fuse_pwm_init: a=%d b=%d different slices\n", data->a, data->b);
             return false;
         }
+        else
+        {
+            slice_a = slice_b;
+        }
+    }
+    if (slice_a == 0xFF && slice_b == 0xFF)
+    {
+        fuse_debugf(self, "fuse_pwm_init: invalid GPIO combination\n");
+        return false;
     }
 
     // Check slice
-    if (fuse_pwm[slice] != NULL)
+    if (fuse_pwm[slice_a] != NULL)
     {
-        fuse_debugf(self, "fuse_pwm_init: slice %d already in use\n", slice);
+        fuse_debugf(self, "fuse_pwm_init: slice %d already in use\n", slice_a);
         return false;
     }
 
     // Set slice
-    assert(slice < NUM_PWM_SLICES);
-    pwm->slice = slice;
-    fuse_pwm[slice] = pwm;
+    assert(slice_a < NUM_PWM_SLICES);
+    pwm->slice = slice_a;
+    fuse_pwm[slice_a] = pwm;
 
     // Create GPIO pins
-    pwm->a = fuse_new_gpio(self, data->a, FUSE_GPIO_PWM);
-    if (pwm->a == NULL)
+    if (data->a != 0)
     {
-        return false;
+        pwm->a = fuse_new_gpio(self, data->a, FUSE_GPIO_PWM);
+        if (pwm->a == NULL)
+        {
+            return false;
+        }
+    }
+    else
+    {
+        pwm->a = NULL;
     }
     if (data->b != 0)
     {
@@ -139,8 +161,11 @@ static bool fuse_pwm_init(fuse_t *self, fuse_value_t *value, const void *user_da
     pwm_config_set_wrap(&cfg, pwm->wrap);
     pwm_init(pwm->slice, &cfg, false);
 
-    // Set 50% duty cycle
-    fuse_pwm_set_duty_cycle_a(self, pwm, 128);
+    // Set 50% duty cycle on both channels
+    if (pwm->a)
+    {
+        fuse_pwm_set_duty_cycle_a(self, pwm, 128);
+    }
     if (pwm->b)
     {
         fuse_pwm_set_duty_cycle_b(self, pwm, 128);
@@ -330,11 +355,12 @@ static inline uint32_t fuse_pwm_get_freq(fuse_pwm_t *pwm)
 }
 
 /** @brief IRQ callback function - for a PWM slice
- * 
+ *
  * @param self The fuse application
  * @param pwm The PWM context
  */
-static inline void fuse_pwm_callback(fuse_t *self, fuse_pwm_t *pwm) {
+static inline void fuse_pwm_callback(fuse_t *self, fuse_pwm_t *pwm)
+{
     assert(self);
     assert(pwm);
     fuse_event_t *evt = fuse_new_event(self, (fuse_value_t *)pwm, FUSE_EVENT_PWM, pwm);
@@ -353,7 +379,7 @@ static void fuse_pwm_callback_global()
         if (irq & (1 << slice))
         {
             fuse_pwm_t *pwm = fuse_pwm[slice];
-            if(pwm)
+            if (pwm)
             {
                 fuse_pwm_callback(fuse_pwm_instance, pwm);
             }
