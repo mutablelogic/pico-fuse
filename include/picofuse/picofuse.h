@@ -11,13 +11,8 @@
 #include "led.h"
 #include "pwm.h"
 #include "spi.h"
+#include "watchdog.h"
 #include "drivers/bme280.h"
 #include "drivers/uc8151.h"
-
-/* @brief Register picofuse types
- *
- * @param fuse The fuse application
- */
-void picofuse_init(fuse_t *fuse);
 
 #endif

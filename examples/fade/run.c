@@ -35,15 +35,21 @@ void pwm_callback(fuse_t *self, fuse_event_t *evt, void *user_data)
 
 int run(fuse_t *self)
 {
-    fuse_pwm_config_t config = {
+    fuse_pwm_config_t pwm_config = {
         .gpio_b = PICO_DEFAULT_LED_PIN,
         .duty_cycle_b = 0xFF,
         .freq = 512 * 1000,
         .event = true,
     };
+    fuse_watchdog_config_t watchdog_config = {};
+
+    // Watchdog
+    fuse_watchdog_t *watchdog = (fuse_watchdog_t *)fuse_retain(self, fuse_new_watchdog(self, watchdog_config));
+    assert(watchdog);
+    fuse_debugf(self, "WATCHDOG: %v\n", watchdog);
 
     // PWM
-    fuse_pwm_t *pwm = (fuse_pwm_t *)fuse_retain(self, fuse_new_pwm(self, config));
+    fuse_pwm_t *pwm = (fuse_pwm_t *)fuse_retain(self, fuse_new_pwm(self, pwm_config));
     assert(pwm);
     fuse_register_callback(self, FUSE_EVENT_PWM, 0, pwm_callback);
     fuse_debugf(self, "PWM: %v\n", pwm);

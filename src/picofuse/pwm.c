@@ -7,33 +7,6 @@
 #include "printf.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-// DECLARATIONS
-
-/** @brief Initialize a PWM interface
- */
-static bool fuse_pwm_init(fuse_t *self, fuse_value_t *value, const void *user_data);
-
-/** @brief Destroy the PWM interface
- */
-static void fuse_pwm_destroy(fuse_t *self, fuse_value_t *value);
-
-/** @brief Append a string representation of a PWM interface
- */
-static size_t fuse_pwm_str(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v, bool json);
-
-/** @brief Calculate PWM configuration from frequency
- */
-static void fuse_pwm_set_freq(fuse_pwm_t *pwm, uint32_t freq);
-
-/** @brief Return PWM frequency
- */
-static uint32_t fuse_pwm_get_freq(fuse_pwm_t *pwm);
-
-/** @brief IRQ callback function - for all PWM
- */
-static void fuse_pwm_callback_global();
-
-///////////////////////////////////////////////////////////////////////////////
 // GLOBALS
 
 static fuse_pwm_t *fuse_pwm[NUM_PWM_SLICES];

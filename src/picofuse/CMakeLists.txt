@@ -4,6 +4,7 @@ add_library(${NAME} STATIC
     led.c
     pwm.c
     spi.c
+    watchdog.c
 )
 
 target_include_directories(${NAME} PRIVATE
@@ -20,6 +21,7 @@ if(${TARGET_OS} STREQUAL "pico")
         hardware_adc
         hardware_pwm        
         hardware_spi
+        hardware_watchdog
         pico_stdlib
     )
     if(PICO_CYW43_SUPPORTED)
