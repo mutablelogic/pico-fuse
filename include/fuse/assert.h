@@ -22,14 +22,14 @@ void fuse_panic(const char *expr, const char *file, int line);
 
 #ifdef DEBUG
 #define assert(e) \
-    ((void)((e) ? 0 : fuse_panic(#e, __FILE__, __LINE__)))
+    ((e) ? (void)0 : fuse_panic(#e, __FILE__, __LINE__))
 #define assert_cstr_eq(a, b) \
-    ((void)((strcmp((a), (b)) == 0) ? 0 : fuse_panic(#a " == " #b, __FILE__, __LINE__)))
+    ((strcmp((a), (b)) == 0) ? (void)0 : fuse_panic(#a " == " #b, __FILE__, __LINE__))
 #else
 #define assert(e) \
-    ((void)((e) ? 0 : fuse_panic(#e, NULL, 0)))
+    ((e) ? (void)0 : fuse_panic(#e, NULL, 0))
 #define assert_cstr_eq(a, b) \
-    ((void)((strcmp((a), (b)) == 0) ? 0 : fuse_panic(#a " == " #b, 0, 0)))
+    ((strcmp((a), (b)) == 0) ? (void)0 : fuse_panic(#a " == " #b, 0, 0))
 #endif /* DEBUG */
 
 #endif /* FUSE_ALLOC_H */

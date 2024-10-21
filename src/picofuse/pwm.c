@@ -85,51 +85,61 @@ static bool fuse_pwm_init(fuse_t *self, fuse_value_t *value, const void *user_da
     // Check parameters
     fuse_pwm_t *pwm = (fuse_pwm_t *)value;
     fuse_pwm_config_t *data = (fuse_pwm_config_t *)user_data;
-    assert(data->a == 0 || data->a < fuse_gpio_count());
-    assert(data->b == 0 || data->b < fuse_gpio_count());
+    assert(data->gpio_a < fuse_gpio_count());
+    assert(data->gpio_a < fuse_gpio_count());
+    assert(data->freq > 0);
 
-    // Get PWM number for GPIO pins
-    uint8_t slice_a = 0xFF;
-    uint8_t slice_b = 0xFF;
-    if (data->a != 0)
+    // Channel A
+    uint8_t slice = 0xFF;
+    if (data->duty_cycle_a > 0)
     {
-        slice_a = pwm_gpio_to_slice_num(data->a);
-    }
-    if (data->b != 0)
-    {
-        slice_b = pwm_gpio_to_slice_num(data->b);
-        if (slice_a != 0xFF && slice_a != slice_b)
+        slice = pwm_gpio_to_slice_num(data->gpio_a);
+        uint8_t ch = pwm_gpio_to_channel(data->gpio_a);
+        if (ch != PWM_CHAN_A)
         {
-            fuse_debugf(self, "fuse_pwm_init: a=%d b=%d different slices\n", data->a, data->b);
+            fuse_debugf(self, "fuse_pwm_init: invalid GPIO%d for Channel A\n", data->gpio_a);
             return false;
         }
-        else
-        {
-            slice_a = slice_b;
-        }
-    }
-    if (slice_a == 0xFF && slice_b == 0xFF)
-    {
-        fuse_debugf(self, "fuse_pwm_init: invalid GPIO combination\n");
-        return false;
     }
 
-    // Check slice
-    if (fuse_pwm[slice_a] != NULL)
+    // Channel B
+    if (data->duty_cycle_b > 0)
     {
-        fuse_debugf(self, "fuse_pwm_init: slice %d already in use\n", slice_a);
+        uint8_t slice_b = pwm_gpio_to_slice_num(data->gpio_b);
+        uint8_t ch = pwm_gpio_to_channel(data->gpio_b);
+        if (ch != PWM_CHAN_B)
+        {
+            fuse_debugf(self, "fuse_pwm_init: invalid GPIO%d for Channel B\n", data->gpio_b);
+            return false;
+        }
+        if (slice != 0xFF && slice != slice_b)
+        {
+            fuse_debugf(self, "fuse_pwm_init: GPIO%d and GPIO%d different slices\n", data->gpio_a, data->gpio_b);
+            return false;
+        }
+        slice = slice_b;
+    }
+
+    // If neither channel is initialized, return false
+    if (slice > NUM_PWM_SLICES)
+    {
+        fuse_debugf(self, "fuse_pwm_init: neither channel initialized\n");
+        return false;
+    }
+    else if (fuse_pwm[slice] != NULL)
+    {
+        fuse_debugf(self, "fuse_pwm_init: slice %d already in use\n", slice);
         return false;
     }
 
     // Set slice
-    assert(slice_a < NUM_PWM_SLICES);
-    pwm->slice = slice_a;
-    fuse_pwm[slice_a] = pwm;
+    pwm->slice = slice;
+    fuse_pwm[slice] = pwm;
 
-    // Create GPIO pins
-    if (data->a != 0)
+    // Initialize GPIO A
+    if (data->duty_cycle_a > 0)
     {
-        pwm->a = fuse_new_gpio(self, data->a, FUSE_GPIO_PWM);
+        pwm->a = fuse_new_gpio(self, data->gpio_a, FUSE_GPIO_PWM);
         if (pwm->a == NULL)
         {
             return false;
@@ -139,9 +149,11 @@ static bool fuse_pwm_init(fuse_t *self, fuse_value_t *value, const void *user_da
     {
         pwm->a = NULL;
     }
-    if (data->b != 0)
+
+    // Initialize GPIO B
+    if (data->duty_cycle_b > 0)
     {
-        pwm->b = fuse_new_gpio(self, data->b, FUSE_GPIO_PWM);
+        pwm->b = fuse_new_gpio(self, data->gpio_b, FUSE_GPIO_PWM);
         if (pwm->b == NULL)
         {
             return false;
@@ -161,19 +173,19 @@ static bool fuse_pwm_init(fuse_t *self, fuse_value_t *value, const void *user_da
     pwm_config_set_wrap(&cfg, pwm->wrap);
     pwm_init(pwm->slice, &cfg, false);
 
-    // Set 50% duty cycle on both channels
+    // Set duty cycles
     if (pwm->a)
     {
-        fuse_pwm_set_duty_cycle_a(self, pwm, 128);
+        fuse_pwm_set_duty_cycle_a(self, pwm, data->duty_cycle_a);
     }
     if (pwm->b)
     {
-        fuse_pwm_set_duty_cycle_b(self, pwm, 128);
+        fuse_pwm_set_duty_cycle_b(self, pwm, data->duty_cycle_b);
     }
 
-    // Clear IRQ
+    // Clear IRQ, then set it
     pwm_clear_irq(pwm->slice);
-    pwm_set_irq_enabled(pwm->slice, true);
+    pwm_set_irq_enabled(pwm->slice, data->event);
 
     // Enable PWM
     pwm_set_enabled(pwm->slice, !data->disabled);
@@ -193,6 +205,10 @@ static void fuse_pwm_destroy(fuse_t *self, fuse_value_t *value)
     assert(self);
     assert(value);
     fuse_pwm_t *pwm = (fuse_pwm_t *)value;
+
+    // Clear IRQ, then set it
+    pwm_clear_irq(pwm->slice);
+    pwm_set_irq_enabled(pwm->slice, false);
 
     // Disable the PWM
     pwm_set_enabled(pwm->slice, false);
@@ -297,14 +313,14 @@ fuse_pwm_t *fuse_new_pwm_ex(fuse_t *self, fuse_pwm_config_t data, const char *fi
  */
 void fuse_pwm_set_duty_cycle_a(fuse_t *self, fuse_pwm_t *pwm, uint8_t duty_cycle)
 {
+    assert(self);
     assert(pwm);
-    assert(pwm->a);
 
-    uint16_t level = (pwm->wrap * duty_cycle) >> 8;
-
-    fuse_debugf(self, "fuse_pwm_set_duty_cycle_a: slice=%d clock=%d level=%d\n", pwm->slice, clock_get_hz(clk_sys), level);
-
-    pwm_set_chan_level(pwm->slice, PWM_CHAN_A, level);
+    if (pwm->a)
+    {
+        uint16_t level = (pwm->wrap * duty_cycle) >> 8;
+        pwm_set_chan_level(pwm->slice, PWM_CHAN_A, level);
+    }
 }
 
 /** @brief Set duty cycle for Channel B
@@ -315,11 +331,27 @@ void fuse_pwm_set_duty_cycle_a(fuse_t *self, fuse_pwm_t *pwm, uint8_t duty_cycle
  */
 void fuse_pwm_set_duty_cycle_b(fuse_t *self, fuse_pwm_t *pwm, uint8_t duty_cycle)
 {
+    assert(self);
     assert(pwm);
-    assert(pwm->b);
 
-    uint16_t level = (pwm->wrap * duty_cycle) >> 8;
-    pwm_set_chan_level(pwm->slice, PWM_CHAN_B, level);
+    if (pwm->b)
+    {
+        uint16_t level = (pwm->wrap * duty_cycle) >> 8;
+        pwm_set_chan_level(pwm->slice, PWM_CHAN_B, level);
+    }
+}
+
+/** @brief Enable or disable the PWM instance
+ *
+ * @param self The fuse application
+ * @param pwm The PWM context
+ * @param enabled Set to true to enable the PWM
+ */
+void fuse_pwm_set_enabled(fuse_t *self, fuse_pwm_t *pwm, bool enabled)
+{
+    assert(self);
+    assert(pwm);
+    pwm_set_enabled(pwm->slice, enabled);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

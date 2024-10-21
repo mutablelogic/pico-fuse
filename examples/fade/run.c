@@ -36,8 +36,10 @@ void pwm_callback(fuse_t *self, fuse_event_t *evt, void *user_data)
 int run(fuse_t *self)
 {
     fuse_pwm_config_t config = {
-        .b = PICO_DEFAULT_LED_PIN,
+        .gpio_b = PICO_DEFAULT_LED_PIN,
+        .duty_cycle_b = 0xFF,
         .freq = 256 * 1000,
+        .event = true,
     };
 
     // PWM

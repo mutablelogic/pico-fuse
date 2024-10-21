@@ -42,12 +42,12 @@ typedef struct pwm_context fuse_pwm_t;
 typedef struct
 {
     uint32_t freq;        ///< Requested frequency (actual frequency may be different)
-    uint8_t duty_cycle_a; ///< Initial duty cycle for Channel A (1-255), or zero if channel unused
-    uint8_t duty_cycle_b; ///< Initial duty cycle for Channel B (1-255), or zero if channel unused
     uint8_t gpio_a;       ///< GPIO pin for Channel A
     uint8_t gpio_b;       ///< GPIO pin for Channel B
+    uint8_t duty_cycle_a; ///< Initial duty cycle for Channel A (1-255), or zero if channel unused
+    uint8_t duty_cycle_b; ///< Initial duty cycle for Channel B (1-255), or zero if channel unused
     bool disabled;        ///< True if the PWM should not be enabled after initialization
-    bool event;           ///< True if the PWM should generate an IRQ
+    bool event;           ///< True if the PWM should emit a FUSE_EVENT_PWM event when the counter wraps around
 } fuse_pwm_config_t;
 
 /** @brief Initialize a PWM interface
