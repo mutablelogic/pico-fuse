@@ -9,13 +9,17 @@
 #include "value.h"
 
 // Define the event types
-#define FUSE_EVENT_NULL 0x00  ///< NULL event
-#define FUSE_EVENT_TIMER 0x01 ///< Timer event
-#define FUSE_EVENT_GPIO 0x02  ///< GPIO input event
-#define FUSE_EVENT_ADC 0x03   ///< ADC samples event
+#define FUSE_EVENT_NULL   0x00 ///< NULL event
+#define FUSE_EVENT_TIMER  0x01 ///< Timer event
+#define FUSE_EVENT_GPIO   0x02 ///< GPIO input event
+#define FUSE_EVENT_PWM    0x03 ///< PWM level event
+#define FUSE_EVENT_ADC    0x04 ///< ADC samples event
+#define FUSE_EVENT_SPI_TX 0x05 ///< SPI transmit event
+#define FUSE_EVENT_SPI_RX 0x06 ///< SPI receive event
+#define FUSE_EVENT_BME280 0x07 ///< BME280 measurement event
 
 // Maximum number of events
-#define FUSE_EVENT_COUNT 0x04       ///< Maximum number of events
+#define FUSE_EVENT_COUNT 0x08       ///< Maximum number of events
 #define FUSE_EVENT_CALLBACK_COUNT 3 ///< Maximum number of callbacks per event
 
 #ifdef DEBUG

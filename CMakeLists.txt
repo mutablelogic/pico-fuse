@@ -40,7 +40,6 @@ include(CTest)
 add_subdirectory(tests/fuse)
 
 # Examples
-add_subdirectory(examples/fuse)
 if(TARGET_OS STREQUAL "pico")
-    add_subdirectory(examples/picofuse)
+    add_subdirectory(examples)
 endif()

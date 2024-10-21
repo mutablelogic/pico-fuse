@@ -17,13 +17,13 @@ typedef struct fuse_value fuse_value_t;
 
 /** @brief The representation of a fuse value descriptor
  */
-typedef struct {
-    size_t size;
-    const char *name;
-    bool (*init)(struct fuse_application *self, fuse_value_t *value, const void *user_data);
-    void (*destroy)(struct fuse_application *self, fuse_value_t *value);
-    size_t (*cstr)(struct fuse_application *self, char *buf, size_t sz, size_t i, fuse_value_t *v);
-    size_t (*qstr)(struct fuse_application *self, char *buf, size_t sz, size_t i, fuse_value_t *v);
+typedef struct
+{
+    size_t size;                                                                                              ///< The size of the value
+    const char *name;                                                                                         ///< The name of the value
+    bool (*init)(struct fuse_application *self, fuse_value_t *value, const void *user_data);                  ///< Initialize the value
+    void (*destroy)(struct fuse_application *self, fuse_value_t *value);                                      ///< Destroy the value
+    size_t (*str)(struct fuse_application *self, char *buf, size_t sz, size_t i, fuse_value_t *v, bool json); ///< Convert the value to a string
 } fuse_value_desc_t;
 
 /** @brief Register value type
@@ -33,6 +33,14 @@ typedef struct {
  * @param type The value type descriptor
  */
 void fuse_register_value_type(fuse_t *self, uint16_t magic, fuse_value_desc_t type);
+
+/** @brief Determine if a value type is registered
+ *
+ * @param self The fuse instance
+ * @param magic The value type
+ * @return true if the value type is registered
+ */
+bool fuse_is_registered_value(fuse_t *self, uint16_t magic);
 
 #ifdef DEBUG
 #define fuse_new_null(self) \
@@ -84,5 +92,16 @@ fuse_value_t *fuse_retain(fuse_t *self, void *value);
  * @param ptr The value to release, which must be a fuse_value_t*
  */
 void fuse_release(fuse_t *self, void *value);
+
+/** @brief Check type of a value
+ *
+ * This method returns the value type, or 0 if the value is not
+ * a valid value or a NULL value.
+ *
+ * @param self The fuse instance
+ * @param value The value
+ * @return The magic number of the value
+ */
+uint16_t fuse_value_type(fuse_t *self, void *value);
 
 #endif /* FUSE_VALUE_H */

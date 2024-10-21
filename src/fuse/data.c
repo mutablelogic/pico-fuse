@@ -8,8 +8,7 @@
 // DECLARATIONS
 
 static bool fuse_init_data(fuse_t *self, fuse_value_t *value, const void *user_data);
-static size_t fuse_cstr_data(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v);
-static size_t fuse_qstr_data(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v);
+static size_t fuse_str_data(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v, bool json);
 
 ///////////////////////////////////////////////////////////////////////////////
 // LIFECYCLE
@@ -25,8 +24,7 @@ void fuse_register_value_data(fuse_t *self)
         .size = 0,
         .name = "DATA",
         .init = fuse_init_data,
-        .cstr = fuse_cstr_data,
-        .qstr = fuse_qstr_data,
+        .str = fuse_str_data,
     };
     fuse_register_value_type(self, FUSE_MAGIC_DATA, fuse_data_type);
 }
@@ -59,13 +57,20 @@ static bool fuse_init_data(fuse_t *self, fuse_value_t *value, const void *user_d
     return true;
 }
 
-/* @brief Output a data block as hex
+/* @brief Output a data block as hex or base64
+ *
+ * Outputs as hexidecimal if json is false, otherwise as base64
  */
-static size_t fuse_cstr_data(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v)
+static size_t fuse_str_data(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v, bool json)
 {
     assert(self);
     assert(v);
     assert(fuse_allocator_magic(self->allocator, v) == FUSE_MAGIC_DATA);
+
+    if (json)
+    {
+        return b64tostr_internal(buf, sz, i, v, fuse_allocator_size(self->allocator, v));
+    }
 
     // If data size is zero, then return empty string
     size_t datasz = fuse_allocator_size(self->allocator, v);
@@ -83,15 +88,4 @@ static size_t fuse_cstr_data(fuse_t *self, char *buf, size_t sz, size_t i, fuse_
 
     // Return the new index
     return i;
-}
-
-/* @brief Output a data block as base64
- */
-static size_t fuse_qstr_data(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v)
-{
-    assert(self);
-    assert(v);
-    assert(fuse_allocator_magic(self->allocator, v) == FUSE_MAGIC_DATA);
-
-    return b64tostr_internal(buf, sz, i, v, fuse_allocator_size(self->allocator, v));
 }

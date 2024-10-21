@@ -8,8 +8,8 @@
 // DECLARATIONS
 
 static bool fuse_init_number(fuse_t *self, fuse_value_t *value, const void *user_data);
-static size_t fuse_qstr_bool(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v);
-static size_t fuse_qstr_number(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v);
+static size_t fuse_str_bool(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v, bool json);
+static size_t fuse_str_number(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v, bool json);
 
 ///////////////////////////////////////////////////////////////////////////////
 // LIFECYCLE
@@ -24,8 +24,7 @@ void fuse_register_value_int(fuse_t *self)
         .size = sizeof(int8_t),
         .name = "S8",
         .init = fuse_init_number,
-        .cstr = fuse_qstr_number,
-        .qstr = fuse_qstr_number,
+        .str = fuse_str_number,
     };
     fuse_register_value_type(self, FUSE_MAGIC_S8, fuse_s8_type);
 
@@ -33,8 +32,7 @@ void fuse_register_value_int(fuse_t *self)
         .size = sizeof(int16_t),
         .name = "S16",
         .init = fuse_init_number,
-        .cstr = fuse_qstr_number,
-        .qstr = fuse_qstr_number,
+        .str = fuse_str_number,
     };
     fuse_register_value_type(self, FUSE_MAGIC_S16, fuse_s16_type);
 
@@ -42,8 +40,7 @@ void fuse_register_value_int(fuse_t *self)
         .size = sizeof(int32_t),
         .name = "S32",
         .init = fuse_init_number,
-        .cstr = fuse_qstr_number,
-        .qstr = fuse_qstr_number,
+        .str = fuse_str_number,
     };
     fuse_register_value_type(self, FUSE_MAGIC_S32, fuse_s32_type);
 
@@ -51,8 +48,7 @@ void fuse_register_value_int(fuse_t *self)
         .size = sizeof(int64_t),
         .name = "S64",
         .init = fuse_init_number,
-        .cstr = fuse_qstr_number,
-        .qstr = fuse_qstr_number,
+        .str = fuse_str_number,
     };
     fuse_register_value_type(self, FUSE_MAGIC_S64, fuse_s64_type);
 }
@@ -67,8 +63,7 @@ void fuse_register_value_uint(fuse_t *self)
         .size = sizeof(uint8_t),
         .name = "U8",
         .init = fuse_init_number,
-        .cstr = fuse_qstr_number,
-        .qstr = fuse_qstr_number,
+        .str = fuse_str_number,
     };
     fuse_register_value_type(self, FUSE_MAGIC_U8, fuse_u8_type);
 
@@ -76,8 +71,7 @@ void fuse_register_value_uint(fuse_t *self)
         .size = sizeof(uint16_t),
         .name = "U16",
         .init = fuse_init_number,
-        .cstr = fuse_qstr_number,
-        .qstr = fuse_qstr_number,
+        .str = fuse_str_number,
     };
     fuse_register_value_type(self, FUSE_MAGIC_U16, fuse_u16_type);
 
@@ -85,8 +79,7 @@ void fuse_register_value_uint(fuse_t *self)
         .size = sizeof(uint32_t),
         .name = "U32",
         .init = fuse_init_number,
-        .cstr = fuse_qstr_number,
-        .qstr = fuse_qstr_number,
+        .str = fuse_str_number,
     };
     fuse_register_value_type(self, FUSE_MAGIC_U32, fuse_u32_type);
 
@@ -94,8 +87,7 @@ void fuse_register_value_uint(fuse_t *self)
         .size = sizeof(uint64_t),
         .name = "U64",
         .init = fuse_init_number,
-        .cstr = fuse_qstr_number,
-        .qstr = fuse_qstr_number,
+        .str = fuse_str_number,
     };
     fuse_register_value_type(self, FUSE_MAGIC_U64, fuse_u64_type);
 }
@@ -110,8 +102,7 @@ void fuse_register_value_bool(fuse_t *self)
         .size = sizeof(bool),
         .name = "BOOL",
         .init = fuse_init_number,
-        .cstr = fuse_qstr_bool,
-        .qstr = fuse_qstr_bool,
+        .str = fuse_str_bool,
     };
     fuse_register_value_type(self, FUSE_MAGIC_BOOL, fuse_bool_type);
 }
@@ -126,8 +117,7 @@ void fuse_register_value_float(fuse_t *self)
         .size = sizeof(float),
         .name = "F32",
         .init = fuse_init_number,
-        .cstr = fuse_qstr_number,
-        .qstr = fuse_qstr_number,
+        .str = fuse_str_number,
     };
     fuse_register_value_type(self, FUSE_MAGIC_F32, fuse_f32_type);
 
@@ -135,8 +125,7 @@ void fuse_register_value_float(fuse_t *self)
         .size = sizeof(double),
         .name = "F64",
         .init = fuse_init_number,
-        .cstr = fuse_qstr_number,
-        .qstr = fuse_qstr_number,
+        .str = fuse_str_number,
     };
     fuse_register_value_type(self, FUSE_MAGIC_F64, fuse_f64_type);
 }
@@ -203,9 +192,9 @@ static bool fuse_init_number(fuse_t *self, fuse_value_t *value, const void *user
     return true;
 }
 
-/* @brief Output a bool as a cstr
+/* @brief Output a bool as a string
  */
-static size_t fuse_qstr_bool(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v)
+static size_t fuse_str_bool(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v, bool json)
 {
     assert(self);
     assert(v);
@@ -222,9 +211,9 @@ static size_t fuse_qstr_bool(fuse_t *self, char *buf, size_t sz, size_t i, fuse_
     }
 }
 
-/* @brief Output an integer as a cstr
+/* @brief Output an integer as a string
  */
-static size_t fuse_qstr_number(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v)
+static size_t fuse_str_number(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v, bool json)
 {
     assert(self);
     assert(v);

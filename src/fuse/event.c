@@ -13,7 +13,7 @@ static struct event_callbacks *fuse_get_callbacks(fuse_t *self, uint8_t type, ui
 
 /** @brief Append a quoted string representation of an event
  */
-static size_t fuse_qstr_event(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v);
+static size_t fuse_str_event(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v, bool json);
 
 ///////////////////////////////////////////////////////////////////////////////
 // LIFECYCLE
@@ -28,8 +28,7 @@ void fuse_register_value_event(fuse_t *self)
     fuse_value_desc_t fuse_event_type = {
         .size = sizeof(struct event_context),
         .name = "EVT",
-        .cstr = fuse_qstr_event,
-        .qstr = fuse_qstr_event,
+        .str = fuse_str_event,
     };
     fuse_register_value_type(self, FUSE_MAGIC_EVENT, fuse_event_type);
 
@@ -194,7 +193,7 @@ static struct event_callbacks *fuse_get_callbacks(fuse_t *self, uint8_t type, ui
 
 /** @brief Append a quoted string representation of an event
  */
-static size_t fuse_qstr_event_type(char *buf, size_t sz, size_t i, uint8_t type)
+static size_t fuse_str_event_type(char *buf, size_t sz, size_t i, uint8_t type)
 {
 #ifdef DEBUG
     switch (type)
@@ -205,8 +204,16 @@ static size_t fuse_qstr_event_type(char *buf, size_t sz, size_t i, uint8_t type)
         return qstrtostr_internal(buf, sz, i, "TIMER");
     case FUSE_EVENT_GPIO:
         return qstrtostr_internal(buf, sz, i, "GPIO");
+    case FUSE_EVENT_PWM:
+        return qstrtostr_internal(buf, sz, i, "PWM");
     case FUSE_EVENT_ADC:
         return qstrtostr_internal(buf, sz, i, "ADC");
+    case FUSE_EVENT_SPI_TX:
+        return qstrtostr_internal(buf, sz, i, "SPI_TX");
+    case FUSE_EVENT_SPI_RX:
+        return qstrtostr_internal(buf, sz, i, "SPI_RX");    
+    case FUSE_EVENT_BME280:
+        return qstrtostr_internal(buf, sz, i, "BME280");
     default:
         assert(false);
         return i;
@@ -216,9 +223,9 @@ static size_t fuse_qstr_event_type(char *buf, size_t sz, size_t i, uint8_t type)
 #endif
 }
 
-/** @brief Append a quoted string representation of an event
+/** @brief Append a string representation of an event
  */
-static size_t fuse_qstr_event(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v)
+static size_t fuse_str_event(fuse_t *self, char *buf, size_t sz, size_t i, fuse_value_t *v, bool json)
 {
     assert(self);
     assert(buf == NULL || sz > 0);
@@ -241,7 +248,7 @@ static size_t fuse_qstr_event(fuse_t *self, char *buf, size_t sz, size_t i, fuse
     i = chtostr_internal(buf, sz, i, ',');
     i = qstrtostr_internal(buf, sz, i, "type");
     i = chtostr_internal(buf, sz, i, ':');
-    i = fuse_qstr_event_type(buf, sz, i, evt->type);
+    i = fuse_str_event_type(buf, sz, i, evt->type);
 
     // Add user data
     if (evt->user_data)

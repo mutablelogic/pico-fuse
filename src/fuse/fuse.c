@@ -172,6 +172,11 @@ size_t fuse_drain(fuse_t *self, size_t cap)
         struct fuse_allocator_header *next = hdr->next;
         if (hdr->ref == 0)
         {
+            //fuse_debugf(self, "fuse_drain: %p %s (%d bytes)", hdr->ptr, self->desc[hdr->magic].name, hdr->size);
+            //if (hdr->file != NULL)
+            //{
+            //    fuse_debugf(self, " [allocated at %s:%d]", hdr->file, hdr->line);
+            //}
             fuse_free(self, hdr->ptr);
             count++;
         }
@@ -284,6 +289,20 @@ inline void fuse_exit(fuse_t *self, int exit_code)
     self->exit_code = exit_code ? exit_code : FUSE_EXIT_SUCCESS;
 }
 
+
+/** @brief Return the memory statistics
+ */
+void fuse_memstats(fuse_t *self, size_t *cur, size_t* max) {
+    assert(self);
+
+    if (cur) {
+        *cur = self->allocator->cur;
+    }
+    if (max) {
+        *max = self->allocator->max;
+    }
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // PRIVATE METHODS
 
@@ -296,7 +315,7 @@ static void fuse_runloop(fuse_t *self, uint8_t q)
     fuse_debugf(self, "fuse_runloop: core %u: start\n", q);
     while (!self->exit_code)
     {
-        // Pop event from the event queue
+        // Pop event from the event queue for a specific core
         fuse_event_t *evt = fuse_next_event(self, q);
         if (evt)
         {
@@ -313,7 +332,7 @@ static void fuse_runloop(fuse_t *self, uint8_t q)
             drained = fuse_drain(self, 10);
             if (drained > 0)
             {
-                fuse_debugf(self, "fuse_runloop: drained %u item(s)\n", drained);
+                //fuse_debugf(self, "fuse_runloop: drained %u item(s)\n", drained);
             }
             else
             {
