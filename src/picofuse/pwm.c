@@ -29,9 +29,15 @@ static void fuse_pwm_set_freq(fuse_pwm_t *pwm, uint32_t freq);
  */
 static uint32_t fuse_pwm_get_freq(fuse_pwm_t *pwm);
 
-/** @brief IRQ callback function
+/** @brief IRQ callback function - for all PWM
  */
-static void fuse_pwm_callback();
+static void fuse_pwm_callback_global();
+
+///////////////////////////////////////////////////////////////////////////////
+// GLOBALS
+
+static fuse_pwm_t *fuse_pwm[NUM_PWM_SLICES];
+static fuse_t *fuse_pwm_instance = NULL;
 
 ///////////////////////////////////////////////////////////////////////////////
 // LIFECYCLE
@@ -50,6 +56,19 @@ void fuse_register_value_pwm(fuse_t *self)
         .str = fuse_pwm_str,
     };
     fuse_register_value_type(self, FUSE_MAGIC_PWM, fuse_pwm_type);
+
+    // Register IRQ
+    irq_set_exclusive_handler(PWM_DEFAULT_IRQ_NUM(), fuse_pwm_callback_global);
+    irq_set_enabled(PWM_DEFAULT_IRQ_NUM(), true);
+
+    // Clear PWM instances
+    for (size_t i = 0; i < NUM_PWM_SLICES; i++)
+    {
+        fuse_pwm[i] = NULL;
+    }
+
+    // Set the callback instance
+    fuse_pwm_instance = self;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -80,16 +99,17 @@ static bool fuse_pwm_init(fuse_t *self, fuse_value_t *value, const void *user_da
         }
     }
 
-    // Check slice is valid
-    if (slice >= NUM_PWM_SLICES)
+    // Check slice
+    if (fuse_pwm[slice] != NULL)
     {
-        fuse_debugf(self, "fuse_pwm_init: a=%d invalid slice\n", data->a);
+        fuse_debugf(self, "fuse_pwm_init: slice %d already in use\n", slice);
         return false;
     }
-    else
-    {
-        pwm->slice = slice;
-    }
+
+    // Set slice
+    assert(slice < NUM_PWM_SLICES);
+    pwm->slice = slice;
+    fuse_pwm[slice] = pwm;
 
     // Create GPIO pins
     pwm->a = fuse_new_gpio(self, data->a, FUSE_GPIO_PWM);
@@ -129,8 +149,6 @@ static bool fuse_pwm_init(fuse_t *self, fuse_value_t *value, const void *user_da
     // Clear IRQ
     pwm_clear_irq(pwm->slice);
     pwm_set_irq_enabled(pwm->slice, true);
-    irq_set_exclusive_handler(PWM_DEFAULT_IRQ_NUM(), fuse_pwm_callback);
-    irq_set_enabled(PWM_DEFAULT_IRQ_NUM(), true);
 
     // Enable PWM
     pwm_set_enabled(pwm->slice, !data->disabled);
@@ -157,6 +175,9 @@ static void fuse_pwm_destroy(fuse_t *self, fuse_value_t *value)
     // Release GPIO pins
     fuse_release(self, pwm->a);
     fuse_release(self, pwm->b);
+
+    // Remove the slice from the globals
+    fuse_pwm[pwm->slice] = NULL;
 }
 
 /** @brief Append a JSON representation of a PWM interface
@@ -308,11 +329,21 @@ static inline uint32_t fuse_pwm_get_freq(fuse_pwm_t *pwm)
     return clock_get_hz(clk_sys) / period;
 }
 
-#include <stdio.h>
+/** @brief IRQ callback function - for a PWM slice
+ * 
+ * @param self The fuse application
+ * @param pwm The PWM context
+ */
+static inline void fuse_pwm_callback(fuse_t *self, fuse_pwm_t *pwm) {
+    assert(self);
+    assert(pwm);
+    fuse_event_t *evt = fuse_new_event(self, (fuse_value_t *)pwm, FUSE_EVENT_PWM, pwm);
+    assert(evt);
+}
 
 /** @brief PWM interrupt callback - wrap
  */
-static void fuse_pwm_callback()
+static void fuse_pwm_callback_global()
 {
     uint32_t irq = pwm_get_irq_status_mask();
 
@@ -321,7 +352,11 @@ static void fuse_pwm_callback()
     {
         if (irq & (1 << slice))
         {
-            //printf("fuse_pwm_callback slice=%d\n", slice);
+            fuse_pwm_t *pwm = fuse_pwm[slice];
+            if(pwm)
+            {
+                fuse_pwm_callback(fuse_pwm_instance, pwm);
+            }
             pwm_clear_irq(slice);
         }
     }

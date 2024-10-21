@@ -204,6 +204,8 @@ static size_t fuse_str_event_type(char *buf, size_t sz, size_t i, uint8_t type)
         return qstrtostr_internal(buf, sz, i, "TIMER");
     case FUSE_EVENT_GPIO:
         return qstrtostr_internal(buf, sz, i, "GPIO");
+    case FUSE_EVENT_PWM:
+        return qstrtostr_internal(buf, sz, i, "PWM");
     case FUSE_EVENT_ADC:
         return qstrtostr_internal(buf, sz, i, "ADC");
     case FUSE_EVENT_SPI_TX:
