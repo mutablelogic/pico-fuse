@@ -14,9 +14,9 @@ void pwm_callback(fuse_t *self, fuse_event_t *evt, void *user_data)
     if (going_up)
     {
         ++fade;
-        if (fade > 255)
+        if (fade > 0xFF)
         {
-            fade = 255;
+            fade = 0xFF;
             going_up = false;
         }
     }
@@ -38,17 +38,14 @@ int run(fuse_t *self)
     fuse_pwm_config_t config = {
         .gpio_b = PICO_DEFAULT_LED_PIN,
         .duty_cycle_b = 0xFF,
-        .freq = 256 * 1000,
+        .freq = 512 * 1000,
         .event = true,
     };
 
     // PWM
     fuse_pwm_t *pwm = (fuse_pwm_t *)fuse_retain(self, fuse_new_pwm(self, config));
     assert(pwm);
-
-    // Register a callback on Core 0
     fuse_register_callback(self, FUSE_EVENT_PWM, 0, pwm_callback);
-
     fuse_debugf(self, "PWM: %v\n", pwm);
 
     return 0;
