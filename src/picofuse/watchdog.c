@@ -65,10 +65,6 @@ static bool fuse_watchdog_init(fuse_t *self, fuse_value_t *value, const void *us
         fuse_debugf(self, "fuse_watchdog_init: Unable to schedule timer\n");
         return false;
     }
-    else
-    {
-        fuse_debugf(self, "fuse_watchdog_init: Scheduled timer %v with period %u\n", watchdog->timer, data->period_ms >> 1);
-    }
 
     // Callback for timer event
     bool success = fuse_register_callback(self, FUSE_EVENT_TIMER, 0, fuse_watchdog_callback);
